@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<head>
+    <!-- Tus otras etiquetas head aquí -->
+
+    <!-- Incluye jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <!-- Incluye Popper.js y Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+    <!-- Add the slick-theme.css if you want default styling -->
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/kenwheeler/slick@1.8.1/slick/slick.css"/>
+    <!-- Add the slick-theme.css if you want default styling -->
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/kenwheeler/slick@1.8.1/slick/slick-theme.css"/>
+    
+    <!-- Tus otras etiquetas head aquí -->
+</head>
+
+
+    <!-- Header Start -->
+    <div class="container-fluid page-header">
+        <div class="container">
+            <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 400px">
+                <h3 class="display-4 text-white text-uppercase">Nosotros</h3>
+
+            </div>
+        </div>
+    </div>
+    <!-- Header End -->
+
+<!-- About Start -->
+<div class="container-fluid py-5">
+    <div class="container pt-5">
+        <div class="row">
+            <div class="col-lg-6" style="min-height: 500px;">
+                <div class="position-relative h-100">
+                    <img class="position-absolute w-100 h-100" src="{{ nosotros.imagen.url }}" style="object-fit: cover;" alt="{{ nosotros.titulo }}">
+                </div>
+            </div>
+            <div class="col-lg-6 pt-5 pb-lg-5">
+                <div class="about-text bg-white p-4 p-lg-5 my-lg-5">
+                    <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">{{ nosotros.subtitulo }}</h6>
+                    <h1 class="mb-3">{{ nosotros.titulo }}</h1>
+                    <p>{{ nosotros.descripcion }}</p>
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <img class="img-fluid" src="{{ nosotros.imagen_pequena_1.url }}" alt="Image 1">
+                        </div>
+                        <div class="col-6">
+                            <img class="img-fluid" src="{{ nosotros.imagen_pequena_2.url }}" alt="Image 2">
+                        </div>
+                    </div>
+                    <a href="{{ nosotros.url_boton }}" class="btn btn-primary mt-1">{{ nosotros.texto_boton }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- About End -->
+
+{% comment %} <!-- Feature Start -->
+<div class="container-fluid pb-5">
+    <div class="container pb-8">
+        
+        <div class="row">
+            {% for servicio in servicios %}
+            <div class="col-md-6">
+                <div class="d-flex mb-4 mb-lg-0">
+                    <div class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary mr-3" style="height: 100px; width: 100px;">
+                        <img src="{{ servicio.Servicio_icono.url }}" alt="{{ servicio.servicio_titulo }}" class="fa fa-2x text-white"  style="height: 100px;">
+                    </div>
+                    <div class="d-flex flex-column">
+                        <h5 class="">{{ servicio.servicio_titulo }}</h5>
+                        <p class="m-1">{{ servicio.servicio_descripcion }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+    </div>
+</div>
+<!-- Feature End --> {% endcomment %}
+
+<!-- Feature Start -->
+<div class="container-fluid pb-5">
+    <div class="container pb-8">
+        <div class="row">
+            <div class="slider-container">
+                {% for servicio in servicios %}
+                <div class="col-md-6">
+                    <div class="d-flex mb-4 mb-lg-0">
+                        <div class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary mr-3" style="height: 100px; width: 100px;">
+                            <img src="{{ servicio.Servicio_icono.url }}" alt="{{ servicio.servicio_titulo }}" class="fa fa-2x text-white"  style="height: 100px;">
+                        </div>
+                        <div class="d-flex flex-column">
+                            <h5 class="">{{ servicio.servicio_titulo }}</h5>
+                            <p class="m-1">{{ servicio.servicio_descripcion }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Feature End -->
+
+
+
+    <!-- Registration Start -->
+    <div class="container-fluid bg-registration py-5" style="margin: 90px 0;">
+        <div class="container py-5">
+            <div class="row align-items-center">
+                <div class="col-lg-7 mb-5 mb-lg-0">
+                    <div class="mb-4">
+                        <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">{{ ultima_oferta.titulo_oferta }}</h6>
+                        <h1 class="text-white"><span class="text-primary">{{ ultima_oferta.porcentaje_descuento }} OFF</span> {{ ultima_oferta.servicio_descuento }}</h1>
+                    </div>
+                    <p class="text-white">{{ ultima_oferta.descripcion }}</p>
+                    <ul class="list-inline text-white m-0">
+                        <li class="py-2"><i class="fa fa-check text-primary mr-3"></i>{{ ultima_oferta.detalle_1 }}</li>
+                        <li class="py-2"><i class="fa fa-check text-primary mr-3"></i>{{ ultima_oferta.detalle_2 }}</li>
+                        <li class="py-2"><i class="fa fa-check text-primary mr-3"></i>{{ ultima_oferta.detalle_3 }}</li>
+                    </ul>
+                </div>
+                <div class="col-lg-5">
+                    <div class="card border-0">
+                        <div class="card-header bg-primary text-center p-4">
+                            <h1 class="text-white m-0">Solicitar oferta</h1>
+                        </div>
+                        <div class="card-body rounded-bottom bg-white p-5">
+
+                            <form method="post" id="solicitud_oferta" action="{% url 'nosotros' %}">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <input type="text" class="form-control p-4" placeholder="Tu Nombre" name="nombre" required="required" />
+                                </div>
+                                <div class="form-group">
+                                    <input type="email" class="form-control p-4" placeholder="Tu correo" name="email" required="required" />
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" class="form-control p-4" placeholder="Tu telefono" name="telefono" required="required" />
+                                </div>
+                                <div>
+                                    <button class="btn btn-primary btn-block py-3" type="submit">Solicitar Oferta</button>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Registration End -->
+
+
+    <!-- Team Start -->
+    {% include "sections/team.html" %}
+    <!-- Team End -->
+
+
+
+<!-- Modal de Éxito -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Solicitud Enviada con Éxito</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Muestra la información que desees aquí -->
+                <p>¡Tu solicitud ha sido enviada correctamente!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Error -->
+<div class="modal fade" id="myModalError" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabelError" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabelError">Error al Enviar la Solicitud</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Muestra la información de error que desees aquí -->
+                <p>Hubo un problema al enviar la solicitud. Inténtelo de nuevo.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/kenwheeler/slick@1.8.1/slick/slick.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Captura el evento submit del formulario
+        $('#solicitud_oferta').submit(function (e) {
+            e.preventDefault();  // Evita que el formulario se envíe normalmente
+
+            // Realiza la petición Ajax para enviar el formulario
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function (response) {
+                    if (response.success) {
+                        // Muestra la modal de éxito
+                        $('#myModal').modal('show');
+                    } else {
+                        // Muestra una modal de error si la solicitud no se guardó correctamente
+                        $('#myModalError').modal('show');
+                    }
+                },
+                error: function () {
+                    // Muestra una modal de error si hay un error en la petición Ajax
+                    $('#myModalError').modal('show');
+                }
+            });
+        });
+
+        // Recargar la página al cerrar el modal de éxito
+        $('#myModal').on('hidden.bs.modal', function () {
+            location.reload();
+        });
+    });
+</script>
+
+<!-- Inicializa el slider con las opciones deseadas -->
+<script>
+    $(document).ready(function(){
+        $('.slider-container').slick({
+            slidesToShow: 3,  // Número de slides a mostrar
+            slidesToScroll: 1,  // Número de slides a desplazarse
+            autoplay: true,  // Reproducción automática
+            autoplaySpeed: 2000,  // Velocidad de reproducción automática en milisegundos
+            infinite: true,  // Bucle infinito
+            arrows: true,  // Desactiva las flechas de navegación
+            responsive: [
+                {
+                    breakpoint: 768,
+                    settings: {
+                        slidesToShow: 1,
+                    }
+                }
+            ]
+        });
+    });
+</script>
+{% endblock extra_js %}

@@ -1,0 +1,46 @@
+
+{% load humanize %}
+<!-- templates/correo_reserva.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles de la Reserva</title>
+    <!-- Agrega enlaces a estilos CSS si es necesario -->
+</head>
+<body>
+    <div style="max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #28a745;">¡Reserva Exitosa!</h2>
+        <p>Tu reserva ha sido realizada con éxito.</p>
+
+        <div style="margin-bottom: 20px;">
+            <p style="font-size: 18px;">Código de Reserva: <strong>{{ codigo_reserva }}</strong></p>
+        </div>
+
+        <h3>Detalles de la Reserva:</h3>
+        <ul>
+            <li><strong>Nombre:</strong> {{ nombre }}</li>
+            <li><strong>{{ tipo_documento }}:</strong> {{ dui }}</li>
+            <li><strong>Telefono:</strong> {{ telefono }}</li>
+            <li><strong>Correo Electrónico:</strong> {{ correo_electronico }}</li>
+            <li><strong>Pais de Residencia:</strong> {{ pais_residencia }}</li>
+            <li><strong>Dirección:</strong> {{ direccion }}</li>
+            <li><strong>Cantidad de Adultos:</strong> {{ cantidad_adultos }}</li>
+            <li><strong>Cantidad de Niños:</strong> {{ cantidad_ninos }}</li>
+            <li><strong>Fecha de Reserva:</strong> {{ fecha_reserva }}</li>
+            {% comment %} <li><strong>Total a Pagar:</strong> <span style="color: #007bff; font-size: 20px;">{{ total_pagar }}</span></li> {% endcomment %}
+            <li>
+                <strong>Total a Pagar:</strong>
+                <span class="text-primary h4" style="color: #007bff; font-size: 20px;">
+                    ${{ total_pagar|floatformat:2|intcomma }}
+                </span>
+              </li>
+            <!-- Agrega más detalles según sea necesario -->
+        </ul>
+
+        <p style="font-size: 18px; margin-top: 20px;">Gracias por elegir nuestro tour. ¡Esperamos que tengas una experiencia maravillosa!</p>
+    </div>
+</body>
+</html>

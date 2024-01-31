@@ -1,0 +1,67 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% include "sections/head.html" %}
+</head>
+
+<body>
+
+    {% include "sections/topbardstart.html" %}
+    {% include "sections/navbar.html" %}
+
+    <div class="container">
+
+        {% block content %}
+        {% if request.path == '/' %}  {# Verifica si la URL es la página de inicio #}
+
+            {% include "sections/carrusel_inicio.html" %}
+            {% include "sections/booking_start.html" %}
+            {% comment %} {% include "sections/featurestart.html" %} {% endcomment %}
+            {% include "sections/destination.html" %}
+            {% include "sections/services.html" %}
+            {% comment %} {% include "sections/package.html" %} {% endcomment %}
+            {% comment %} {% include "sections/registration.html" %} {% endcomment %}
+            {% include "sections/team.html" %}
+            {% comment %} {% include "sections/testimonial.html" %} {% endcomment %}
+        
+
+        {% endif %}
+
+
+        {% endblock content %}
+    </div>
+
+{% include "sections/footer.html" %}
+
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="fa fa-angle-double-up"></i></a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Incluye Splide.js JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@3.0.9/dist/js/splide.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'lib/easing/easing.min.js' %}"></script>
+    <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/moment.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/moment-timezone.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+
+    <!-- Contact Javascript File -->
+    <script src="{% static 'mail/jqBootstrapValidation.min.js' %}"></script>
+    <script src="{% static 'mail/contact.js' %}"></script>
+
+    <!-- Template Javascript -->
+    <script src="{% static 'js/main.js' %}"></script>
+
+    {% block extra_js %}
+    
+    
+    {% endblock extra_js %}
+    
+</body>
+
+</html>

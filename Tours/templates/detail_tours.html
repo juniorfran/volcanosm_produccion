@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Header Start -->
+<div class="container-fluid page-header">
+    <div class="container">
+        <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 400px">
+            <h3 class="display-4 text-white text-uppercase">Tours</h3>
+            <div class="d-inline-flex text-white">
+                <p class="m-0 text-uppercase"><a class="text-white" href="">Inicio</a></p>
+                <i class="fa fa-angle-double-right pt-1 px-3"></i>
+                <p class="m-0 text-uppercase">Tours</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Header End -->
+<br>
+<hr>
+<h1>{{ tour.titulo }}</h1>
+<hr>
+<!-- Tour Detail Start -->
+<div class="container mt-5">
+    <div class="row">
+        <!-- Imagen principal -->
+        <div class="col-md-6">
+            <div class="mt-4">
+                <img src="{{ tour.obtener_imagen_principal }}" alt="Imagen del Tour" class="img-fluid" id="imagen-principal" style="max-width: 500px;">
+            </div>
+
+            <!-- Miniaturas de otras imágenes -->
+            <div class="mt-4">
+                <div class="row">
+                    {% if imagenes %}
+                        {% for imagen in imagenes %}
+                            <div class="col-2 mb-2">
+                                <img src="{{ imagen.url }}" alt="Miniatura" class="img-thumbnail imagen-miniatura" data-imagen="{{ imagen.url }}" style="max-width: 100%;">
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No hay miniaturas disponibles.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <!-- Información del Tour -->
+        <div class="col-md-6">
+            <div class="mt-4">
+                
+                <p>{{ tour.incluye_tour }}</p>
+                <p>Precio Adultos: ${{ tour.precio_adulto }}</p>
+                <p>Precio niños: ${{ tour.precio_nino }}</p>
+                <p>Duracion del Tour: {{ tour.duracion }} horas.</p>
+                <p>Tipo: {{ tour.tipo_tour }}</p>
+                <a href="{% url 'reservar_tour' tour_id=tour.id %}" class="btn btn-primary">Reservar</a>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <hr>
+            <p>{{ tour.descripcion }}</p>
+            <br>
+            <p>{{ tour.descripcion1 }}</p>
+            <br>
+            <p>{{ tour.descripcion2 }}</p>
+        </div>
+    </div>
+    <hr>
+</div>
+
+<!-- Apartado de Reseñas -->
+
+<style>
+    #full-stars-example-two .rating-group {
+      display: inline-flex;
+    }
+  
+    #full-stars-example-two .rating__icon {
+      pointer-events: none;
+    }
+  
+    #full-stars-example-two .rating__input {
+      position: absolute !important;
+      left: -9999px !important;
+    }
+  
+    #full-stars-example-two .rating__label {
+      cursor: pointer;
+      padding: 0 0.1em;
+      font-size: 2rem;
+    }
+  
+    #full-stars-example-two .rating__icon--star {
+      color: orange;
+    }
+  
+    #full-stars-example-two .rating__input:checked ~ .rating__label .rating__icon--star {
+      color: #ddd;
+    }
+  
+    #full-stars-example-two .rating-group:hover .rating__label .rating__icon--star {
+      color: orange;
+    }
+  
+    #full-stars-example-two .rating__input:hover ~ .rating__label .rating__icon--star {
+      color: #ddd;
+    }
+
+
+    /* Agrega estilos para las reseñas */
+.reseña-container {
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+.reseña-estrellas {
+    color: #f0a80a; /* Cambia el color según tus preferencias */
+    margin-right: 5px;
+}
+
+/* Puedes ajustar estos estilos según tus preferencias */
+.reseña-comentario {
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+  </style>
+
+
+<!-- Apartado de Reseñas -->
+<div class="mt-4">
+    <h2>Deja tu Reseña</h2>
+    <form method="post" action="{% url 'tour_detail' tour_id=tour.id %}">
+        {% csrf_token %}
+
+        <!-- Agregar el campo de estrellas con el estilo CSS aplicado -->
+        <div id="full-stars-example-two" class="rating-group">
+            <input class="rating__input rating__input--none" checked name="estrellas" id="rating-none" value="0" type="radio">
+                    <!-- Agregar el campo de estrellas con el estilo CSS aplicado -->
+        <div id="full-stars-example-two" class="rating-group">
+              <input class="rating__input rating__input--none" checked name="rating" id="rating-none" value="0" type="radio">
+              <label aria-label="No rating" class="rating__label" for="rating-none"><i class="rating__icon rating__icon--none fa fa-ban"></i></label>
+              <label aria-label="1 star" class="rating__label" for="rating-1"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+              <input class="rating__input" name="rating" id="rating-1" value="1" type="radio">
+              <label aria-label="2 stars" class="rating__label" for="rating-2"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+              <input class="rating__input" name="rating" id="rating-2" value="2" type="radio">
+              <label aria-label="3 stars" class="rating__label" for="rating-3"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+              <input class="rating__input" name="rating" id="rating-3" value="3" type="radio" checked>
+              <label aria-label="4 stars" class="rating__label" for="rating-4"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+              <input class="rating__input" name="rating" id="rating-4" value="4" type="radio">
+              <label aria-label="5 stars" class="rating__label" for="rating-5"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+              <input class="rating__input" name="rating" id="rating-5" value="5" type="radio">
+        </div>
+        </div>
+
+        <!-- Agregar otros campos del formulario según sea necesario -->
+        <textarea name="comentario" class="form-control" placeholder="Deja tu comentario"></textarea>
+        <br>
+
+        <button type="submit" class="btn btn-primary">Enviar Reseña</button>
+    </form>
+</div>
+
+
+
+<!-- Lista de Reseñas con Estrellas -->
+<div class="container mt-4">
+    <h2>Reseñas</h2>
+    {% for resena in resenas %}
+        <div class="reseña-container row">
+            <div class="col-md-2">
+                <span class="reseña-estrellas">
+                    {% for _ in resena.get_estrellas_range %}
+                        <i class="fas fa-star"></i>
+                    {% endfor %}
+                </span>
+                {{ resena.estrellas }} Estrellas
+            </div>
+            <div class="col-md-10 reseña-comentario">
+                {{ resena.comentario }}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock content %}
+
+
+{% block extra_js %}
+<!-- Script jQuery -->
+<script>
+    $(document).ready(function() {
+        // Al hacer clic en una miniatura, actualiza la imagen principal
+        $(".imagen-miniatura").click(function() {
+            var nuevaImagen = $(this).data("imagen");
+            $("#imagen-principal").attr("src", nuevaImagen);
+        });
+    });
+</script>
+{% endblock extra_js %}

@@ -1,0 +1,16 @@
+
+{% load humanize %}
+<!-- tu_template.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detalle del Enlace de Pago</title>
+</head>
+<body>
+    <h1>Detalle del Enlace de Pago</h1>
+    <p>ID enlace de pago: {{ enlace_pago.wompi_id }}</p>
+    <p>Monto: ${{ enlace_pago.monto }}</p>
+    <p>Nombre del Producto: {{ enlace_pago.nombre_producto }}</p>
+    <!-- Agrega más campos según la información que desees mostrar -->
+</body>
+</html>

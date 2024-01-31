@@ -1,0 +1,36 @@
+{% load humanize %}
+
+<!-- correo_solicitud_oferta.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud de Oferta</title>
+</head>
+<body>
+    <h2>Nueva Solicitud de Oferta</h2>
+    
+    <p>Nombre: {{ nombre }}</p>
+    <p>Email: {{ email }}</p>
+    <p>Teléfono: {{ telefono }}</p>
+    <p>Fecha de Creación: {{ fecha_creacion }}</p>
+
+    {% if oferta_titulo %}
+        <h3>Última Oferta Solicitada</h3>
+        <p>Título de la Oferta: {{ oferta_titulo }}</p>
+        <p>Porcentaje de Descuento: {{ porcentaje_descuento }}</p>
+        <p>Servicio con Descuento: {{ servicio_descuento }}</p>
+        <p>Descripción de la Oferta: {{ descripcion_oferta }}</p>
+        <p>Detalles:</p>
+        <ul>
+            <li>{{ detalle_1_oferta }}</li>
+            <li>{{ detalle_2_oferta }}</li>
+            <li>{{ detalle_3_oferta }}</li>
+        </ul>
+    {% else %}
+        <p>No se encontró información sobre la oferta solicitada.</p>
+    {% endif %}
+</body>
+</html>

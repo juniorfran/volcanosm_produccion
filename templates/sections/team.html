@@ -1,0 +1,115 @@
+
+{% load static %}
+{% comment %} <!-- Team Start -->
+<div class="container-fluid py-6">
+    <div class="container pt-5 pb-3">
+        <div class="text-center mb-3 pb-3">
+            <h6 class="text-primary text-uppercase" style="letter-spacing: 5px; font-size: 35px;">Guias</h6>
+            <h1>Nuestros guias capacitados</h1>
+        </div>
+        <div class="row">
+            <div class="col-lg-3 col-md-4 col-sm-6 pb-2">
+                <div class="team-item bg-white mb-4">
+                    <div class="team-img position-relative overflow-hidden">
+                        <img class="img-fluid w-100" src="{% static 'img/team-1.jpg' %}" alt="">
+                        <div class="team-social">
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-twitter"></i></a>
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-instagram"></i></a>
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="text-center py-4">
+                        <h5 class="text-truncate">Guide Name</h5>
+                        <p class="m-0">Designation</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6 pb-2">
+                <div class="team-item bg-white mb-4">
+                    <div class="team-img position-relative overflow-hidden">
+                        <img class="img-fluid w-100" src="{% static 'img/team-2.jpg' %}" alt="">
+                        <div class="team-social">
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-twitter"></i></a>
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-instagram"></i></a>
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="text-center py-4">
+                        <h5 class="text-truncate">Guide Name</h5>
+                        <p class="m-0">Designation</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6 pb-2">
+                <div class="team-item bg-white mb-4">
+                    <div class="team-img position-relative overflow-hidden">
+                        <img class="img-fluid w-100" src="{% static 'img/team-3.jpg' %}" alt="">
+                        <div class="team-social">
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-twitter"></i></a>
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-instagram"></i></a>
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="text-center py-4">
+                        <h5 class="text-truncate">Guide Name</h5>
+                        <p class="m-0">Designation</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6 pb-2">
+                <div class="team-item bg-white mb-4">
+                    <div class="team-img position-relative overflow-hidden">
+                        <img class="img-fluid w-100" src="{% static 'img/team-4.jpg' %}" alt="">
+                        <div class="team-social">
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-twitter"></i></a>
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-instagram"></i></a>
+                            <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="text-center py-4">
+                        <h5 class="text-truncate">Guide Name</h5>
+                        <p class="m-0">Designation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Team End --> {% endcomment %}
+
+
+<!-- Team Start -->
+<div class="container-fluid py-6">
+    <div class="container pt-5 pb-3">
+        <div class="text-center mb-3 pb-3">
+            <h6 class="text-primary text-uppercase" style="letter-spacing: 5px; font-size: 35px;">Guias</h6>
+            <h1>Nuestros guias capacitados</h1>
+        </div>
+        <div class="row">
+            {% for team_member in teams_bar %}
+                <div class="col-lg-3 col-md-4 col-sm-6 pb-2">
+                    <div class="team-item bg-white mb-4">
+                        <div class="team-img position-relative overflow-hidden">
+                            <img class="img-fluid w-100" src="{{ team_member.team_image.url }}" alt="{{ team_member.team_nombre }}">
+                            <div class="team-social">
+                                <a class="btn btn-outline-primary btn-square" href="{{ team_member.url_twitter }}"><i class="fab fa-twitter"></i></a>
+                                <a class="btn btn-outline-primary btn-square" href="{{ team_member.url_facebook }}"><i class="fab fa-facebook-f"></i></a>
+                                <a class="btn btn-outline-primary btn-square" href="{{ team_member.url_instagram }}"><i class="fab fa-instagram"></i></a>
+                                <a class="btn btn-outline-primary btn-square" href="{{ team_member.url_linkedin }}"><i class="fab fa-linkedin-in"></i></a>
+                            </div>
+                        </div>
+                        <div class="text-center py-4">
+                            <h5 class="text-truncate">{{ team_member.team_nombre }}</h5>
+                            <p class="m-0">{{ team_member.team_job }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<!-- Team End -->
