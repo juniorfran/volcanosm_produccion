@@ -8,13 +8,34 @@ from io import BytesIO
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+import os
+from datetime import datetime
+from azure.storage.blob import BlobServiceClient
+from ckeditor.fields import RichTextField
 
-# imagen para el cuadro de informacion sobre nosotros
+# Función de carga para el directorio "nosotros" con la fecha actual
 def upload_to_nosotros(instance, filename):
-    # La función toma la instancia del modelo y el nombre del archivo y construye la ruta de almacenamiento
-    return f'nosotros/nosotros/{filename}'
+    # Obtener la fecha actual
+    fecha_actual = datetime.now().strftime('%Y-%m-%d')
+    # Devolver la ruta completa del archivo
+    return f'nosotros/{fecha_actual}/{filename}'
 
-#Modelo de la pagina nosotros
+
+# Función de carga para el directorio "servicios" con la fecha actual
+def upload_to_servicios(instance, filename):
+    # Obtener la fecha actual
+    fecha_actual = datetime.now().strftime('%Y-%m-%d')
+    # Devolver la ruta completa del archivo
+    return f'servicios/{fecha_actual}/{filename}'
+
+# Función de carga para el directorio "ofertas" con la fecha actual
+def upload_to_ofertas(instance, filename):
+    # Obtener la fecha actual
+    fecha_actual = datetime.now().strftime('%Y-%m-%d')
+    # Devolver la ruta completa del archivo
+    return f'ofertas/{fecha_actual}/{filename}'
+
+# Modelo de la página nosotros
 class Nosotros(models.Model):
     titulo = models.CharField("Titulo", max_length=100)
     subtitulo = models.CharField("Subtitulo", max_length=100)
@@ -25,39 +46,146 @@ class Nosotros(models.Model):
     texto_boton = models.CharField(max_length=50)
     url_boton = models.CharField(max_length=100)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
+    imagen_url = models.URLField(max_length=200, blank=True)  # Campo para guardar la URL de la imagen principal
+    imagen_pequena_1_url = models.URLField(max_length=200, blank=True)  # Campo para guardar la URL de la primera imagen pequeña
+    imagen_pequena_2_url = models.URLField(max_length=200, blank=True)  # Campo para guardar la URL de la segunda imagen pequeña
     
     class Meta:
         verbose_name = "Nosotros"
         verbose_name_plural = "Nosotros"
-        def __str__(self):
-            return self.titulo  # String a mostrar en las vistas
         
-#imagen para la parte de servicios
-def upload_to_servicios(instance, filename):
-    # La función toma la instancia del modelo y el nombre del archivo y construye la ruta de almacenamiento
-    return f'nosotros/servicios/{filename}'
+    def __str__(self):
+        return self.titulo  # String a mostrar en las vistas
 
-#modelo que se encarga de los servicios ofrecidos por la empresa
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Conexión al servicio Blob de Azure
+        blob_service_client = BlobServiceClient.from_connection_string(settings.AZURE_CONNECTION_STRING)
+        container_client = blob_service_client.get_container_client(settings.AZURE_CONTAINER_NAME)
+
+        # Variables para almacenar las URLs de las imágenes
+        imagen_url, imagen_pequena_1_url, imagen_pequena_2_url = None, None, None
+
+        # Subir las imágenes si existen
+        for field_name in ['imagen', 'imagen_pequena_1', 'imagen_pequena_2']:
+            imagen_field = getattr(self, field_name)
+            if imagen_field:
+                # Generar la ruta completa de la imagen
+                ruta_imagen = upload_to_nosotros(self, os.path.basename(imagen_field.name))
+                # Obtener el blob client
+                blob_client = container_client.get_blob_client(ruta_imagen)
+                if not blob_client.exists():
+                    with open(imagen_field.path, "rb") as data:
+                        blob_client.upload_blob(data)
+                # Obtener y guardar la URL de la imagen
+                if field_name == 'imagen':
+                    imagen_url = blob_client.url
+                elif field_name == 'imagen_pequena_1':
+                    imagen_pequena_1_url = blob_client.url
+                elif field_name == 'imagen_pequena_2':
+                    imagen_pequena_2_url = blob_client.url
+
+        # Asignar las URLs al modelo
+        self.imagen_url = imagen_url
+        self.imagen_pequena_1_url = imagen_pequena_1_url
+        self.imagen_pequena_2_url = imagen_pequena_2_url
+
+        # Guardar el modelo una vez que se hayan asignado todas las URLs
+        super().save(*args, **kwargs)
+
+
+# Modelo para los servicios ofrecidos por la empresa
 class Nosotros_Servicios(models.Model):
-    servicio_titulo = models.CharField( max_length=50)
+    servicio_titulo = models.CharField(max_length=50)
     servicio_descripcion = models.TextField()
-    Servicio_icono = models.ImageField(upload_to=upload_to_servicios, height_field=None, width_field=None, max_length=None)
+    servicio_icono = models.ImageField(upload_to=upload_to_servicios, height_field=None, width_field=None, max_length=None)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
+    icono_url = models.URLField(max_length=200, blank=True)  # Campo para guardar la URL del icono
     
-    #funcion str
+    # Función str
     def __str__(self):
         return self.servicio_titulo
 
+    def save(self, *args, **kwargs):
+            super().save(*args, **kwargs)
+
+            # Conexión al servicio Blob de Azure
+            blob_service_client = BlobServiceClient.from_connection_string(settings.AZURE_CONNECTION_STRING)
+            container_client = blob_service_client.get_container_client(settings.AZURE_CONTAINER_NAME)
+
+            # Variables para almacenar las URLs de las imágenes
+            icono_url = None
+
+            # Subir las imágenes si existen
+            for field_name in ['servicio_icono']:
+                imagen_field = getattr(self, field_name)
+                if imagen_field:
+                    # Generar la ruta completa de la imagen
+                    ruta_imagen = upload_to_servicios(self, os.path.basename(imagen_field.name))
+                    # Obtener el blob client
+                    blob_client = container_client.get_blob_client(ruta_imagen)
+                    if not blob_client.exists():
+                        with open(imagen_field.path, "rb") as data:
+                            blob_client.upload_blob(data)
+                    # Obtener y guardar la URL de la imagen
+                    if field_name == 'servicio_icono':
+                        icono_url = blob_client.url
+
+            # Asignar las URLs al modelo
+            self.icono_url = icono_url
+
+            # Guardar el modelo una vez que se hayan asignado todas las URLs
+            super().save(*args, **kwargs)
+            
+            
 #seccion de oferta
 class Nosotros_Oferta(models.Model):
     titulo_oferta = models.CharField(max_length=50)
     porcentaje_descuento = models.CharField(max_length=50)
     servicio_descuento = models.CharField(max_length=50)
-    descripcion = models.TextField()
+    descripcion = RichTextField()
     detalle_1 = models.CharField(max_length=50)
     detalle_2 = models.CharField(max_length=50)
     detalle_3 = models.CharField(max_length=50)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
+    oferta_imagen = models.ImageField(upload_to=upload_to_servicios, height_field=None, width_field=None, max_length=None)
+    imagen_url = models.URLField(max_length=200, blank=True)  # Campo para guardar la URL del icono
+    
+    # Función str agregando titulo_oferta y porcentaje_descuento
+    def __str__(self):
+        return f"{self.titulo_oferta} - {self.porcentaje_descuento}"
+    
+    def save(self, *args, **kwargs):
+            super().save(*args, **kwargs)
+
+            # Conexión al servicio Blob de Azure
+            blob_service_client = BlobServiceClient.from_connection_string(settings.AZURE_CONNECTION_STRING)
+            container_client = blob_service_client.get_container_client(settings.AZURE_CONTAINER_NAME)
+
+            # Variables para almacenar las URLs de las imágenes
+            imagen_url = None
+
+            # Subir las imágenes si existen
+            for field_name in ['oferta_imagen']:
+                imagen_field = getattr(self, field_name)
+                if imagen_field:
+                    # Generar la ruta completa de la imagen
+                    ruta_imagen = upload_to_ofertas(self, os.path.basename(imagen_field.name))
+                    # Obtener el blob client
+                    blob_client = container_client.get_blob_client(ruta_imagen)
+                    if not blob_client.exists():
+                        with open(imagen_field.path, "rb") as data:
+                            blob_client.upload_blob(data)
+                    # Obtener y guardar la URL de la imagen
+                    if field_name == 'oferta_imagen':
+                        imagen_url = blob_client.url
+
+            # Asignar las URLs al modelo
+            self.imagen_url = imagen_url
+
+            # Guardar el modelo una vez que se hayan asignado todas las URLs
+            super().save(*args, **kwargs)
     
 #detalles para el formulario de solicitud de descuento
 class Solicitud_Oferta(models.Model):

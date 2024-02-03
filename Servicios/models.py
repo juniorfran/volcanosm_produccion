@@ -38,7 +38,7 @@ class TipoServicio(models.Model):
 
 class Servicios(models.Model):
     tipo = models.ForeignKey(TipoServicio, on_delete=models.CASCADE)
-    imagenes = models.ManyToManyField(ImagenesServicio, null=True)
+    imagenes = models.ManyToManyField(ImagenesServicio)
     nombre = models.CharField(max_length=70)
     descripcion = models.CharField(max_length=175)
     imagen = models.ImageField(upload_to='servicios/{nombre}')

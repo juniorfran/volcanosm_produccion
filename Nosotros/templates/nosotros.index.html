@@ -97,7 +97,7 @@
                 <div class="col-md-6">
                     <div class="d-flex mb-4 mb-lg-0">
                         <div class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary mr-3" style="height: 100px; width: 100px;">
-                            <img src="{{ servicio.Servicio_icono.url }}" alt="{{ servicio.servicio_titulo }}" class="fa fa-2x text-white"  style="height: 100px;">
+                            <img src="{{ servicio.icono_url }}" alt="{{ servicio.servicio_titulo }}" class="fa fa-2x text-white"  style="height: 100px;">
                         </div>
                         <div class="d-flex flex-column">
                             <h5 class="">{{ servicio.servicio_titulo }}</h5>
@@ -115,7 +115,13 @@
 
 
     <!-- Registration Start -->
-    <div class="container-fluid bg-registration py-5" style="margin: 90px 0;">
+    <style>
+        .bg-registration-1 {
+        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ ultima_oferta.imagen_url }}') no-repeat center center;
+        background-size: cover;
+        }
+    </style>
+    <div class="container-fluid bg-registration-1 py-5" style="margin: 90px 0;">
         <div class="container py-5">
             <div class="row align-items-center">
                 <div class="col-lg-7 mb-5 mb-lg-0">
@@ -123,7 +129,7 @@
                         <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">{{ ultima_oferta.titulo_oferta }}</h6>
                         <h1 class="text-white"><span class="text-primary">{{ ultima_oferta.porcentaje_descuento }} OFF</span> {{ ultima_oferta.servicio_descuento }}</h1>
                     </div>
-                    <p class="text-white">{{ ultima_oferta.descripcion }}</p>
+                    <p class="text-white">{{ ultima_oferta.descripcion | safe }}</p>
                     <ul class="list-inline text-white m-0">
                         <li class="py-2"><i class="fa fa-check text-primary mr-3"></i>{{ ultima_oferta.detalle_1 }}</li>
                         <li class="py-2"><i class="fa fa-check text-primary mr-3"></i>{{ ultima_oferta.detalle_2 }}</li>
@@ -159,6 +165,8 @@
             </div>
         </div>
     </div>
+
+
     <!-- Registration End -->
 
 

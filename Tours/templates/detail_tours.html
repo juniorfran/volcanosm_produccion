@@ -23,25 +23,26 @@
 <!-- Tour Detail Start -->
 <div class="container mt-5">
     <div class="row">
-        <!-- Imagen principal -->
+        <!-- Imagen principal y miniaturas -->
         <div class="col-md-6">
-            <div class="mt-4">
-                <img src="{{ tour.obtener_imagen_principal }}" alt="Imagen del Tour" class="img-fluid" id="imagen-principal" style="max-width: 500px;">
-            </div>
-
             <!-- Miniaturas de otras imágenes -->
             <div class="mt-4">
                 <div class="row">
                     {% if imagenes %}
                         {% for imagen in imagenes %}
                             <div class="col-2 mb-2">
-                                <img src="{{ imagen.url }}" alt="Miniatura" class="img-thumbnail imagen-miniatura" data-imagen="{{ imagen.url }}" style="max-width: 100%;">
+                                <img src="{{ imagen }}" alt="Miniatura" class="img-thumbnail imagen-miniatura" data-imagen="{{ imagen }}" style="max-width: 100%;">
                             </div>
                         {% endfor %}
                     {% else %}
                         <p>No hay miniaturas disponibles.</p>
                     {% endif %}
                 </div>
+            </div>
+
+            <!-- Imagen principal -->
+            <div class="mt-4">
+                <img src="{{ tour.obtener_imagen_principal }}" alt="Imagen del Tour" class="img-fluid" id="imagen-principal" style="max-width: 500px;">
             </div>
         </div>
         <!-- Información del Tour -->

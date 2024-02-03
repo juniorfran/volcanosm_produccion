@@ -44,7 +44,7 @@
         <div class="carousel-inner">
             {% for item in carrusel_incio %}
             <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <img class="w-100" src="{{ item.imagen.url }}" alt="{{ item.titulo }}" style="width: auto; height: 600px;">
+                <img class="w-100" src="{{ item.imagen_url }}" alt="{{ item.titulo }}" style="width: auto; height: 600px;">
                 <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
                     <div class="p-3" style="max-width: 1500px;">
                         <h4 class="text-white text-uppercase mb-md-3">{{ item.titulo }}</h4>

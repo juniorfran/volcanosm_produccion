@@ -52,6 +52,9 @@ EMAIL_HOST_PASSWORD = 'YrN.yYX-8uuz'
 # EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
 # SENDGRID_API_KEY = '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'
 
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -68,7 +71,10 @@ INSTALLED_APPS = [
     'Nosotros',
     'Contactanos',
     'Transacciones',
+    'ckeditor',
+    'ckeditor_uploader',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -120,9 +126,9 @@ DATABASES = {
     },
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'cuadmesv_tour',
-        'USER': 'cuadmesv_tour',
-        'PASSWORD': '8LC*do.&7Emh',
+        'NAME': 'cuadmesv_tour_dev',
+        'USER': 'cuadmesv_tour_dev',
+        'PASSWORD': 'Volcano2024$',
         'HOST': 'www.metrocuadrado.com.sv',
         'PORT': '3306',  # Puerto predeterminado de MySQL
         'OPTIONS': {
@@ -130,6 +136,14 @@ DATABASES = {
         },
     }
 }
+
+#AZURE STORE CONFIG
+# settings.py
+AZURE_ACCOUNT_NAME = 'storagevolcanosm'
+AZURE_ACCOUNT_KEY = 'bM1FfTO84g+fuxlgzL87NJiMQYFsZYnBX0KE9rXLfb/oMDQP9J7FToiBjYqIe0qkoMkFti683sC5+AStrLow7w=='
+AZURE_CONNECTION_STRING = 'DefaultEndpointsProtocol=https;AccountName=storagevolcanosm;AccountKey=bM1FfTO84g+fuxlgzL87NJiMQYFsZYnBX0KE9rXLfb/oMDQP9J7FToiBjYqIe0qkoMkFti683sC5+AStrLow7w==;EndpointSuffix=core.windows.net'
+AZURE_CONTAINER_NAME = 'imagenes'
+AZURE_ENDPOINT_SUFFIX = 'core.windows.net'
 
 
 # Password validation
@@ -173,6 +187,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATIC_URL = '/static/'
 
+CKEDITOR_BASEPATH = '/static/ckeditor/ckeditor/'
 
 
 # STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

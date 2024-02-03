@@ -29,7 +29,7 @@
             {% for tour in tours %}
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="destination-item position-relative overflow-hidden mb-2">
-                    <img class="img-fluid" src="{{ tour.imagen.url }}" alt="{{ tour.titulo }}">
+                    <img class="img-fluid" src="{{ tour.url_azure }}" alt="{{ tour.titulo }}">
                     <a class="destination-overlay text-white text-decoration-none" href="{% url 'tour_detail' tour.id %}">
                         <h5 class="text-white">{{ tour.titulo }}</h5>
                         {% comment %} <span>{{ tour.descripcion }}</span> {% endcomment %}

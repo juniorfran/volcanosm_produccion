@@ -1,3 +1,4 @@
+import datetime
 from django.conf import settings
 from django.db import models
 from decimal import Decimal
@@ -8,16 +9,18 @@ from io import BytesIO
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.conf import settings
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+import os
 # from Transacciones.models import EnlacePago
 
-# Create your models here.
 
 #modelos para tours
 class TipoTour(models.Model):
     nombre = models.CharField(max_length=20)
     def __str__(self):
         return self.nombre
-    
+
 class Tour(models.Model):
     titulo = models.CharField(max_length=50, unique=True)
     descripcion = models.TextField()
@@ -29,8 +32,40 @@ class Tour(models.Model):
     iva = models.BooleanField(default=False)
     incluye_tour = models.TextField()
     
-    imagen = models.ImageField(upload_to='tours')
+    imagen = models.ImageField(upload_to='tours')  # Cambiado a ImageField
+    url_azure = models.CharField(max_length=255, blank=True, null=True)  # Solo una URL para la imagen en Azure
     tipo_tour = models.ForeignKey(TipoTour, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Conexión al servicio Blob de Azure
+        blob_service_client = BlobServiceClient.from_connection_string(settings.AZURE_CONNECTION_STRING)
+        container_client = blob_service_client.get_container_client(settings.AZURE_CONTAINER_NAME)
+
+        if self.imagen:
+            # Obtener la fecha actual
+            fecha_actual = datetime.now()
+            # Generar la ruta para la carpeta basada en la fecha
+            ruta_carpeta = f"tours/{fecha_actual.year}/{fecha_actual.month}/{fecha_actual.day}/"
+            
+            # Generar un nombre único para la imagen en Azure
+            blob_name = f"{self.id}_imagen_{os.path.basename(self.imagen.name)}"
+            # Concatenar la ruta de la carpeta con el nombre de la imagen
+            ruta_imagen = os.path.join(ruta_carpeta, blob_name)
+
+            # Verificar si el blob ya existe antes de subirlo
+            blob_client = container_client.get_blob_client(ruta_imagen)
+            if not blob_client.exists():
+                # Si el blob no existe, subir la imagen
+                with open(self.imagen.path, "rb") as data:
+                    blob_client.upload_blob(data)
+                # Actualizar la URL de la imagen en Azure
+                self.url_azure = blob_client.url
+    
+        # Guardar el objeto una vez finalizado el proceso
+        super().save(*args, **kwargs)
 
     def obtener_imagen_principal(self):
         return self.imagen.url
@@ -38,15 +73,61 @@ class Tour(models.Model):
     def __str__(self):
         return f"{self.titulo} - ${self.precio_adulto}"
 
+def get_upload_path(instance, filename):
+    # Obtiene el nombre del modelo y el ID de la instancia
+    model_name = instance.__class__.__name__
+    model_id = instance.id
+
+    # Construye la ruta de la carpeta con el nombre del modelo y el ID
+    folder_path = f"{model_name}/{model_id}/"
+
+    # Combina la ruta de la carpeta con el nombre del archivo
+    return os.path.join(folder_path, filename)
+
 class ImagenTour(models.Model):
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='imagenes')
-    imagen = models.ImageField(upload_to='tours/%Y/%m/%d/')
-    imagen1 = models.ImageField(upload_to='tours/%Y/%m/%d/')
-    imagen2 = models.ImageField(upload_to='tours/%Y/%m/%d/')
-    imagen3 = models.ImageField(upload_to='tours/%Y/%m/%d/')
+    imagen1 = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+    imagen2 = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+    imagen3 = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+    imagen4 = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+    url_azure_1 = models.CharField(max_length=255, blank=True, null=True)
+    url_azure_2 = models.CharField(max_length=255, blank=True, null=True)
+    url_azure_3 = models.CharField(max_length=255, blank=True, null=True)
+    url_azure_4 = models.CharField(max_length=255, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Conexión al servicio Blob de Azure
+        blob_service_client = BlobServiceClient.from_connection_string(settings.AZURE_CONNECTION_STRING)
+        container_client = blob_service_client.get_container_client(settings.AZURE_CONTAINER_NAME)
+
+        # Guardar cada imagen en Azure y obtener sus URLs
+        for i in range(1, 5):  # Iterar sobre las 4 imágenes
+            field_name = f'imagen{i}'
+            url_field_name = f'url_azure_{i}'
+            imagen = getattr(self, field_name)
+            url_field = getattr(self, url_field_name)
+
+            if imagen:
+                # Generar un nombre único para la imagen en Azure
+                blob_name = f"{self.id}_{field_name}_{os.path.basename(imagen.name)}"
+
+                # Verificar si el blob ya existe antes de subirlo
+                blob_client = container_client.get_blob_client(blob_name)
+                if not blob_client.exists():
+                    # Si el blob no existe, subir la imagen y obtener la URL
+                    blob_client.upload_blob(imagen)
+                    setattr(self, url_field_name, blob_client.url)
+                else:
+                    # Si el blob ya existe, obtener la URL existente
+                    setattr(self, url_field_name, blob_client.url)
+
+        # Guardar la instancia del modelo una vez que se han procesado todas las imágenes
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Imagen"
+        return f"Imágenes del tour {self.tour.titulo}"
 
     class Meta:
         verbose_name_plural = "Imágenes de Tours"

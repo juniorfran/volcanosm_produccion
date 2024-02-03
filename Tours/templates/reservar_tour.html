@@ -17,7 +17,7 @@
         <h2>Reservar Tour - {{ tour.nombre }}</h2>
         <form method="post" action="{% url 'reservar_tour' tour_id=tour.id %}">
           {% csrf_token %}
-          <div id="booking" class="section" style="background-image: url('{{ tour.imagen.url }}');">
+          <div id="booking" class="section" style="background-image: url('{{ tour.url_azure }}');">
             <div class="section-center">
                 <div class="container">
                     <div class="row">

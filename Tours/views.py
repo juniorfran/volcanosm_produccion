@@ -50,24 +50,21 @@ def tours_index(request):
 
 def tour_detail(request, tour_id):
     tour = Tour.objects.get(pk=tour_id)
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion') #obtener la barra principal
+    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
     resenas = Resena.objects.filter(tour=tour)
-    data_contact = Contacts.objects.latest()#obtener todos los datos de contacto
-    urls_info = Urls_info.objects.all() #obtener todas las url de informacion
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion') # Obtén la última descripción general
-    urls_interes = Urls_interes.objects.all() #urls de interes
+    data_contact = Contacts.objects.latest()
+    urls_info = Urls_info.objects.all()
+    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    urls_interes = Urls_interes.objects.all()
 
-    
     # Crear una lista con todas las imágenes relacionadas, incluida la principal
-    imagenes = [tour.imagen] + [getattr(imagen_tour, f'imagen{i}') for i in range(1, 4) for imagen_tour in ImagenTour.objects.filter(tour=tour)]
+    imagenes = [tour.imagen.url] + [getattr(imagen_tour, f'url_azure_{i}') for i in range(1, 5) for imagen_tour in ImagenTour.objects.filter(tour=tour)]
 
     if request.method == 'POST':
         estrellas = int(request.POST.get('rating'))
         comentario = request.POST.get('comentario')
 
-        # Validación de campos, ajusta según tus necesidades
         if estrellas < 1 or estrellas > 5:
-            # Manejar error, por ejemplo, redirigir a la misma página con un mensaje de error
             return redirect('tour_detail', tour_id=tour_id)
 
         resena = Resena.objects.create(tour=tour, estrellas=estrellas, comentario=comentario)
@@ -77,11 +74,11 @@ def tour_detail(request, tour_id):
         'tour': tour,
         'imagenes': imagenes,
         'resenas': resenas,
-        'barra_principal':barra_principal,
-        'data_contact':data_contact,
-        'urls_info':urls_info,
+        'barra_principal': barra_principal,
+        'data_contact': data_contact,
+        'urls_info': urls_info,
         'ultima_descripcion': ultima_descripcion,
-        'urls_interes':urls_interes,
+        'urls_interes': urls_interes,
     }
 
     return render(request, 'detail_tours.html', context)

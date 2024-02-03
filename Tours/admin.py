@@ -12,7 +12,7 @@ class TourAdmin(admin.ModelAdmin):
 
 @admin.register(ImagenTour)
 class ImagenTourAdmin(admin.ModelAdmin):
-    list_display = ('tour','imagen')
+    list_display = ('tour','imagen1')
 
 @admin.register(Resena)
 class ResenaAdmin(admin.ModelAdmin):
