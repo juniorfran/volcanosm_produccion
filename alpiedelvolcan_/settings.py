@@ -126,9 +126,9 @@ DATABASES = {
     },
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'cuadmesv_tour_dev',
-        'USER': 'cuadmesv_tour_dev',
-        'PASSWORD': 'Volcano2024$',
+        'NAME': 'cuadmesv_tour',
+        'USER': 'cuadmesv_tour',
+        'PASSWORD': '8LC*do.&7Emh',
         'HOST': 'www.metrocuadrado.com.sv',
         'PORT': '3306',  # Puerto predeterminado de MySQL
         'OPTIONS': {
@@ -136,6 +136,7 @@ DATABASES = {
         },
     }
 }
+
 
 #AZURE STORE CONFIG
 # settings.py
