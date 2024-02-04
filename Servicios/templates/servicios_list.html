@@ -77,11 +77,11 @@
             {% for tour in tours %}
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="service-item bg-white text-center mb-2 py-5 px-4">
-                    <img class="img-fluid mx-auto" src="{{ tour.url_azure }}" style="width: 100px; height: 100px;" class="img-fluid mb-4">
+                    <img class="img-fluid mx-auto" src="{{ tour.url_azure }}" class="img-fluid mb-4">
                     <h5 class="text-truncate">{{ tour.titulo }}</h5>
-                    <p>Duration: {{ tour.duracion }} hours</p>
-                    <p>Price (Adult): ${{ tour.precio_adulto }}</p>
-                    <p>Price (Child): ${{ tour.precio_nino }}</p>
+                    <p>Duracion: {{ tour.duracion }} Horas</p>
+                    <p>Pricio Adultos: ${{ tour.precio_adulto }}</p>
+                    <p>Price Niños: ${{ tour.precio_nino }}</p>
                     <p>{{ tour.incluye_tour | safe }}</p>
                 </div>
             </div>
