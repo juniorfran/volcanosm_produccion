@@ -77,12 +77,15 @@
             {% for tour in tours %}
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="service-item bg-white text-center mb-2 py-5 px-4">
+                    <h5 class="text-truncate">{{ tour.titulo }}</h5>
                     <img class="img-fluid mx-auto" src="{{ tour.url_azure }}" class="img-fluid mb-4">
-                    <h5 class="text-truncate">{{ tour.titulo }}</h5>
                     <p>Duracion: {{ tour.duracion }} Horas</p>
-                    <p>Pricio Adultos: ${{ tour.precio_adulto }}</p>
-                    <p>Price Niños: ${{ tour.precio_nino }}</p>
-                    {% comment %} <p>{{ tour.incluye_tour | safe }}</p> {% endcomment %}
+                    <p>Precio Adultos: ${{ tour.precio_adulto }}</p>
+                    <p>Precio Niños: ${{ tour.precio_nino }}</p>
+                    <div class="expandable-description">
+                        <p class="description">{{ tour.descripcion }}</p>
+                        <button class="btn btn-primary expand-button" data-toggle="collapse" data-target="#collapse{{ forloop.counter }}">Expandir</button>
+                    </div>
                 </div>
             </div>
             {% endfor %}
@@ -91,61 +94,44 @@
 </div>
 <!-- Testimonial End -->
 
-{% comment %} <!-- Testimonial Start -->
-<div class="container-fluid py-5">
-    <div class="container py-5">
-        <div class="text-center mb-3 pb-3">
-            <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">Camping</h6>
-            <h1>Descubre zonas de camping</h1>
-        </div>
-        <div class="owl-carousel testimonial-carousel">
-            {% for tour in tours %}
-            <div class="text-center pb-4">
-                <img class="img-fluid mx-auto" src="{{ tour.url_azure }}" style="width: 100px; height: 100px;" >
-                <div class="testimonial-text bg-white p-4 mt-n5">
-                    <p class="mt-5">{{ tour.descripcion | safe }}</p>
-                    <h5 class="text-truncate">{{ tour.titulo }}</h5>
-                    <p>Duration: {{ tour.duracion }} hours</p>
-                    <p>Price (Adult): ${{ tour.precio_adulto }}</p>
-                    <p>Price (Child): ${{ tour.precio_nino }}</p>
-                    <p>{{ tour.incluye_tour | safe}}</p>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-<!-- Testimonial End -->
-
-<!-- Testimonial Start -->
-<div class="container-fluid py-5">
-    <div class="container py-5">
-        <div class="text-center mb-3 pb-3">
-            <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">Cabañas</h6>
-            <h1>Nuestras cabañas</h1>
-        </div>
-        <div class="owl-carousel testimonial-carousel">
-            {% for tour in tours %}
-            <div class="text-center pb-4">
-                <img class="img-fluid mx-auto" src="{{ tour.url_azure }}" style="width: 100px; height: 100px;" >
-                <div class="testimonial-text bg-white p-4 mt-n5">
-                    <p class="mt-5">{{ tour.descripcion | safe }}</p>
-                    <h5 class="text-truncate">{{ tour.titulo }}</h5>
-                    <p>Duration: {{ tour.duracion }} hours</p>
-                    <p>Price (Adult): ${{ tour.precio_adulto }}</p>
-                    <p>Price (Child): ${{ tour.precio_nino }}</p>
-                    <p>{{ tour.incluye_tour | safe}}</p>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-<!-- Testimonial End --> {% endcomment %}
+<style>
+    .expandable-description .description {
+        overflow: hidden;
+        max-height: 50px; /* Muestra solo las primeras 50px de la descripción */
+        transition: max-height 0.3s ease;
+    }
+    
+    .expandable-description.expanded .description {
+        max-height: none; /* Muestra toda la descripción cuando está expandida */
+    }
+    
+    .expandable-description .expand-button {
+        display: none;
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .expandable-description.expanded .expand-button {
+        display: block;
+    }
+    
+</style>
 
 {% endblock content %}
 
 
 {% block extra_js %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.expand-button').forEach(button => {
+            button.addEventListener('click', () => {
+                button.innerText = button.innerText === 'Expandir' ? 'Cerrar' : 'Expandir';
+            });
+        });
+    });
+    </script>
+    
 
 {% endblock extra_js %}
