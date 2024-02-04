@@ -70,8 +70,7 @@
 <div class="container-fluid py-5">
     <div class="container pt-5 pb-3">
         <div class="text-center mb-3 pb-3">
-            <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">Services</h6>
-            <h1>Nuestros Servicios</h1>
+            <h1>Descubre un Tour</h1>
         </div>
         <div class="row">
             {% for tour in tours %}
@@ -79,12 +78,18 @@
                 <div class="service-item bg-white text-center mb-2 py-5 px-4">
                     <h5 class="text-truncate">{{ tour.titulo }}</h5>
                     <img class="img-fluid mx-auto" src="{{ tour.url_azure }}" class="img-fluid mb-4">
-                    <p>Duracion: {{ tour.duracion }} Horas</p>
+                    <p>Duración: {{ tour.duracion }} Horas</p>
                     <p>Precio Adultos: ${{ tour.precio_adulto }}</p>
                     <p>Precio Niños: ${{ tour.precio_nino }}</p>
                     <div class="expandable-description">
-                        <p class="description">{{ tour.descripcion }}</p>
-                        <button class="btn btn-primary expand-button" data-toggle="collapse" data-target="#collapse{{ forloop.counter }}">Expandir</button>
+                        <a class="btn btn-primary" data-toggle="collapse" href="#collapseDescription{{ forloop.counter }}" role="button" aria-expanded="false" aria-controls="collapseDescription{{ forloop.counter }}">
+                            Ver descripción
+                        </a>
+                        <div class="collapse" id="collapseDescription{{ forloop.counter }}">
+                            <div class="card card-body">
+                                {{ tour.descripcion | safe }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -94,44 +99,10 @@
 </div>
 <!-- Testimonial End -->
 
-<style>
-    .expandable-description .description {
-        overflow: hidden;
-        max-height: 50px; /* Muestra solo las primeras 50px de la descripción */
-        transition: max-height 0.3s ease;
-    }
-    
-    .expandable-description.expanded .description {
-        max-height: none; /* Muestra toda la descripción cuando está expandida */
-    }
-    
-    .expandable-description .expand-button {
-        display: none;
-        background-color: transparent;
-        border: none;
-        cursor: pointer;
-    }
-    
-    .expandable-description.expanded .expand-button {
-        display: block;
-    }
-    
-</style>
-
 {% endblock content %}
 
 
 {% block extra_js %}
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.expand-button').forEach(button => {
-            button.addEventListener('click', () => {
-                button.innerText = button.innerText === 'Expandir' ? 'Cerrar' : 'Expandir';
-            });
-        });
-    });
-    </script>
     
 
 {% endblock extra_js %}
