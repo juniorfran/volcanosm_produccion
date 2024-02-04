@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from decimal import Decimal
 import os
 from django.db import models
@@ -10,25 +10,15 @@ from alpiedelvolcan_ import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+
+from django.conf import settings
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+import os
+from ckeditor.fields import RichTextField
 # Create your models here.
 
 
 #modelo para tipos de servicios
-
-def imagen_servicio_upload_to(instance, filename):
-    today = datetime.now()
-    date_folder = today.strftime('%Y/%m/%d')
-    filename_base, filname_ext = os.path.splitext(filename)
-    new_filname = f'{instance.nombre}_{instance.id}{filname_ext}'
-    return os.path.join('servicio', date_folder, new_filname)
-
-class ImagenesServicio(models.Model):
-    titulo = models.CharField(max_length=50)
-    imagen = models.ImageField(upload_to=imagen_servicio_upload_to)
-    def __str__(self):
-        return f"{self.titulo}"
-    class Meta:
-        verbose_name_plural = "Imágenes de Cabaña"
 
 class TipoServicio(models.Model):
     nombre = models.CharField("Nombre", max_length=50)
@@ -38,10 +28,107 @@ class TipoServicio(models.Model):
 
 class Servicios(models.Model):
     tipo = models.ForeignKey(TipoServicio, on_delete=models.CASCADE)
-    imagenes = models.ManyToManyField(ImagenesServicio)
     nombre = models.CharField(max_length=70)
-    descripcion = models.CharField(max_length=175)
+    descripcion = RichTextField()
     imagen = models.ImageField(upload_to='servicios/{nombre}')
+    url_azure = models.CharField(max_length=255, blank=True, null=True)  # Solo una URL para la imagen en Azure
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Conexión al servicio Blob de Azure
+        blob_service_client = BlobServiceClient.from_connection_string(settings.AZURE_CONNECTION_STRING)
+        container_client = blob_service_client.get_container_client(settings.AZURE_CONTAINER_NAME)
+
+        if self.imagen:
+            # Obtener la fecha actual
+            fecha_actual = datetime.now()
+            # Generar la ruta para la carpeta basada en la fecha
+            ruta_carpeta = f"tours/{fecha_actual.year}/{fecha_actual.month}/{fecha_actual.day}/"
+            
+            # Generar un nombre único para la imagen en Azure
+            blob_name = f"{self.id}_imagen_{os.path.basename(self.imagen.name)}"
+            # Concatenar la ruta de la carpeta con el nombre de la imagen
+            ruta_imagen = os.path.join(ruta_carpeta, blob_name)
+
+            # Verificar si el blob ya existe antes de subirlo
+            blob_client = container_client.get_blob_client(ruta_imagen)
+            if not blob_client.exists():
+                # Si el blob no existe, subir la imagen
+                with open(self.imagen.path, "rb") as data:
+                    blob_client.upload_blob(data)
+                # Actualizar la URL de la imagen en Azure
+                self.url_azure = blob_client.url
+    
+        # Guardar el objeto una vez finalizado el proceso
+        super().save(*args, **kwargs)
+
+    def obtener_imagen_principal(self):
+        return self.imagen.url
+
+
+def imagen_servicio_upload_to(instance, filename):
+    today = datetime.now()
+    date_folder = today.strftime('%Y/%m/%d')
+    filename_base, filname_ext = os.path.splitext(filename)
+    new_filname = f'{instance.nombre}_{instance.id}{filname_ext}'
+    return os.path.join('servicio', date_folder, new_filname)
+
+def get_upload_path(instance, filename):
+    # Obtiene el nombre del modelo y el ID de la instancia
+    model_name = instance.__class__.__name__
+    model_id = instance.id
+    # Construye la ruta de la carpeta con el nombre del modelo y el ID
+    folder_path = f"{model_name}/{model_id}/"
+    # Combina la ruta de la carpeta con el nombre del archivo
+    return os.path.join(folder_path, filename)
+
+class ImagenesServicio(models.Model):
+    servicio = models.ForeignKey(Servicios, on_delete=models.CASCADE, related_name='imagenes')
+    imagen1 = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+    imagen2 = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+    imagen3 = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+    imagen4 = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+    url_azure_1 = models.CharField(max_length=255, blank=True, null=True)
+    url_azure_2 = models.CharField(max_length=255, blank=True, null=True)
+    url_azure_3 = models.CharField(max_length=255, blank=True, null=True)
+    url_azure_4 = models.CharField(max_length=255, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Conexión al servicio Blob de Azure
+        blob_service_client = BlobServiceClient.from_connection_string(settings.AZURE_CONNECTION_STRING)
+        container_client = blob_service_client.get_container_client(settings.AZURE_CONTAINER_NAME)
+
+        # Guardar cada imagen en Azure y obtener sus URLs
+        for i in range(1, 5):  # Iterar sobre las 4 imágenes
+            field_name = f'imagen{i}'
+            url_field_name = f'url_azure_{i}'
+            imagen = getattr(self, field_name)
+            url_field = getattr(self, url_field_name)
+
+            if imagen:
+                # Generar un nombre único para la imagen en Azure
+                blob_name = f"{self.id}_{field_name}_{os.path.basename(imagen.name)}"
+
+                # Verificar si el blob ya existe antes de subirlo
+                blob_client = container_client.get_blob_client(blob_name)
+                if not blob_client.exists():
+                    # Si el blob no existe, subir la imagen y obtener la URL
+                    blob_client.upload_blob(imagen)
+                    setattr(self, url_field_name, blob_client.url)
+                else:
+                    # Si el blob ya existe, obtener la URL existente
+                    setattr(self, url_field_name, blob_client.url)
+
+        # Guardar la instancia del modelo una vez que se han procesado todas las imágenes
+        super().save(*args, **kwargs)
+        
+    def __str__(self):
+        return f"Imágenes del servicio {self.servicio.nombre}"
+
+
     
     
     
@@ -100,7 +187,7 @@ class ReservaCamping (models.Model):
     nombre = models.CharField(max_length=255)
     dui = models.CharField(max_length=10)  # Asumiendo que el DUI tiene 10 dígitos
     correo_electronico = models.EmailField()
-    direccion = models.TextField()
+    direccion = RichTextField()
     cantidad_adultos = models.PositiveIntegerField(validators=[MinValueValidator(0)])
     cantidad_ninos = models.PositiveIntegerField(validators=[MinValueValidator(0)], default=0)
     qr_code_url = models.URLField(blank=True)
@@ -300,12 +387,12 @@ class Cabanias(models.Model):
     nombre = models.CharField(max_length=100)
     tipo_servicio = models.ForeignKey(TipoServicio, on_delete=models.SET_NULL, null=True, blank=True)
     ubicacion = models.CharField(max_length=200)
-    descripcion = models.TextField()
-    descripcion1 = models.TextField()
+    descripcion = RichTextField()
+    descripcion1 = RichTextField()
     capacidad_personas = models.PositiveIntegerField()
     costo_por_noche = models.DecimalField(max_digits=10, decimal_places=2)
     iva = models.BooleanField(default=False)
-    incluye_cabania = models.TextField()
+    incluye_cabania = RichTextField()
     comodidades = models.ManyToManyField(Comodidad)
     imagen = models.ImageField(upload_to='cabañas')
     imagenes = models.ManyToManyField(ImagenesCabania)
@@ -319,7 +406,7 @@ class Cabanias(models.Model):
 class Resena_cabanias(models.Model):
     cabania = models.ForeignKey(Cabanias, related_name='resenas', on_delete=models.CASCADE)
     estrellas = models.PositiveIntegerField()
-    comentario = models.TextField()
+    comentario = RichTextField()
 
     def __str__(self):
         return f"Reseña para {self.cabania.nombre}"

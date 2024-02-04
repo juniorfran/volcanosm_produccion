@@ -18,7 +18,6 @@
 <!-- Header End -->
 <br>
 <hr>
-<h1>Nombre del tour:</h1>
 <h1>{{ tour.titulo }}</h1>
 <hr>
 <!-- Tour Detail Start -->
@@ -50,7 +49,7 @@
         <div class="col-md-6">
             <div class="mt-4">
                 
-                <p>{{ tour.incluye_tour }}</p>
+                <p>{{ tour.incluye_tour | safe }}</p>
                 <p>Precio Adultos: ${{ tour.precio_adulto }}</p>
                 <p>Precio niños: ${{ tour.precio_nino }}</p>
                 <p>Duracion del Tour: {{ tour.duracion }} horas.</p>
@@ -61,11 +60,11 @@
         
         <div class="mt-4">
             <hr>
-            <p>{{ tour.descripcion }}</p>
+            <p>{{ tour.descripcion | safe}}</p>
             <br>
-            <p>{{ tour.descripcion1 }}</p>
+            <p>{{ tour.descripcion1 | safe }}</p>
             <br>
-            <p>{{ tour.descripcion2 }}</p>
+            <p>{{ tour.descripcion2 | safe }}</p>
         </div>
     </div>
     <hr>

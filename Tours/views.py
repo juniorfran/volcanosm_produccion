@@ -58,7 +58,7 @@ def tour_detail(request, tour_id):
     urls_interes = Urls_interes.objects.all()
 
     # Crear una lista con todas las imágenes relacionadas, incluida la principal
-    imagenes = [tour.imagen.url] + [getattr(imagen_tour, f'url_azure_{i}') for i in range(1, 5) for imagen_tour in ImagenTour.objects.filter(tour=tour)]
+    imagenes = [tour.url_azure] + [getattr(imagen_tour, f'url_azure_{i}') for i in range(1, 5) for imagen_tour in ImagenTour.objects.filter(tour=tour)]
 
     if request.method == 'POST':
         estrellas = int(request.POST.get('rating'))

@@ -40,7 +40,7 @@
         <div class="row">
             <div class="col-lg-6" style="min-height: 500px;">
                 <div class="position-relative h-100">
-                    <img class="position-absolute w-100 h-100" src="{{ nosotros.imagen.url }}" style="object-fit: cover;" alt="{{ nosotros.titulo }}">
+                    <img class="position-absolute w-100 h-100" src="{{ nosotros.imagen_url }}" style="object-fit: cover;" alt="{{ nosotros.titulo }}">
                 </div>
             </div>
             <div class="col-lg-6 pt-5 pb-lg-5">
@@ -50,10 +50,10 @@
                     <p>{{ nosotros.descripcion }}</p>
                     <div class="row mb-4">
                         <div class="col-6">
-                            <img class="img-fluid" src="{{ nosotros.imagen_pequena_1.url }}" alt="Image 1">
+                            <img class="img-fluid" src="{{ nosotros.imagen_pequena_1_url }}" alt="Image 1">
                         </div>
                         <div class="col-6">
-                            <img class="img-fluid" src="{{ nosotros.imagen_pequena_2.url }}" alt="Image 2">
+                            <img class="img-fluid" src="{{ nosotros.imagen_pequena_2_url }}" alt="Image 2">
                         </div>
                     </div>
                     <a href="{{ nosotros.url_boton }}" class="btn btn-primary mt-1">{{ nosotros.texto_boton }}</a>
@@ -89,27 +89,35 @@
 <!-- Feature End --> {% endcomment %}
 
 <!-- Feature Start -->
+
 <div class="container-fluid pb-5">
     <div class="container pb-8">
         <div class="row">
             <div class="slider-container">
                 {% for servicio in servicios %}
-                <div class="col-md-6">
-                    <div class="d-flex mb-4 mb-lg-0">
-                        <div class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary mr-3" style="height: 100px; width: 100px;">
-                            <img src="{{ servicio.icono_url }}" alt="{{ servicio.servicio_titulo }}" class="fa fa-2x text-white"  style="height: 100px;">
-                        </div>
-                        <div class="d-flex flex-column">
-                            <h5 class="">{{ servicio.servicio_titulo }}</h5>
-                            <p class="m-1">{{ servicio.servicio_descripcion }}</p>
+                {% if forloop.counter0|divisibleby:3 %}
+                <div class="row">
+                {% endif %}
+                    <div class="col-md-4">
+                        <div class="d-flex mb-4 mb-lg-0">
+                            <div class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary mr-3" style="height: 100px; width: 100px;">
+                                <img src="{{ servicio.icono_url }}" alt="{{ servicio.servicio_titulo }}" class="fa fa-2x text-white"  style="height: 100px;">
+                            </div>
+                            <div class="d-flex flex-column">
+                                <h5 class="">{{ servicio.servicio_titulo }}</h5>
+                                <p class="m-1">{{ servicio.servicio_descripcion }}</p>
+                            </div>
                         </div>
                     </div>
+                {% if forloop.counter0|add:1|divisibleby:3 or forloop.last %}
                 </div>
+                {% endif %}
                 {% endfor %}
             </div>
         </div>
     </div>
 </div>
+
 <!-- Feature End -->
 
 
@@ -257,7 +265,7 @@
         });
     });
 </script>
-
+{% comment %} 
 <!-- Inicializa el slider con las opciones deseadas -->
 <script>
     $(document).ready(function(){
@@ -278,5 +286,5 @@
             ]
         });
     });
-</script>
+</script> {% endcomment %}
 {% endblock extra_js %}

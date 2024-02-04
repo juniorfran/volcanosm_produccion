@@ -39,7 +39,7 @@ def upload_to_ofertas(instance, filename):
 class Nosotros(models.Model):
     titulo = models.CharField("Titulo", max_length=100)
     subtitulo = models.CharField("Subtitulo", max_length=100)
-    descripcion = models.TextField("Descripción")
+    descripcion = RichTextField()
     imagen = models.ImageField(upload_to=upload_to_nosotros, blank=False, null=False)
     imagen_pequena_1 = models.ImageField(upload_to=upload_to_nosotros, blank=False, null=False)
     imagen_pequena_2 = models.ImageField(upload_to=upload_to_nosotros, blank=False, null=False)
@@ -98,7 +98,7 @@ class Nosotros(models.Model):
 # Modelo para los servicios ofrecidos por la empresa
 class Nosotros_Servicios(models.Model):
     servicio_titulo = models.CharField(max_length=50)
-    servicio_descripcion = models.TextField()
+    servicio_descripcion = RichTextField()
     servicio_icono = models.ImageField(upload_to=upload_to_servicios, height_field=None, width_field=None, max_length=None)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     icono_url = models.URLField(max_length=200, blank=True)  # Campo para guardar la URL del icono

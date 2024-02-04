@@ -12,6 +12,7 @@ from django.utils.html import strip_tags
 from django.conf import settings
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 import os
+from ckeditor.fields import RichTextField
 # from Transacciones.models import EnlacePago
 
 
@@ -23,14 +24,14 @@ class TipoTour(models.Model):
 
 class Tour(models.Model):
     titulo = models.CharField(max_length=50, unique=True)
-    descripcion = models.TextField()
-    descripcion1 = models.TextField()
-    descripcion2 = models.TextField()
+    descripcion = RichTextField()
+    descripcion1 = RichTextField()
+    descripcion2 = RichTextField()
     precio_adulto = models.DecimalField(max_digits=10, decimal_places=2)
     precio_nino = models.DecimalField(max_digits=10, decimal_places=2)
     duracion = models.PositiveIntegerField()
     iva = models.BooleanField(default=False)
-    incluye_tour = models.TextField()
+    incluye_tour = RichTextField()
     
     imagen = models.ImageField(upload_to='tours')  # Cambiado a ImageField
     url_azure = models.CharField(max_length=255, blank=True, null=True)  # Solo una URL para la imagen en Azure
@@ -68,8 +69,8 @@ class Tour(models.Model):
         super().save(*args, **kwargs)
 
     def obtener_imagen_principal(self):
-        return self.imagen.url
-
+        return self.url_azure
+    
     def __str__(self):
         return f"{self.titulo} - ${self.precio_adulto}"
 
@@ -135,7 +136,7 @@ class ImagenTour(models.Model):
 class Resena(models.Model):
     tour = models.ForeignKey(Tour, related_name='resenas', on_delete=models.CASCADE)
     estrellas = models.PositiveIntegerField()
-    comentario = models.TextField()
+    comentario = RichTextField()
 
     def __str__(self):
         return f"Reseña para {self.tour.titulo}"
@@ -146,7 +147,7 @@ class Reserva(models.Model):
     nombre = models.CharField(max_length=255)
     dui = models.CharField(max_length=10)  # Asumiendo que el DUI tiene 10 dígitos
     correo_electronico = models.EmailField()
-    direccion = models.TextField()
+    direccion = RichTextField()
     cantidad_adultos = models.PositiveIntegerField(validators=[MinValueValidator(0)])
     cantidad_ninos = models.PositiveIntegerField(validators=[MinValueValidator(0)], default=0)
     fecha_reserva = models.DateField(editable=True)

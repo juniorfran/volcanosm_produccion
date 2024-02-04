@@ -1,6 +1,7 @@
 # models.py en tu aplicación de Django
 from django.db import models
 from Tours.models import Reserva
+from ckeditor.fields import RichTextField
 
 def upload_to_transactions(instance, filename):
     # La función toma la instancia del modelo y el nombre del archivo y construye la ruta de almacenamiento
@@ -15,7 +16,7 @@ class EnlacePago(models.Model):
     url_qr_code = models.URLField()
     url_enlace = models.URLField()
     esta_productivo = models.BooleanField()
-    descripcionProducto = models.TextField()
+    descripcionProducto = RichTextField()
     cantidad = models.CharField(max_length=5)
     imagenProducto = models.URLField(max_length=250, null=True)
     idEnlace = models.CharField(max_length=150)
