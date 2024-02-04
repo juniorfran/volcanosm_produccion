@@ -82,7 +82,7 @@
                     <p>Duracion: {{ tour.duracion }} Horas</p>
                     <p>Pricio Adultos: ${{ tour.precio_adulto }}</p>
                     <p>Price Niños: ${{ tour.precio_nino }}</p>
-                    <p>{{ tour.incluye_tour | safe }}</p>
+                    {% comment %} <p>{{ tour.incluye_tour | safe }}</p> {% endcomment %}
                 </div>
             </div>
             {% endfor %}
