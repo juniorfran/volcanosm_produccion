@@ -28,22 +28,33 @@ if access_token:
         #print(consulta_result)
 
 def tours_index(request):
+    # Obtener la fecha actual
+    fecha_actual = timezone.now()
+
     # Obtener todos los tours desde la base de datos
     tours = Tour.objects.all()
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion') #obtener la barra principal
-    data_contact = Contacts.objects.latest()#obtener todos los datos de contacto
-    urls_info = Urls_info.objects.all() #obtener todas las url de informacion
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion') # Obtén la última descripción general
-    urls_interes = Urls_interes.objects.all() #urls de interes
 
-    # Renderizar la plantilla 'index.html' con la lista de tours
-    context={
+    # Verificar la disponibilidad de cada tour
+    for tour in tours:
+        if tour.fecha_inicio <= fecha_actual <= tour.fecha_fin:
+            tour.disponible = True
+        else:
+            tour.disponible = False
+
+    barra_principal = Barra_Principal.objects.latest('fecha_creacion') # Obtener la barra principal
+    data_contact = Contacts.objects.latest() # Obtener todos los datos de contacto
+    urls_info = Urls_info.objects.all() # Obtener todas las URL de información
+    ultima_descripcion = General_Description.objects.latest('fecha_creacion') # Obtener la última descripción general
+    urls_interes = Urls_interes.objects.all() # URLs de interés
+
+    # Renderizar la plantilla 'show_tours.html' con la lista de tours y otros datos
+    context = {
         'tours': tours,
-        'barra_principal':barra_principal,
-        'data_contact':data_contact,
-        'urls_info':urls_info,
+        'barra_principal': barra_principal,
+        'data_contact': data_contact,
+        'urls_info': urls_info,
         'ultima_descripcion': ultima_descripcion,
-        'urls_interes':urls_interes,
+        'urls_interes': urls_interes,
     }
     return render(request, 'show_tours.html', context)
 

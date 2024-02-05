@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.utils import timezone
 from django.conf import settings
 from django.db import models
 from decimal import Decimal
@@ -37,7 +38,10 @@ class Tour(models.Model):
     url_azure = models.CharField(max_length=255, blank=True, null=True)  # Solo una URL para la imagen en Azure
     tipo_tour = models.ForeignKey(TipoTour, on_delete=models.SET_NULL, null=True, blank=True)
     
-    
+        # Nuevo campo para el rango de fechas disponibles
+    fecha_inicio = models.DateTimeField(default=timezone.now)
+    fecha_fin = models.DateTimeField(default=timezone.now)
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
@@ -46,28 +50,19 @@ class Tour(models.Model):
         container_client = blob_service_client.get_container_client(settings.AZURE_CONTAINER_NAME)
 
         if self.imagen:
-            # Obtener la fecha actual
-            fecha_actual = datetime.now()
-            # Generar la ruta para la carpeta basada en la fecha
+            fecha_actual = timezone.now()
             ruta_carpeta = f"tours/{fecha_actual.year}/{fecha_actual.month}/{fecha_actual.day}/"
-            
-            # Generar un nombre único para la imagen en Azure
             blob_name = f"{self.id}_imagen_{os.path.basename(self.imagen.name)}"
-            # Concatenar la ruta de la carpeta con el nombre de la imagen
             ruta_imagen = os.path.join(ruta_carpeta, blob_name)
 
-            # Verificar si el blob ya existe antes de subirlo
             blob_client = container_client.get_blob_client(ruta_imagen)
             if not blob_client.exists():
-                # Si el blob no existe, subir la imagen
                 with open(self.imagen.path, "rb") as data:
                     blob_client.upload_blob(data)
-                # Actualizar la URL de la imagen en Azure
                 self.url_azure = blob_client.url
     
-        # Guardar el objeto una vez finalizado el proceso
         super().save(*args, **kwargs)
-
+    
     def obtener_imagen_principal(self):
         return self.url_azure
     
