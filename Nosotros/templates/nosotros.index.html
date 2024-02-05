@@ -98,17 +98,21 @@
                 {% if forloop.counter0|divisibleby:3 %}
                 <div class="row">
                 {% endif %}
+                
                     <div class="col-md-4">
                         <div class="d-flex mb-4 mb-lg-0">
+                            <a class="destination-overlay text-white text-decoration-none" href="{% url 'tour_detail' tour.id %}">
                             <div class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary mr-3" style="height: 100px; width: 100px;">
                                 <img src="{{ servicio.icono_url }}" alt="{{ servicio.servicio_titulo }}" class="fa fa-2x text-white"  style="height: 100px;">
                             </div>
+                            </a>
                             <div class="d-flex flex-column">
                                 <h5 class="">{{ servicio.servicio_titulo }}</h5>
                                 <p class="m-1">{{ servicio.servicio_descripcion }}</p>
                             </div>
                         </div>
                     </div>
+                
                 {% if forloop.counter0|add:1|divisibleby:3 or forloop.last %}
                 </div>
                 {% endif %}
@@ -121,7 +125,7 @@
 <!-- Feature End -->
 
 
-
+{% if ultima_oferta.estado_oferta %}
     <!-- Registration Start -->
     <style>
         .bg-registration-1 {
@@ -175,6 +179,8 @@
             </div>
         </div>
     </div>
+{% endif %}
+
 
 
     <!-- Registration End -->

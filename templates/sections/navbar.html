@@ -10,21 +10,12 @@
             </button>
             <div class="collapse navbar-collapse justify-content-between px-3" id="navbarCollapse">
                 <div class="navbar-nav ml-auto py-0">
-                    <a href="{% url "index" %}" class="nav-item nav-link active">Inicio</a>
-                    <a href="{% url 'nosotros' %}" class="nav-item nav-link">Nosotros</a>
-                    <a href="{% url 'servicios' %}" class="nav-item nav-link">Servicios</a>
-                    <a href="{% url 'tours' %}" class="nav-item nav-link">Tours</a>
-                    {% comment %} <div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Paginas</a>
-                        <div class="dropdown-menu border-0 rounded-0 m-0">
-                            <a href="blog.html" class="dropdown-item">Blog Grid</a>
-                            <a href="single.html" class="dropdown-item">Blog Detail</a>
-                            <a href="destination.html" class="dropdown-item">Destination</a>
-                            <a href="guide.html" class="dropdown-item">Travel Guides</a>
-                            <a href="testimonial.html" class="dropdown-item">Testimonial</a>
-                        </div>
-                    </div> {% endcomment %}
-                    <a href="#" class="nav-item nav-link">Contactanos</a>
+                    <a href="{% url "index" %}" class="nav-item nav-link {% if request.path == '/' %}active{% endif %}">Inicio</a>
+                    <a href="{% url 'nosotros' %}" class="nav-item nav-link {% if request.path == '/nosotros/' %}active{% endif %}">Nosotros</a>
+                    <a href="{% url 'servicios' %}" class="nav-item nav-link {% if request.path == '/servicios/' %}active{% endif %}">Servicios</a>
+                    <a href="{% url 'tours' %}" class="nav-item nav-link {% if request.path == '/tours/' %}active{% endif %}">Tours</a>
+                    <a href="{% url 'contacto' %}" class="nav-item nav-link {% if request.path == '/contacto/' %}active{% endif %}">Contactanos</a>
+                    
                 </div>
             </div>
         </nav>

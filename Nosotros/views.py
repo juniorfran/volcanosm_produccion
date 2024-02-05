@@ -10,25 +10,14 @@ from .models import Nosotros, Nosotros_Servicios, Solicitud_Oferta, Nosotros_Ofe
 # Create your views here.
 def nosotros_index(request):
     
-    #Obtener todos los services bar
-    services = Services_Bar.objects.filter(services_visible=True)  # Filtra los servicios visibles
     
-    #obetner todos los teams
-    teams_bar = Team_bar.objects.all().order_by("id")
-    
-    # Obtén la última descripción general
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
-    #obtener la barra principal
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
-    
-    #obtener todos los datos de contacto
-    data_contact = Contacts.objects.latest()
-    
-    #obtener todas las url de informacion
-    urls_info = Urls_info.objects.all()
-    
-    #urls de interes
-    urls_interes = Urls_interes.objects.all()
+    services = Services_Bar.objects.filter(services_visible=True)  # Filtra los servicios visibles y Obtener todos los services bar
+    teams_bar = Team_bar.objects.all().order_by("id") #obetner todos los teams
+    ultima_descripcion = General_Description.objects.latest('fecha_creacion') # Obtén la última descripción general
+    barra_principal = Barra_Principal.objects.latest('fecha_creacion') # obtener la barra principal
+    data_contact = Contacts.objects.latest() #obtener todos los datos de contacto
+    urls_info = Urls_info.objects.all() #obtener todas las url de informacion
+    urls_interes = Urls_interes.objects.all() #urls de interes
     
     #formulario de solicitud de oferta
     if request.method == 'POST':
@@ -36,39 +25,29 @@ def nosotros_index(request):
         nombre = request.POST.get('nombre')
         email = request.POST.get('email')
         telefono = request.POST.get('telefono')
-
-        # Crear una nueva solicitud de oferta
-        solicitud = Solicitud_Oferta.objects.create(nombre=nombre, email=email, telefono=telefono)
-
-        # Obtener la última oferta registrada
-        ultima_oferta = Nosotros_Oferta.objects.latest('fecha_creacion')
-
-        # Relacionar la solicitud con la última oferta
-        solicitud.oferta_relacionada = ultima_oferta
+        solicitud = Solicitud_Oferta.objects.create(nombre=nombre, email=email, telefono=telefono) # Crear una nueva solicitud de oferta
+        ultima_oferta = Nosotros_Oferta.objects.latest('fecha_creacion') # Obtener la última oferta registrada
+        solicitud.oferta_relacionada = ultima_oferta # Relacionar la solicitud con la última oferta
         solicitud.save()
 
-        # Enviar la solicitud por correo electrónico
-        solicitud.enviar_solicitud_por_correo()
-
-        # Mostrar un mensaje de éxito
-        messages.success(request, 'Solicitud de oferta enviada con éxito.')
-
-        # Redireccionar a la misma página o a cualquier otra deseada
-        return JsonResponse({'success': True})  # 
+        
+        solicitud.enviar_solicitud_por_correo() # Enviar la solicitud por correo electrónico        
+        messages.success(request, 'Solicitud de oferta enviada con éxito.') # Mostrar un mensaje de éxito
+        return JsonResponse({'success': True})  # Redireccionar a la misma página o a cualquier otra deseada
     
     nosotros = Nosotros.objects.first()
+    servicios = Nosotros_Servicios.objects.all().order_by('-fecha_creacion')[:4] # Obtener los últimos 4 servicios
     
-    # Obtener los últimos 4 servicios
-    servicios = Nosotros_Servicios.objects.all().order_by('-fecha_creacion')[:4]
+    ultima_oferta = Nosotros_Oferta.objects.latest('fecha_creacion') # Obtener la última oferta registrada
+    # try:
+    #     # Intenta obtener la última oferta registrada
+    #     ultima_oferta = Nosotros_Oferta.objects.latest('fecha_creacion')
+    # except Nosotros_Oferta.DoesNotExist:
+    #     # Maneja la excepción si no hay ninguna oferta registrada
+    #     raise Http404("No hay ofertas registradas en este momento.")
     
-    # Obtener la última oferta registrada
-    #ultima_oferta = Nosotros_Oferta.objects.latest('fecha_creacion')
-    try:
-        # Intenta obtener la última oferta registrada
-        ultima_oferta = Nosotros_Oferta.objects.latest('fecha_creacion')
-    except Nosotros_Oferta.DoesNotExist:
-        # Maneja la excepción si no hay ninguna oferta registrada
-        raise Http404("No hay ofertas registradas en este momento.")
+    #en el caso de que estado_oferta de Nosotros_Oferta este True se veran las ofertas de lo contrarios no se veran
+    
     
     
     context={

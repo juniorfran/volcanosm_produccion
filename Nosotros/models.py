@@ -149,6 +149,7 @@ class Nosotros_Oferta(models.Model):
     detalle_2 = models.CharField(max_length=50)
     detalle_3 = models.CharField(max_length=50)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
+    estado_oferta = models.BooleanField(default=True)
     oferta_imagen = models.ImageField(upload_to=upload_to_servicios, height_field=None, width_field=None, max_length=None)
     imagen_url = models.URLField(max_length=200, blank=True)  # Campo para guardar la URL del icono
     
