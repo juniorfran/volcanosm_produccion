@@ -1,11 +1,22 @@
 from django.shortcuts import render
 from Tours.models import Tour
+from django.utils import timezone
 from Configuraciones.models import Barra_Principal, CarruselInicio, Services_Bar, Team_bar, Contacts, Urls_info, Urls_interes, General_Description
 
 #vista para mostrar la pagina principal
 def index(request):
-    #obtener los tour por orden de popularidad
+    # Obtener la fecha actual
+    fecha_actual = timezone.now()
+
+    # Obtener todos los tours desde la base de datos
     tours = Tour.objects.all()
+
+    # Verificar la disponibilidad de cada tour
+    for tour in tours:
+        if tour.fecha_inicio <= fecha_actual <= tour.fecha_fin:
+            tour.disponible = True
+        else:
+            tour.disponible = False
     
     #obtener la barra principal
     barra_principal = Barra_Principal.objects.latest('fecha_creacion')
