@@ -47,7 +47,7 @@
                 <div class="about-text bg-white p-4 p-lg-5 my-lg-5">
                     <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">{{ nosotros.subtitulo }}</h6>
                     <h1 class="mb-3">{{ nosotros.titulo }}</h1>
-                    <p>{{ nosotros.descripcion }}</p>
+                    <p>{{ nosotros.descripcion | safe }}</p>
                     <div class="row mb-4">
                         <div class="col-6">
                             <img class="img-fluid" src="{{ nosotros.imagen_pequena_1_url }}" alt="Image 1">
@@ -132,6 +132,7 @@
     <div class="container-fluid bg-registration-1 py-5" style="margin: 90px 0;">
         <div class="container py-5">
             <div class="row align-items-center">
+
                 <div class="col-lg-7 mb-5 mb-lg-0">
                     <div class="mb-4">
                         <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">{{ ultima_oferta.titulo_oferta }}</h6>
@@ -144,6 +145,7 @@
                         <li class="py-2"><i class="fa fa-check text-primary mr-3"></i>{{ ultima_oferta.detalle_3 }}</li>
                     </ul>
                 </div>
+
                 <div class="col-lg-5">
                     <div class="card border-0">
                         <div class="card-header bg-primary text-center p-4">
