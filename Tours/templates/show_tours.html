@@ -62,31 +62,30 @@
                         <p class="text-white">Precio Adultos: ${{ tour.precio_adulto }}</p>
                         <p class="text-white">Duracion:{{ tour.duracion }} Horas</p>
                     </a>
-                    
                 </div>
                 {% else %}
-                    <div class="destination-item overlay-not-available position-relative overflow-hidden mb-2">
-                        <img class="img-fluid" src="{{ tour.url_azure }}" alt="{{ tour.titulo }}">
-                        <a class="destination-overlay text-white text-decoration-none">
-                            <h5 class="text-white">{{ tour.titulo }}</h5>
-                            <p class="text-white">Precio Adultos: ${{ tour.precio_adulto }}</p>
-                            <p class="text-white">Duracion:{{ tour.duracion }} Horas</p>
-                        </a>
+                <div class="destination-item position-relative overflow-hidden mb-2">
+                    <img class="img-fluid" src="{{ tour.url_azure }}" alt="{{ tour.titulo }}">
+                    <div class="destination-overlay text-white text-decoration-none">
+                        <h5 class="text-white">{{ tour.titulo }}</h5>
+                        <p class="text-white">Precio Adultos: ${{ tour.precio_adulto }}</p>
+                        <p class="text-white">Duracion:{{ tour.duracion }} Horas</p>
+                        <div class="alert alert-danger" role="alert" style="background-color: rgba(255, 235, 59, 0.5);">
+                            <h4 class="alert-heading text-white">¡No disponible!</h4>
+                            <p class="text-white">Por el momento este tour no se encuentra disponible.</p>
+                            <hr>
+                            <p class="mb-0 text-white"><a class="text-white" href="{% url 'contacto'%}">Solicitar Ayuda</a></p>
+                        </div>
                     </div>
-                    <div class="alert alert-warning" role="alert">
-                        <h4 class="alert-heading">No disponible!</h4>
-                        <p>Por el momento este tour no se encuentra disponible.</p>
-                        <hr>
-                        <a class=" text-black text-decoration-none" href="{% url 'contacto'%}"> Solicitar Ayuda</a>
-                    </div> 
-                
-                    {% endif %}
+                </div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
     </div>
 </div>
 <!-- Destination End -->
+
 
 
 {% endblock content %}
