@@ -12,6 +12,7 @@ import os
 from datetime import datetime
 from azure.storage.blob import BlobServiceClient
 from ckeditor.fields import RichTextField
+from azure.storage.blob import ContentSettings
 
 # Función de carga para el directorio "nosotros" con la fecha actual
 def upload_to_nosotros(instance, filename):
@@ -77,7 +78,7 @@ class Nosotros(models.Model):
                 blob_client = container_client.get_blob_client(ruta_imagen)
                 if not blob_client.exists():
                     with open(imagen_field.path, "rb") as data:
-                        blob_client.upload_blob(data)
+                        blob_client.upload_blob(data, content_settings=ContentSettings(content_disposition=None, content_type="image/jpeg"))
                 # Obtener y guardar la URL de la imagen
                 if field_name == 'imagen':
                     imagen_url = blob_client.url
@@ -127,7 +128,7 @@ class Nosotros_Servicios(models.Model):
                     blob_client = container_client.get_blob_client(ruta_imagen)
                     if not blob_client.exists():
                         with open(imagen_field.path, "rb") as data:
-                            blob_client.upload_blob(data)
+                            blob_client.upload_blob(data, content_settings=ContentSettings(content_disposition=None, content_type="image/jpeg"))
                     # Obtener y guardar la URL de la imagen
                     if field_name == 'servicio_icono':
                         icono_url = blob_client.url
@@ -177,7 +178,7 @@ class Nosotros_Oferta(models.Model):
                     blob_client = container_client.get_blob_client(ruta_imagen)
                     if not blob_client.exists():
                         with open(imagen_field.path, "rb") as data:
-                            blob_client.upload_blob(data)
+                            blob_client.upload_blob(data, content_settings=ContentSettings(content_disposition=None, content_type="image/jpeg"))
                     # Obtener y guardar la URL de la imagen
                     if field_name == 'oferta_imagen':
                         imagen_url = blob_client.url

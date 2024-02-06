@@ -14,6 +14,7 @@ from django.conf import settings
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 import os
 from ckeditor.fields import RichTextField
+from azure.storage.blob import ContentSettings
 # from Transacciones.models import EnlacePago
 
 
@@ -35,7 +36,7 @@ class Tour(models.Model):
     incluye_tour = RichTextField()
     
     imagen = models.ImageField(upload_to='tours')  # Cambiado a ImageField
-    url_azure = models.CharField(max_length=255, blank=True, null=True)  # Solo una URL para la imagen en Azure
+    url_azure = models.URLField(max_length=400, blank=True, null=True)
     tipo_tour = models.ForeignKey(TipoTour, on_delete=models.SET_NULL, null=True, blank=True)
     
         # Nuevo campo para el rango de fechas disponibles
@@ -58,7 +59,7 @@ class Tour(models.Model):
             blob_client = container_client.get_blob_client(ruta_imagen)
             if not blob_client.exists():
                 with open(self.imagen.path, "rb") as data:
-                    blob_client.upload_blob(data)
+                    blob_client.upload_blob(data, content_settings=ContentSettings(content_disposition=None, content_type="image/jpeg"))
                 self.url_azure = blob_client.url
     
         super().save(*args, **kwargs)

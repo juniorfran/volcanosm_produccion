@@ -15,6 +15,7 @@ from django.conf import settings
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 import os
 from ckeditor.fields import RichTextField
+from azure.storage.blob import ContentSettings
 # Create your models here.
 
 
@@ -56,7 +57,7 @@ class Servicios(models.Model):
             if not blob_client.exists():
                 # Si el blob no existe, subir la imagen
                 with open(self.imagen.path, "rb") as data:
-                    blob_client.upload_blob(data)
+                    blob_client.upload_blob(data, content_settings=ContentSettings(content_disposition=None, content_type="image/jpeg"))
                 # Actualizar la URL de la imagen en Azure
                 self.url_azure = blob_client.url
     

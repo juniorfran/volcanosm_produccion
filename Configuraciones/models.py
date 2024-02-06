@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 from azure.storage.blob import BlobServiceClient
 from ckeditor.fields import RichTextField
-
+from azure.storage.blob import ContentSettings
 from alpiedelvolcan_ import settings
 
 # Create your models here.
@@ -84,7 +84,7 @@ class CarruselInicio(models.Model):
                 blob_client = container_client.get_blob_client(ruta_imagen)
                 if not blob_client.exists():
                     with open(imagen_field.path, "rb") as data:
-                        blob_client.upload_blob(data)
+                        blob_client.upload_blob(data, content_settings=ContentSettings(content_disposition=None, content_type="image/jpeg"))
                 # Obtener y guardar la URL de la imagen
                 if field_name == 'imagen':
                     imagen_url = blob_client.url
@@ -134,7 +134,7 @@ class Services_Bar(models.Model):
                 blob_client = container_client.get_blob_client(ruta_imagen)
                 if not blob_client.exists():
                     with open(imagen_field.path, "rb") as data:
-                        blob_client.upload_blob(data)
+                        blob_client.upload_blob(data, content_settings=ContentSettings(content_disposition=None, content_type="image/jpeg"))
                 # Obtener y guardar la URL de la imagen
                 if field_name == 'services_ico':
                     imagen_url = blob_client.url
@@ -197,7 +197,7 @@ class Team_bar(models.Model):
                 blob_client = container_client.get_blob_client(ruta_imagen)
                 if not blob_client.exists():
                     with open(imagen_field.path, "rb") as data:
-                        blob_client.upload_blob(data)
+                        blob_client.upload_blob(data, content_settings=ContentSettings(content_disposition=None, content_type="image/jpeg"))
                 # Obtener y guardar la URL de la imagen
                 if field_name == 'team_image':
                     imagen_url = blob_client.url

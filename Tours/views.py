@@ -11,10 +11,10 @@ from Transacciones.models import EnlacePago
 
 
 # Tus credenciales de Wompi
-# Client_id = "86d5de4c-dd6a-42d2-8d5b-ff5aed09ae83"
-# Client_secret = "c3bb69e4-7d19-486b-b9d8-1b2b592714d5"
-Client_id = "84697956-57f9-4171-ac57-0e885d45a630"
-Client_secret = "dfb98854-b75b-40ad-8a0e-5e4914ba32f6"
+Client_id = "86d5de4c-dd6a-42d2-8d5b-ff5aed09ae83"
+Client_secret = "c3bb69e4-7d19-486b-b9d8-1b2b592714d5"
+#Client_id = "84697956-57f9-4171-ac57-0e885d45a630"
+#Client_secret = "dfb98854-b75b-40ad-8a0e-5e4914ba32f6"
 
 # Autenticarse y obtener el token
 access_token = authenticate_wompi(Client_id, Client_secret)
@@ -152,7 +152,9 @@ def reservar_tour(request, tour_id):
         # url_imagen_tour = imagen_tour.url
         # #verificar que la url tenga el formato correcto
         # if url_imagen_tour and not url_imagen_tour.startswith(("http://", "https://")):
-        url_imagen_tour = "https://codigogenesis.com/genesis/2022/04/imagen-placeholder-por-defecto-WooCommerce.png"
+        #url_imagen_tour = "https://codigogenesis.com/genesis/2022/04/imagen-placeholder-por-defecto-WooCommerce.png"
+        url_imagen_tour = tour.url_azure
+        print("Esta es la url que obtengo  en depuracion: ",url_imagen_tour)
 
         # Asigna el valor de reserva_id después de obtener la instancia
         reserva_id = reserva_instance.id
