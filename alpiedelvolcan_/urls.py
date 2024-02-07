@@ -43,7 +43,7 @@ urlpatterns = [
     #url para contactanos
     path('contactanos/', include('Contactanos.urls')),
     
-]
+]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
 # Configuración para servir archivos estáticos en entorno de desarrollo

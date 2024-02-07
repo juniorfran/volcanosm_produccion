@@ -15,6 +15,7 @@ from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 import os
 from ckeditor.fields import RichTextField
 from azure.storage.blob import ContentSettings
+from azure.communication.email import EmailClient
 # from Transacciones.models import EnlacePago
 
 
@@ -199,17 +200,17 @@ class Reserva(models.Model):
         from datetime import datetime
 
         # Obtén la fecha actual en formato YYYYMMDD
-        fecha_actual = datetime.now().strftime("%Y%m%d")
+        fecha_actual = datetime.now().strftime("%Y%m")
 
         # Genera un número correlativo desde 001
         correlativo = str(random.randint(1, 9999)).zfill(4)
 
-        # Si fecha_reserva es una cadena, conviértela a un objeto datetime
-        if isinstance(self.fecha_reserva, str):
-            self.fecha_reserva = datetime.strptime(self.fecha_reserva, "%Y-%m-%d")
+        # # Si fecha_reserva es una cadena, conviértela a un objeto datetime
+        # if isinstance(self.fecha_reserva, str):
+        #     self.fecha_reserva = datetime.strptime(self.fecha_reserva, "%m")
 
         # Combina los elementos para formar el código de reserva
-        codigo = f"re-{fecha_actual}-{self.fecha_reserva.strftime('%Y%m%d')}-{correlativo}"
+        codigo = f"re-{fecha_actual}f{self.dui}{correlativo}"
 
         return codigo
     
@@ -225,59 +226,65 @@ class Reserva(models.Model):
         return self.qr_code.url
 
     def enviar_codigo_por_correo(self):
-        
-        # Crea el mensaje del correo electrónic
-        
-        # Genera el código QR
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(self.codigo_reserva)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="black", back_color="white")
+        try:
+            # Configuración de la conexión al servicio de correo electrónico de Azure
+            connection_string = "endpoint=https://emailvolcanosm.unitedstates.communication.azure.com/;accesskey=SkW7u9s6sgjkska6ncJ8iOQutZdU1f+iIH9rfMto3j+NFLi8bpmcM4PF+4oJ3A+gQkAOXVFvhxaNqa8UTdtcUg=="
+            client = EmailClient.from_connection_string(connection_string)
 
-        # Guarda el código QR en un BytesIO
-        qr_io = BytesIO()
-        img.save(qr_io)
-        qr_io.seek(0)
+            # Genera el código QR
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(self.codigo_reserva)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="black", back_color="white")
 
-        # Guarda el código QR en la base de datos y obtén la URL
-        self.qr_code_url = self.guardar_qr_code_image(qr_io)
+            # Guarda el código QR en un BytesIO
+            qr_io = BytesIO()
+            img.save(qr_io)
+            qr_io.seek(0)
 
-        # Envia el código de reserva y el código QR por correo electrónico
-        subject = 'Código de Reserva para el Tour'
-        from_email = settings.DEFAULT_FROM_EMAIL  # Cambia esto al remitente real
-        to_email = [self.correo_electronico, 'volcanosanmiguel.sv@gmail.com']
-                
-        # Renderiza el contenido del correo utilizando un template
-        context = {
-            'tour_titulo': self.tour.titulo,
-            'codigo_reserva': self.codigo_reserva,
-            'nombre': self.nombre,
-            'dui': self.dui,
-            'tipo_documento': self.tipo_documento,
-            'telefono': self.telefono,
-            'correo_electronico': self.correo_electronico,
-            'pais_residencia': self.pais_residencia,
-            'direccion': self.direccion,
-            'cantidad_adultos': self.cantidad_adultos,
-            'cantidad_ninos': self.cantidad_ninos,
-            'fecha_reserva': self.fecha_reserva,
-            'total_pagar': self.total_pagar
-        }
-        html_content = render_to_string('email/correo_reserva.html', context)
-        text_content = strip_tags(html_content)
+            # Renderiza el contenido del correo utilizando un template
+            context = {
+                'tour_titulo': self.tour.titulo,
+                'codigo_reserva': self.codigo_reserva,
+                'nombre': self.nombre,
+                'dui': self.dui,
+                'tipo_documento': self.tipo_documento,
+                'telefono': self.telefono,
+                'correo_electronico': self.correo_electronico,
+                'pais_residencia': self.pais_residencia,
+                'direccion': self.direccion,
+                'cantidad_adultos': self.cantidad_adultos,
+                'cantidad_ninos': self.cantidad_ninos,
+                'fecha_reserva': self.fecha_reserva,
+                'total_pagar': self.total_pagar
+            }
+            html_content = render_to_string('email/correo_reserva.html', context)
+            text_content = strip_tags(html_content)
 
-        # Adjunta la imagen del código QR al mensaje
-        msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
-        msg.attach_alternative(html_content, "text/html")
-        msg.attach(f"qrcode_{self.codigo_reserva}.png", qr_io.getvalue(), "image/png")
+            # Configuración del mensaje
+            message = {
+                "senderAddress": settings.EMAIL_HOST_USER,  # Reemplaza con el remitente real
+                "recipients": {
+                    "to": [
+                        {"address": self.correo_electronico},
+                        {"address": "volcanosanmiguel.sv@gmail.com"}
+                        ],
+                },
+                "content": {
+                    "subject": "Código de Reserva para el Tour",
+                    "html": html_content,
+                    "plainText": text_content,
+                }
+            }
 
-        # Adjunta la URL del código QR al mensaje
-        msg.attach(f"qrcode_url_{self.codigo_reserva}.txt", self.qr_code_url)
+            # Envía el correo electrónico utilizando el servicio de correo electrónico de Azure
+            poller = client.begin_send(message)
+            result = poller.result()
 
-        # Envía el correo
-        msg.send()
+        except Exception as ex:
+            print(ex)

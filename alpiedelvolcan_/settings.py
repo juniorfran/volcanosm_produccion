@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-71ilsry+%0yrbexaf^j!f41b0i=t!g+8%pvd!1d8a)azph_nd-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['volcano-sm.azurewebsites.net', 'http://0.0.0.0:8000/', '127.0.0.1', 'volcanosm.net']
 #CORS_ALLOWED_ORIGINS = ['https://alpiedelvolcan.azurewebsites.net/']
@@ -47,9 +47,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587  # El puerto para Gmail es 587
 EMAIL_USE_TLS = True  # Utiliza TLS (Transport Layer Security) para la conexión
-EMAIL_HOST_USER = 'volcanosanmiguel.sv@gmail.com'
+EMAIL_HOST_USER = 'test@fe12acb8-21f7-46d8-9613-2c3e2746e6a6.azurecomm.net'
 EMAIL_HOST_PASSWORD = '18032022#sm'
-DEFAULT_FROM_EMAIL = 'fvillalta@alpiedelvolcan.com'
+DEFAULT_FROM_EMAIL = 'volcanosanmiguel.sv@gmail.com'
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
 
@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     'material',
     'material.admin',
     #'django.contrib.admin',
-    'django.contrib.admin',
+
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
