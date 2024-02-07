@@ -15,6 +15,7 @@
     <div class="container">
 
         {% block content %}
+
         {% if request.path == '/' %}  {# Verifica si la URL es la página de inicio #}
 
             {% include "sections/carrusel_inicio.html" %}

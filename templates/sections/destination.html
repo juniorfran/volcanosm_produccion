@@ -1,12 +1,12 @@
  {% load static %}
- <!-- Destination Start -->
- <div class="container-fluid py-6">
-    <div class="container pt-5 pb-6">
-        <div class="text-center mb-1 pb-5">
-            <h6 class="text-primary text-uppercase" style="letter-spacing: 5px; font-size: 35px;">Tours</h6>
-            <h3>Explora lo mejor de nuestro pais.</h3>
+<!-- Destination Start -->
+<div class="container-fluid py-5">
+    <div class="container pt-5 pb-3">
+        <div class="text-center mb-3 pb-3">
+            <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">Tours Al Pie del Volcan</h6>
+            <h1>Explora con los mejores Tours</h1>
         </div>
-        <div class="row">
+        <div class="row justify-content-center">
             {% for tour in tours %}
             <div class="col-lg-4 col-md-6 mb-4">
                 {% if tour.disponible %}
@@ -14,9 +14,8 @@
                     <img class="img-fluid" src="{{ tour.url_azure }}" alt="{{ tour.titulo }}">
                     <a class="destination-overlay text-white text-decoration-none" href="{% url 'tour_detail' tour.id %}">
                         <h5 class="text-white">{{ tour.titulo }}</h5>
-                        {% comment %} <span>{{ tour.descripcion }}</span> {% endcomment %}
                         <p class="text-white">Precio Adultos: ${{ tour.precio_adulto }}</p>
-                        <p class="text-white">Duracion:{{ tour.duracion }} Horas</p>
+                        <p class="text-white">Duracion: {{ tour.duracion }} Horas</p>
                     </a>
                 </div>
                 {% else %}
@@ -25,7 +24,7 @@
                     <div class="destination-overlay text-white text-decoration-none">
                         <h5 class="text-white">{{ tour.titulo }}</h5>
                         <p class="text-white">Precio Adultos: ${{ tour.precio_adulto }}</p>
-                        <p class="text-white">Duracion:{{ tour.duracion }} Horas</p>
+                        <p class="text-white">Duracion: {{ tour.duracion }} Horas</p>
                         <div class="alert alert-danger" role="alert" style="background-color: rgba(255, 235, 59, 0.5);">
                             <h4 class="alert-heading text-white">¡No disponible!</h4>
                             <p class="text-white">Por el momento este tour no se encuentra disponible.</p>
@@ -40,4 +39,4 @@
         </div>
     </div>
 </div>
-<!-- Destination Start -->
+<!-- Destination End -->

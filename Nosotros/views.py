@@ -1,6 +1,6 @@
 from django.http import Http404, JsonResponse
 from django.shortcuts import render
-from Configuraciones.models import Barra_Principal, Contacts, General_Description, Services_Bar, Team_bar, Urls_info, Urls_interes
+from Configuraciones.models import Barra_Principal, Contacts, Direccionamiento, General_Description, Services_Bar, Team_bar, Urls_info, Urls_interes
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Nosotros, Nosotros_Servicios, Solicitud_Oferta, Nosotros_Oferta
@@ -48,9 +48,15 @@ def nosotros_index(request):
     
     #en el caso de que estado_oferta de Nosotros_Oferta este True se veran las ofertas de lo contrarios no se veran
     
+    titulo = "Nosotros"
+    direccion_actual = "nosotros"
+    
+    conf_direccionamiento = Direccionamiento.objects.latest('fecha_creacion')
     
     
     context={
+        'titulo':titulo,
+        'direccion_actual':direccion_actual,
         'services':services,
         'teams_bar':teams_bar[:4],  #mostrando solo
         #los primeros 4 equipos en la barra de info
@@ -63,6 +69,7 @@ def nosotros_index(request):
         'nosotros': nosotros,
         'servicios': servicios,
         'ultima_oferta': ultima_oferta,
+        'direccionamiento':conf_direccionamiento,
         }
 
     # Renderizar la plantilla 'index.html' con la lista de tours

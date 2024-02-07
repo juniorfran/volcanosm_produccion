@@ -5,6 +5,7 @@ from azure.storage.blob import BlobServiceClient
 from ckeditor.fields import RichTextField
 from azure.storage.blob import ContentSettings
 from alpiedelvolcan_ import settings
+from django.utils import timezone
 
 # Create your models here.
 
@@ -25,7 +26,47 @@ class General_Description(models.Model):
     #funcion str
     def __str__(self):
         return self.titulo_largo
+
+# Función de carga para el directorio "direccionamiento" con la fecha actual
+def upload_to_direccionamiento(instance, filename):
+    # Obtener la fecha actual
+    fecha_actual = datetime.now().strftime('%Y-%m-%d')
+    # Devolver la ruta completa del archivo
+    return f'direccionamiento/{fecha_actual}/{filename}'
     
+class Direccionamiento(models.Model):
+    nombre = models.CharField( max_length=50)
+    imagen = models.ImageField(upload_to=upload_to_direccionamiento, height_field=None, width_field=None, max_length=None)
+    url_azure = models.URLField(max_length=500, blank=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    
+    #la funcion str
+    def __str__(self):
+        return self.nombre
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Conexión al servicio Blob de Azure
+        blob_service_client = BlobServiceClient.from_connection_string(settings.AZURE_CONNECTION_STRING)
+        container_client = blob_service_client.get_container_client(settings.AZURE_CONTAINER_NAME)
+
+        if self.imagen:
+            fecha_actual = timezone.now()
+            ruta_carpeta = f"tours/{fecha_actual.year}/{fecha_actual.month}/{fecha_actual.day}/"
+            blob_name = f"{self.id}_imagen_{os.path.basename(self.imagen.name)}"
+            ruta_imagen = os.path.join(ruta_carpeta, blob_name)
+
+            blob_client = container_client.get_blob_client(ruta_imagen)
+            if not blob_client.exists():
+                with open(self.imagen.path, "rb") as data:
+                    blob_client.upload_blob(data, content_settings=ContentSettings(content_disposition=None, content_type="image/jpeg"))
+                self.url_azure = blob_client.url
+    
+        super().save(*args, **kwargs)
+        
+    def obtener_imagen_principal(self):
+        return self.url_azure
 
 class Barra_Principal (models.Model):
     email_contacto = models.CharField(max_length=100)

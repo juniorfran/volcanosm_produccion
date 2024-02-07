@@ -1,31 +1,19 @@
+from datetime import datetime
 from django.shortcuts import get_object_or_404, redirect, render
 #from Transacciones.views import crear_enlace_pago
-from Configuraciones.models import Barra_Principal, Contacts, General_Description, Urls_info, Urls_interes
+from Configuraciones.models import Barra_Principal, Contacts, Direccionamiento, General_Description, Urls_info, Urls_interes
 from Transacciones.wompi_connect import authenticate_wompi
 from Transacciones.wompi_consulta import make_wompi_get_request
 from Transacciones.wompi_envio import create_payment_link
+from django.conf import settings
 from .models import ImagenTour, Resena, Tour, Reserva
 from .forms import ResenaForm, ReservaForm
 from django.utils import timezone
 from Transacciones.models import EnlacePago
 
+Client_id = settings.CLIENT_ID
+Client_secret = settings.CLIENT_SECRET
 
-# Tus credenciales de Wompi
-Client_id = "86d5de4c-dd6a-42d2-8d5b-ff5aed09ae83"
-Client_secret = "c3bb69e4-7d19-486b-b9d8-1b2b592714d5"
-#Client_id = "84697956-57f9-4171-ac57-0e885d45a630"
-#Client_secret = "dfb98854-b75b-40ad-8a0e-5e4914ba32f6"
-
-# Autenticarse y obtener el token
-access_token = authenticate_wompi(Client_id, Client_secret)
-
-if access_token:
-    # Hacer una consulta utilizando el token
-    consulta_result = make_wompi_get_request("EnlacePago", access_token)
-
-    if consulta_result:
-        print("Consulta exitosa:")
-        #print(consulta_result)
 
 def tours_index(request):
     # Obtener la fecha actual
@@ -40,24 +28,30 @@ def tours_index(request):
             tour.disponible = True
         else:
             tour.disponible = False
+            
+    titulo = "Nuestros Tours"
+    direccion_actual = "tours"
 
     barra_principal = Barra_Principal.objects.latest('fecha_creacion') # Obtener la barra principal
     data_contact = Contacts.objects.latest() # Obtener todos los datos de contacto
     urls_info = Urls_info.objects.all() # Obtener todas las URL de información
     ultima_descripcion = General_Description.objects.latest('fecha_creacion') # Obtener la última descripción general
     urls_interes = Urls_interes.objects.all() # URLs de interés
+    conf_direccionamiento = Direccionamiento.objects.latest('fecha_creacion')
 
     # Renderizar la plantilla 'show_tours.html' con la lista de tours y otros datos
     context = {
+        'titulo':titulo,
+        'direccion_actual':direccion_actual,
         'tours': tours,
         'barra_principal': barra_principal,
         'data_contact': data_contact,
         'urls_info': urls_info,
         'ultima_descripcion': ultima_descripcion,
         'urls_interes': urls_interes,
+        'direccionamiento':conf_direccionamiento,
     }
     return render(request, 'show_tours.html', context)
-
 
 def tour_detail(request, tour_id):
     tour = Tour.objects.get(pk=tour_id)
@@ -67,6 +61,7 @@ def tour_detail(request, tour_id):
     urls_info = Urls_info.objects.all()
     ultima_descripcion = General_Description.objects.latest('fecha_creacion')
     urls_interes = Urls_interes.objects.all()
+    conf_direccionamiento = Direccionamiento.objects.latest('fecha_creacion')
 
     # Crear una lista con todas las imágenes relacionadas, incluida la principal
     imagenes = [tour.url_azure] + [getattr(imagen_tour, f'url_azure_{i}') for i in range(1, 5) for imagen_tour in ImagenTour.objects.filter(tour=tour)]
@@ -90,6 +85,7 @@ def tour_detail(request, tour_id):
         'urls_info': urls_info,
         'ultima_descripcion': ultima_descripcion,
         'urls_interes': urls_interes,
+        'direccionamiento':conf_direccionamiento,
     }
 
     return render(request, 'detail_tours.html', context)
@@ -158,9 +154,21 @@ def reservar_tour(request, tour_id):
 
         # Asigna el valor de reserva_id después de obtener la instancia
         reserva_id = reserva_instance.id
+        
+        # Autenticarse y obtener el token
+        access_token = authenticate_wompi(Client_id, Client_secret)
+
+        if access_token:
+            # Hacer una consulta utilizando el token
+            consulta_result = make_wompi_get_request("EnlacePago", access_token)
+
+            if consulta_result:
+                print("Consulta exitosa:")
+                #print(consulta_result)
 
         client_id = Client_id
         client_secret = Client_secret
+        
         comercio_id = reserva.codigo_reserva
         monto = float(reserva.precio_adulto)
         nombre_producto = tour.titulo

@@ -1,14 +1,24 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import TipoTour, Tour, ImagenTour, Resena, Reserva
 
 @admin.register(TipoTour)
 class TipoTourAdmin(admin.ModelAdmin):
     list_display = ('nombre',)
 
-@admin.register(Tour)
+# @admin.register(Tour)
 class TourAdmin(admin.ModelAdmin):
-    list_display = ('titulo', 'descripcion', 'precio_adulto', 'precio_nino', 'duracion', 'iva', 'tipo_tour',)
+    list_display = ('titulo', 'descripcion', 'precio_adulto', 'precio_nino', 'duracion', 'iva', 'tipo_tour', 'fecha_inicio', 'fecha_fin')
     search_fields = ('titulo', 'descripcion', 'tipo_tour__nombre',)
+    def mostrar_imagen_azure(self, obj):
+        if obj.url_azure:
+            return format_html('<img src="{}" width="100" />', obj.url_azure)
+        else:
+            return 'No disponible'
+
+    mostrar_imagen_azure.short_description = 'Imagen Azure'
+
+admin.site.register(Tour, TourAdmin)
 
 @admin.register(ImagenTour)
 class ImagenTourAdmin(admin.ModelAdmin):

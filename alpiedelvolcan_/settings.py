@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-71ilsry+%0yrbexaf^j!f41b0i=t!g+8%pvd!1d8a)azph_nd-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['volcano-sm.azurewebsites.net', 'http://0.0.0.0:8000/', '127.0.0.1', 'volcanosm.net']
 #CORS_ALLOWED_ORIGINS = ['https://alpiedelvolcan.azurewebsites.net/']
@@ -39,25 +39,26 @@ SECURE_SSL_REDIRECT = False
 CORS_ALLOW_ALL_ORIGINS = True
 CSRF_TRUSTED_ORIGINS = ['https://volcano-sm.azurewebsites.net', 'https://volcanosm.net']
 
-
-
+#WOMPI CONECTION
+CLIENT_ID = "86d5de4c-dd6a-42d2-8d5b-ff5aed09ae83"
+CLIENT_SECRET = "c3bb69e4-7d19-486b-b9d8-1b2b592714d5"
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'mail.ceinversiones.com'
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True
-EMAIL_HOST_USER = 'fvillalta@ceinversiones.com'
-EMAIL_HOST_PASSWORD = 'YrN.yYX-8uuz'
-# DEFAULT_FROM_EMAIL = 'fvillalta@alpiedelvolcan.com'
-# EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
-# SENDGRID_API_KEY = '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'
-
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587  # El puerto para Gmail es 587
+EMAIL_USE_TLS = True  # Utiliza TLS (Transport Layer Security) para la conexión
+EMAIL_HOST_USER = 'volcanosanmiguel.sv@gmail.com'
+EMAIL_HOST_PASSWORD = '18032022#sm'
+DEFAULT_FROM_EMAIL = 'fvillalta@alpiedelvolcan.com'
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
 
 # Application definition
 
 INSTALLED_APPS = [
+    'material',
+    'material.admin',
+    #'django.contrib.admin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

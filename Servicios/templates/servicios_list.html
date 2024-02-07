@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block content %}
-<!-- Header Start -->
+{% comment %} <!-- Header Start -->
 <div class="container-fluid page-header">
     <div class="container">
         <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 400px">
@@ -16,7 +16,9 @@
         </div>
     </div>
 </div>
-<!-- Header End -->
+<!-- Header End --> {% endcomment %}
+
+{% include "direccionamiento.html" %}
 
 
 <!-- Service Start -->

@@ -1,8 +1,9 @@
 # En tu archivo views.py
 from django.shortcuts import render, redirect
-from .models import Mensaje_Contacto
+
+from Configuraciones.models import Barra_Principal, Contacts, Direccionamiento, General_Description, Urls_info, Urls_interes
 from Tours.models import Tour
-from Configuraciones.models import Barra_Principal, Contacts, General_Description, Urls_info, Urls_interes
+from .models import Mensaje_Contacto
 
 def contacto(request):
     tours = Tour.objects.all().order_by('-tipo_tour')
@@ -11,6 +12,11 @@ def contacto(request):
     urls_info = Urls_info.objects.all() #obtener todas las url de informacion
     ultima_descripcion = General_Description.objects.latest('fecha_creacion') # Obtén la última descripción general
     urls_interes = Urls_interes.objects.all() #urls de interes
+    conf_direccionamiento = Direccionamiento.objects.latest('fecha_creacion')
+    titulo = "Contactanos"
+    direccion_actual = "contactanos"
+    
+    
     
     if request.method == 'POST':
         nombre = request.POST.get('name', '')
@@ -27,6 +33,9 @@ def contacto(request):
         'urls_info':urls_info,
         'ultima_descripcion': ultima_descripcion,
         'urls_interes':urls_interes,
+        'titulo':titulo,
+        'direccion_actual':direccion_actual,
+        'direccionamiento':conf_direccionamiento,
     }
 
     return render(request, 'contactanos.index.html', context)  # Cambia 'tu_template.html' al nombre de tu template

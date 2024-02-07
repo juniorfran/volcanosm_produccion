@@ -40,9 +40,8 @@ urlpatterns = [
     #url para pagos Servicios
     path('servicios/', include('Servicios.urls')),
     
-    #url para pagos Contactanos
+    #url para contactanos
     path('contactanos/', include('Contactanos.urls')),
-    
     
 ]
 

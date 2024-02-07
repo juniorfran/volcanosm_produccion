@@ -1,0 +1,14 @@
+<!-- Header Start -->
+<div class="container-fluid" style="position: relative; margin-top: -42px; min-height: 400px; background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)); overflow: hidden;">
+    <img src="{{ direccionamiento.url_azure }}" alt="{{ servicio.nombre }}" class="img-fluid mb-4 container-fluid" style="position: absolute; top: 0; left: 0; width: 100vw; height: 100%; object-fit: cover; opacity: 0.5;">
+    <div class="container" style="position: relative; z-index: 1;">
+        <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 400px">
+            <h3 class="display-4 text-white text-uppercase">{{titulo}}</h3>
+            <div class="d-inline-flex text-white">
+                <p class="m-0 text-uppercase"><a class="text-white" href="{% url 'index' %}">inicio</a></p>
+                <i class="fa fa-angle-double-right pt-1 px-3"></i>
+                <p class="m-0 text-uppercase">{{direccion_actual}}</p>
+            </div>
+        </div>
+    </div>
+</div>

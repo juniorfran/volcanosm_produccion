@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import Servicios
 from Tours.models import Tour
-from Configuraciones.models import Barra_Principal, Contacts, General_Description, Urls_info, Urls_interes
+from Configuraciones.models import Barra_Principal, Contacts, Direccionamiento, General_Description, Urls_info, Urls_interes
 
 # Create your views here.
 def index_servicios(request):
@@ -14,6 +14,11 @@ def index_servicios(request):
     ultima_descripcion = General_Description.objects.latest('fecha_creacion') # Obtén la última descripción general
     urls_interes = Urls_interes.objects.all() #urls de interes
     
+    titulo = "Nuestros Servicios"
+    direccion_actual = "servicios"
+    conf_direccionamiento = Direccionamiento.objects.latest('fecha_creacion')
+    
+    
     context = {
         'servicios': servicios,
         'tours': tours,
@@ -22,6 +27,9 @@ def index_servicios(request):
         'urls_info':urls_info,
         'ultima_descripcion': ultima_descripcion,
         'urls_interes':urls_interes,
+        'titulo':titulo,
+        'direccion_actual':direccion_actual,
+        'direccionamiento':conf_direccionamiento,
         }
     
     

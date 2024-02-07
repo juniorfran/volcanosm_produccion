@@ -26,20 +26,20 @@ class TipoTour(models.Model):
 
 class Tour(models.Model):
     titulo = models.CharField(max_length=50, unique=True)
-    descripcion = RichTextField()
-    descripcion1 = RichTextField()
-    descripcion2 = RichTextField()
+    descripcion = RichTextField()  # Cambiado a TextField
+    descripcion1 = RichTextField() # Cambiado a TextField
+    descripcion2 = RichTextField()  # Cambiado a TextField
     precio_adulto = models.DecimalField(max_digits=10, decimal_places=2)
     precio_nino = models.DecimalField(max_digits=10, decimal_places=2)
     duracion = models.PositiveIntegerField()
     iva = models.BooleanField(default=False)
-    incluye_tour = RichTextField()
-    
-    imagen = models.ImageField(upload_to='tours')  # Cambiado a ImageField
+    incluye_tour = RichTextField()  # Cambiado a TextField
+    imagen = models.ImageField(upload_to='tours')  
     url_azure = models.URLField(max_length=400, blank=True, null=True)
     tipo_tour = models.ForeignKey(TipoTour, on_delete=models.SET_NULL, null=True, blank=True)
     
-        # Nuevo campo para el rango de fechas disponibles
+    
+    # Nuevo campo para el rango de fechas disponibles
     fecha_inicio = models.DateTimeField(default=timezone.now)
     fecha_fin = models.DateTimeField(default=timezone.now)
 
@@ -63,7 +63,7 @@ class Tour(models.Model):
                 self.url_azure = blob_client.url
     
         super().save(*args, **kwargs)
-    
+
     def obtener_imagen_principal(self):
         return self.url_azure
     
@@ -250,7 +250,7 @@ class Reserva(models.Model):
         # Envia el código de reserva y el código QR por correo electrónico
         subject = 'Código de Reserva para el Tour'
         from_email = settings.DEFAULT_FROM_EMAIL  # Cambia esto al remitente real
-        to_email = [self.correo_electronico]
+        to_email = [self.correo_electronico, 'volcanosanmiguel.sv@gmail.com']
                 
         # Renderiza el contenido del correo utilizando un template
         context = {
