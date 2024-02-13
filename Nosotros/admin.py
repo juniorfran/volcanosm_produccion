@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Nosotros, Nosotros_Servicios, Nosotros_Oferta, Solicitud_Oferta
+from .models import Generalidades, Nosotros, Nosotros_Servicios, Nosotros_Oferta, Solicitud_Oferta
 
 @admin.register(Nosotros)
 class NosotrosAdmin(admin.ModelAdmin):
@@ -21,3 +21,10 @@ class SolicitudOfertaAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'email', 'telefono', 'fecha_creacion', 'oferta_relacionada')
     search_fields = ('nombre', 'email', 'telefono')
     list_filter = ('oferta_relacionada',)
+    
+    
+class GeneralidadesAdmin(admin.ModelAdmin):
+    list_display = ('id', 'fecha_creacion')
+    ordering = ('-fecha_creacion',)
+
+admin.site.register(Generalidades, GeneralidadesAdmin)

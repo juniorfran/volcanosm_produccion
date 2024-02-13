@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<head>
+    <!-- Tus otras etiquetas head aquí -->
+
+    <!-- Incluye jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <!-- Incluye Popper.js y Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+
+    <!-- Add the slick-theme.css if you want default styling -->
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/kenwheeler/slick@1.8.1/slick/slick.css"/>
+    <!-- Add the slick-theme.css if you want default styling -->
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/kenwheeler/slick@1.8.1/slick/slick-theme.css"/>
+    
+    <!-- Tus otras etiquetas head aquí -->
+</head>
+
+
+    <!-- Header Start -->
+    {% include "direccionamiento.html" %}
+    <br>
+    <hr>
+    <!-- Header End -->
+
+    <div class="accordion" id="terminosCondicionesAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="terminosHeader">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#terminosCollapse" aria-expanded="true" aria-controls="terminosCollapse">
+                    Terminos
+                </button>
+            </h2>
+            <div id="terminosCollapse" class="accordion-collapse collapse show" aria-labelledby="terminosHeader" data-bs-parent="#terminosCondicionesAccordion">
+                <div class="accordion-body">
+                    <p>{{ generalidades.terminos | safe }}</p>
+                    <footer class="blockquote-footer">Última actualización: {{ generalidades.fecha_creacion }}</footer>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="condicionesHeader">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#condicionesCollapse" aria-expanded="false" aria-controls="condicionesCollapse">
+                    Condiciones
+                </button>
+            </h2>
+            <div id="condicionesCollapse" class="accordion-collapse collapse" aria-labelledby="condicionesHeader" data-bs-parent="#terminosCondicionesAccordion">
+                <div class="accordion-body">
+                    <p>{{ generalidades.condiciones | safe }}</p>
+                    <footer class="blockquote-footer">Última actualización: {{ generalidades.fecha_creacion }}</footer>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+
+{% endblock content %}
+
+{% block extra_js %}
+
+{% endblock extra_js %}

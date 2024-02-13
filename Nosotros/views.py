@@ -3,7 +3,7 @@ from django.shortcuts import render
 from Configuraciones.models import Barra_Principal, Contacts, Direccionamiento, General_Description, Services_Bar, Team_bar, Urls_info, Urls_interes
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Nosotros, Nosotros_Servicios, Solicitud_Oferta, Nosotros_Oferta
+from .models import Generalidades, Nosotros, Nosotros_Servicios, Solicitud_Oferta, Nosotros_Oferta
 
 
 
@@ -76,3 +76,33 @@ def nosotros_index(request):
     return render(request, 'nosotros.index.html', context )
 
 
+def mostrar_ultimos_terminos(request):
+     
+    ultima_descripcion = General_Description.objects.latest('fecha_creacion') # Obtén la última descripción general
+    barra_principal = Barra_Principal.objects.latest('fecha_creacion') # obtener la barra principal
+    data_contact = Contacts.objects.latest() #obtener todos los datos de contacto
+    urls_info = Urls_info.objects.all() #obtener todas las url de informacion
+    urls_interes = Urls_interes.objects.all() #urls de interes
+    
+    titulo = "Terminos y Condiciones"
+    direccion_actual = "Terminos y Condiciones"
+    
+    conf_direccionamiento = Direccionamiento.objects.latest('fecha_creacion')
+    
+    
+    # Obtenemos el último registro de Generalidades
+    ultimo_termino = Generalidades.objects.latest('fecha_creacion')
+    
+    context={
+        'titulo':titulo,
+        'direccion_actual':direccion_actual,
+        'data_contact':data_contact,
+        'urls_info':urls_info,
+        'ultima_descripcion': ultima_descripcion,
+        'barra_principal':barra_principal,
+        'urls_interes':urls_interes,
+        'direccionamiento':conf_direccionamiento,
+        'generalidades': ultimo_termino
+        }
+    
+    return render(request, 'terminos_condiciones.html', context)

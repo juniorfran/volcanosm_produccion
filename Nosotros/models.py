@@ -21,7 +21,6 @@ def upload_to_nosotros(instance, filename):
     # Devolver la ruta completa del archivo
     return f'nosotros/{fecha_actual}/{filename}'
 
-
 # Función de carga para el directorio "servicios" con la fecha actual
 def upload_to_servicios(instance, filename):
     # Obtener la fecha actual
@@ -226,6 +225,17 @@ class Solicitud_Oferta(models.Model):
 
         # Enviar el correo electrónico
         send_mail(subject, text_content, settings.DEFAULT_FROM_EMAIL, ['juniorfran@hotmail.es'], html_message=html_content)
+
+#modelo para terminos y condiciones
+class Generalidades(models.Model):
+    terminos = RichTextField()
+    condiciones = RichTextField()
+    politicas = RichTextField()
+    mision = RichTextField()
+    vision = RichTextField()
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    
+    
     
     
     
