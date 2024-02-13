@@ -17,8 +17,7 @@ class Mensaje_Contacto(models.Model):
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
+        
         try:
             # Configuración de la conexión al servicio de correo electrónico de Azure
             connection_string = "endpoint=https://emailvolcanosm.unitedstates.communication.azure.com/;accesskey=SkW7u9s6sgjkska6ncJ8iOQutZdU1f+iIH9rfMto3j+NFLi8bpmcM4PF+4oJ3A+gQkAOXVFvhxaNqa8UTdtcUg=="
@@ -54,3 +53,5 @@ class Mensaje_Contacto(models.Model):
         except Exception as ex:
             # Registra el error en el archivo de registro
             logger.error(f"Error al enviar correo electrónico: {ex}")
+        
+        super().save(*args, **kwargs)
