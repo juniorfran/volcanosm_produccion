@@ -38,4 +38,4 @@ def contacto(request):
         'direccionamiento':conf_direccionamiento,
     }
 
-    return render(request, 'contactanos.index.html', context)  # Cambia 'tu_template.html' al nombre de tu template
+    return render(request, 'contactanos.index.html', context)
