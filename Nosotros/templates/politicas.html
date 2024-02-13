@@ -26,10 +26,54 @@
     <!-- Header Start -->
     {% include "direccionamiento.html" %}
     <!-- Header End -->
+    <br>
+    <hr>
+    
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+                <div class="card border-success mb-3" style="max-width: 45rem;">
+                    <div class="card-header bg-transparent border-success">Visión</div>
+                    <div class="card-body text-success">
+                      <h5 class="card-title">Nuestra Visión</h5>
+                      <p class="card-text">{{ generalidades.vision | safe }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-success"><footer class="blockquote-footer">Última actualización: {{ generalidades.fecha_creacion }}</footer></div>
+                  </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="card border-success mb-3" style="max-width: 45rem;">
+                    <div class="card-header bg-transparent border-success">Misión</div>
+                    <div class="card-body text-success">
+                      <h5 class="card-title">Nuestra Misión</h5>
+                      <p class="card-text">{{ generalidades.mision | safe }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-success"><footer class="blockquote-footer">Última actualización: {{ generalidades.fecha_creacion }}</footer></div>
+                  </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    <br>
+    <hr>
 
+    <div class="card">
+        <div class="card-header">
+            Políticas
+        </div>
+        <div class="card-body">
+          <blockquote class="blockquote mb-0">
+            <p>{{ generalidades.politicas | safe }}</p>
+            <footer class="blockquote-footer">Última actualización: {{ generalidades.fecha_creacion }}</footer>
+          </blockquote>
+        </div>
+    </div>
 
     
-
+    
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
 
 {% endblock content %}
 

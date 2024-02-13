@@ -106,3 +106,34 @@ def mostrar_ultimos_terminos(request):
         }
     
     return render(request, 'terminos_condiciones.html', context)
+
+def politicas_mision_vision(request):
+     
+    ultima_descripcion = General_Description.objects.latest('fecha_creacion') # Obtén la última descripción general
+    barra_principal = Barra_Principal.objects.latest('fecha_creacion') # obtener la barra principal
+    data_contact = Contacts.objects.latest() #obtener todos los datos de contacto
+    urls_info = Urls_info.objects.all() #obtener todas las url de informacion
+    urls_interes = Urls_interes.objects.all() #urls de interes
+    
+    titulo = "Terminos y Condiciones"
+    direccion_actual = "Terminos y Condiciones"
+    
+    conf_direccionamiento = Direccionamiento.objects.latest('fecha_creacion')
+    
+    
+    # Obtenemos el último registro de Generalidades
+    generalidades = Generalidades.objects.latest('fecha_creacion')
+    
+    context={
+        'titulo':titulo,
+        'direccion_actual':direccion_actual,
+        'data_contact':data_contact,
+        'urls_info':urls_info,
+        'ultima_descripcion': ultima_descripcion,
+        'barra_principal':barra_principal,
+        'urls_interes':urls_interes,
+        'direccionamiento':conf_direccionamiento,
+        'generalidades': generalidades
+        }
+    
+    return render(request, 'politicas.html', context)
