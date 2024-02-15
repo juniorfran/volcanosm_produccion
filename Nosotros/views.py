@@ -115,8 +115,8 @@ def politicas_mision_vision(request):
     urls_info = Urls_info.objects.all() #obtener todas las url de informacion
     urls_interes = Urls_interes.objects.all() #urls de interes
     
-    titulo = "Terminos y Condiciones"
-    direccion_actual = "Terminos y Condiciones"
+    titulo = "Politicas, Visión y Misión"
+    direccion_actual = "Politicas, Visión y Misión"
     
     conf_direccionamiento = Direccionamiento.objects.latest('fecha_creacion')
     
