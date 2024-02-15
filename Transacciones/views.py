@@ -44,7 +44,7 @@ def consultar_enlace_pago(enlace_pago_id, client_id, client_secret):
         print("Error al obtener información del enlace de pago.")
 
 # ID del enlace de pago que deseas consultar
-enlace_pago_id = "933231"
+enlace_pago_id = "1072404"
 
 # Llamar a la función para realizar la consulta del enlace de pago
 consultar_enlace_pago(enlace_pago_id, Client_id, Client_secret)

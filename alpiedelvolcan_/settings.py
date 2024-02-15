@@ -47,7 +47,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587  # El puerto para Gmail es 587
 EMAIL_USE_TLS = True  # Utiliza TLS (Transport Layer Security) para la conexión
-EMAIL_HOST_USER = 'test@fe12acb8-21f7-46d8-9613-2c3e2746e6a6.azurecomm.net'
+EMAIL_HOST_USER = 'volcanosm_reservations@fe12acb8-21f7-46d8-9613-2c3e2746e6a6.azurecomm.net'
 EMAIL_HOST_PASSWORD = '18032022#sm'
 DEFAULT_FROM_EMAIL = 'volcanosanmiguel.sv@gmail.com'
 
