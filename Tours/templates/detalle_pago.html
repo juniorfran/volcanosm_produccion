@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Consulta de Enlace de Pago</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="numero_reserva">Código de Reserva:</label>
+        <input type="text" class="form-control" id="numero_reserva" name="numero_reserva" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Consultar</button>
+</form>
+{% if reserva %}
+<h2>Información de la Reserva</h2>
+
+<ul class="list-group">
+    <li class="list-group-item">Nombre del Tour: {{ reserva.tour.titulo }}</li>
+    <li class="list-group-item">Codigo de Reserva: {{ reserva.codigo_reserva }}</li>
+    <li class="list-group-item">Nombre de Cliente: {{ reserva.nombre }}</li>
+    <li class="list-group-item">Monto: {{ reserva.total_pagar }}</li>
+    <li class="list-group-item">Telefono: {{ reserva.telefono  }}</li>
+</ul>
+<ul class="list-group">
+    <li class="list-group-item">Correo Electronico: {{ reserva.correo_electronico }}</li>
+    <li class="list-group-item">Numero de DUI: {{ reserva.dui }}</li>
+    <li class="list-group-item">Fecha de Reserva: {{ reserva.fecha_reserva }}</li>
+</ul>
+
+{% else %}
+<div class="alert alert-danger">
+    {{ error_message }}
+</div>
+{% endif %}
+
+
+<hr>
+
+{% if enlace_pago %}
+
+<h2>Información del Enlace de Pago</h2>
+
+<div style="display: flex;">
+    <div style="flex: 1;">
+        <ul class="list-group">
+            {% for key, value in enlace_pago.items %}
+                {% if key == 'nombreEnlace' %}
+                    <li class="list-group-item"><strong>Codigo de reserva:</strong> {{ value }}</li>
+                {% elif key == 'monto' %}
+                    <li class="list-group-item"><strong>Monto:</strong> {{ value }}</li>
+                {% elif key == 'nombreProducto' %}
+                    <li class="list-group-item"><strong>Nombre de Producto:</strong> {{ value }}</li>
+                {% comment %} {% elif key == 'imagenes' %}
+                    {% for imagen in value %}
+                        <li class="list-group-item"><strong>Imagen:</strong> <img src="{{ imagen.url }}" alt="Imagen" style="max-width: 30%;"></li>
+                    {% endfor %} {% endcomment %}
+                {% elif key == 'usable' %}
+                    <li class="list-group-item"><strong>Usable:</strong> {{ value }}</li>
+                {% elif key == 'cantidadIntentoPagoFallidos' %}
+                    <li class="list-group-item"><strong>Cantidad de Intentos de Pago Fallidos:</strong> {{ value }}</li>
+                {% elif key == 'formaPago' %}
+                    <li class="list-group-item"><strong>Forma de Pago:</strong></li>
+                    <ul class="list-group">
+                        {% for sub_key, sub_value in value.items %}
+                            <li class="list-group-item">{{ sub_key }}: {{ sub_value }}</li>
+                        {% endfor %}
+                    </ul>
+                {% elif key == 'cantidadPagosExitosos' %} 
+                    <li class="list-group-item"><strong>Cantidad de Pagos Exitosos:</strong> {{ value }}</li>
+                    
+                {% elif key == 'transacciones' %}
+                    <li class="list-group-item"><strong>{{ key }}:</strong>
+                        {% if value %}
+                            <ul>
+                                {% for transaccion in value %}
+                                    <li>
+                                        ID de Transacción: {{ transaccion.idTransaccion }}
+                                        {% if transaccion.esReal %}
+                                            <!-- Botón para ver detalles de la transacción -->
+                                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#transaccionModal{{ transaccion.idTransaccion }}">
+                                                Ver Detalles
+                                            </button>
+                                            <!-- Modal para mostrar detalles de la transacción -->
+                                            <div class="modal fade" id="transaccionModal{{ transaccion.idTransaccion }}" tabindex="-1" role="dialog" aria-labelledby="transaccionModalLabel{{ transaccion.idTransaccion }}" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="transaccionModalLabel{{ transaccion.idTransaccion }}">Detalles de la Transacción</h5>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <!-- Aquí va la información detallada de la transacción -->
+                                                            <p>ID de Transacción: {{ transaccion.idTransaccion }}</p>
+                                                            <p>Fecha de Transacción: {{ transaccion.fechaTransaccion }}</p>
+                                                            <p>Resultado de Transacción: {{ transaccion.resultadoTransaccion }}</p>
+                                                            <p>Monto Original: {{ transaccion.montoOriginal }}</p>
+                                                            <p>Es Real: {% if transaccion.esReal %} Sí {% else %} No {% endif %}</p>
+                                                            <p>Es Aprobada: {% if transaccion.esAprobada %} Sí {% else %} No {% endif %}</p>
+                                                            <p>Código de Autorización: {{ transaccion.codigoAutorizacion }}</p>
+                                                            <p>Mensaje: {{ transaccion.mensaje }}</p>
+                                                            <p>Forma de Pago: {{ transaccion.formaPago }}</p>
+                                                            <p>Monto: {{ transaccion.monto }}</p>
+                                                            <!-- Agrega más detalles de la transacción si es necesario -->
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <!-- Si no es una transacción real, mostrar mensaje -->
+                                            No se ha realizado el pago.
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            No hay transacciones.
+                        {% endif %}
+                    </li>
+
+                {% comment %} {% elif key == 'transacciones' %}
+                    <li class="list-group-item"><strong>Transacciones:</strong> {{ value }}</li>
+                    {% endcomment %}
+                
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div style="flex: 1;">
+        <ul class="list-group">
+            {% for key, value in enlace_pago.items %}
+                {% if key == 'vigencia' %}
+                    <li class="list-group-item"><strong>Vigencia:</strong></li>
+                    <ul class="list-group">
+                        {% for sub_key, sub_value in value.items %}
+                            <li class="list-group-item">{{ sub_key }}: {{ sub_value }}</li>
+                        {% endfor %}
+                    </ul>
+                {% elif key == 'urlQrCodeEnlace' %}
+                    <li class="list-group-item">
+                        <strong>URL del Código QR del Enlace:</strong> <a href="{{ value }}">{{ value }}</a>
+                        <br>
+                        <strong>Imagen:</strong> <img src="{{ value }}" alt="Imagen" style="max-width: 30%;">
+                    </li>
+                {% elif key == 'estaProductivo' %}
+                    <li class="list-group-item"><strong>Esta Productivo:</strong> {{ value }}</li>
+                {% elif key == 'urlEnlace' %}
+                    <li class="list-group-item"><strong>URL del Enlace:</strong> <a href="{{ value }}">{{ value }}</a></li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{% else %}
+<div class="alert alert-danger">
+    {{ error_message }}
+</div>
+{% endif %}
+
+{% endblock %}

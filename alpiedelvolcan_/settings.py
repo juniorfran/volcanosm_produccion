@@ -74,8 +74,11 @@ INSTALLED_APPS = [
     'Transacciones',
     'ckeditor',
     'ckeditor_uploader',
+    'Utilidades',
 ]
 
+LOGIN_REDIRECT_URL = 'utilidades:utilidades'
+LOGOUT_REDIRECT_URL = 'login'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -101,6 +104,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'Contactanos/templates'),
             os.path.join(BASE_DIR, 'Configuraciones/templates'),
             os.path.join(BASE_DIR, 'Transacciones/templates'),
+            os.path.join(BASE_DIR, 'Utilidades/templates'),
             ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -137,6 +141,24 @@ DATABASES = {
         },
     }
 }
+
+# DATABASES = {
+#     'sqlite': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     },
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'cuadmesv_tour_dev',
+#         'USER': 'cuadmesv_tour_dev',
+#         'PASSWORD': 'Volcano2024$',
+#         'HOST': 'www.metrocuadrado.com.sv',
+#         'PORT': '3306',  # Puerto predeterminado de MySQL
+#         'OPTIONS': {
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+#         },
+#     }
+# }
 
 
 #AZURE STORE CONFIG

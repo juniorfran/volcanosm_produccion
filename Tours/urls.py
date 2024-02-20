@@ -6,6 +6,7 @@ urlpatterns = [
     path('tour/<int:tour_id>/', views.tour_detail, name='tour_detail'),
     path('reservar/<int:tour_id>/', views.reservar_tour, name='reservar_tour'),
     path('reservar_exitosa/<int:reserva_id>/', views.reserva_exitosa, name='reserva_exitosa'),
+    #path('consulta-enlace-pago/', views.consulta_enlace_pago, name='consulta_enlace_pago'),
 
 
     # Agrega más URL según sea necesario

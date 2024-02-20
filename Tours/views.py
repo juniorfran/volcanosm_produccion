@@ -1,4 +1,5 @@
 from datetime import datetime
+import uuid
 from django.shortcuts import get_object_or_404, redirect, render
 #from Transacciones.views import crear_enlace_pago
 from Configuraciones.models import Barra_Principal, Contacts, Direccionamiento, General_Description, Urls_info, Urls_interes
@@ -10,10 +11,10 @@ from .models import ImagenTour, Resena, Tour, Reserva
 from .forms import ResenaForm, ReservaForm
 from django.utils import timezone
 from Transacciones.models import EnlacePago
+from django.db.models import Q
 
 Client_id = settings.CLIENT_ID
 Client_secret = settings.CLIENT_SECRET
-
 
 def tours_index(request):
     # Obtener la fecha actual
@@ -243,3 +244,57 @@ def reserva_exitosa(request, reserva_id):
     return render(request, 'reserva_exitosa.html', context)
 
 
+# def consultar_enlace_pago(enlace_pago_id, client_id, client_secret):
+#     # Autenticar con Wompi y obtener el token
+#     access_token = authenticate_wompi(client_id, client_secret)
+
+#     if not access_token:
+#         print("Error de autenticación con Wompi.")
+#         return None
+
+#     # Utilizar la función make_wompi_get_request para realizar la solicitud GET
+#     endpoint = f"EnlacePago/{enlace_pago_id}"
+#     enlace_pago_info = make_wompi_get_request(endpoint, access_token)
+
+#     if enlace_pago_info:
+#         # Imprimir la información del enlace de pago
+#         print("Información del enlace de pago:")
+#         print(enlace_pago_info)
+#         return enlace_pago_info
+#     else:
+#         print("Error al obtener información del enlace de pago.")
+#         return None
+
+# def consulta_enlace_pago(request):
+#     if request.method == 'POST':
+#         numero_reserva = request.POST.get('numero_reserva')
+#         try:
+#             # Filtrar las reservas que coinciden con los últimos 4 dígitos
+#             reservas = Reserva.objects.filter(
+#                 Q(codigo_reserva__endswith=numero_reserva) |
+#                 Q(codigo_reserva=numero_reserva)
+#             )
+
+#             if reservas.exists():
+#                 # Tomar la primera reserva encontrada
+#                 reserva = reservas.first()
+
+#                 # Buscar enlace relacionado a la reserva
+#                 enlace_pago = EnlacePago.objects.filter(reserva=reserva).first()
+
+#                 # Si se encuentra un enlace, consultar la información
+#                 if enlace_pago:
+#                     enlace_pago_info = consultar_enlace_pago(enlace_pago.idEnlace, Client_id, Client_secret)
+#                     if enlace_pago_info:
+#                         return render(request, 'detalle_pago.html', {'enlace_pago': enlace_pago_info, 'reserva': reserva})
+#                     else:
+#                         return render(request, 'detalle_pago.html', {'error_message': 'Error al obtener información del enlace de pago.'})
+#                 else:
+#                     return render(request, 'detalle_pago.html', {'error_message': 'No se encontró un enlace de pago para la reserva.'})
+#             else:
+#                 return render(request, 'detalle_pago.html', {'error_message': 'Reserva no encontrada.'})
+
+#         except Reserva.DoesNotExist:
+#             return render(request, 'detalle_pago.html', {'error_message': 'Enlace de pago no encontrada.'})
+#     else:
+#         return render(request, 'detalle_pago.html', {})
