@@ -16,7 +16,7 @@ def index_utilidades(request):
     
     return render(request, 'base_utilities.html')
 
-@login_required
+
 def consultar_enlace_pago(enlace_pago_id, client_id, client_secret):
     # Autenticar con Wompi y obtener el token
     access_token = authenticate_wompi(client_id, client_secret)
@@ -45,7 +45,9 @@ def consultar_enlace_pago(enlace_pago_id, client_id, client_secret):
 
 @login_required
 def consultar_detalle (request):
+    user = request.user
     if request.method == 'POST':
+        
         numero_reserva = request.POST.get('numero_reserva')
         try:
             # Filtrar las reservas que coinciden con los últimos 4 dígitos

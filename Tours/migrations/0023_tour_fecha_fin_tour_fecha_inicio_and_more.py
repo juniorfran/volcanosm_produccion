@@ -11,16 +11,16 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='tour',
-            name='fecha_fin',
-            field=models.DateTimeField(default=django.utils.timezone.now),
-        ),
-        migrations.AddField(
-            model_name='tour',
-            name='fecha_inicio',
-            field=models.DateTimeField(default=django.utils.timezone.now),
-        ),
+        # migrations.AddField(
+        #     model_name='tour',
+        #     name='fecha_fin',
+        #     field=models.DateTimeField(default=django.utils.timezone.now),
+        # ),
+        # migrations.AddField(
+        #     model_name='tour',
+        #     name='fecha_inicio',
+        #     field=models.DateTimeField(default=django.utils.timezone.now),
+        # ),
         migrations.AlterField(
             model_name='tour',
             name='descripcion',
