@@ -69,7 +69,7 @@ class Tour(models.Model):
         return self.url_azure
     
     def __str__(self):
-        return f"{self.titulo} - ${self.precio_adulto}"
+        return f"{self.titulo} - ${self.precio_adulto:.2f}"
 
 def get_upload_path(instance, filename):
     # Obtiene el nombre del modelo y el ID de la instancia

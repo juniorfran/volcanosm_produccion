@@ -56,10 +56,9 @@ CKEDITOR_UPLOAD_PATH = "uploads/"
 # Application definition
 
 INSTALLED_APPS = [
-    'material',
-    'material.admin',
-    #'django.contrib.admin',
-
+    # 'material',
+    # 'material.admin',
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

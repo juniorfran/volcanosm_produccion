@@ -1,11 +1,15 @@
+
+import datetime
 from django.utils import timezone
 from django.contrib import admin
 from django.http import HttpResponse
 from django.utils.html import format_html
 from .models import TipoTour, Tour, ImagenTour, Resena, Reserva
 import csv
+import openpyxl
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
+from django.contrib.admin.models import LogEntry
 
 @admin.register(TipoTour)
 class TipoTourAdmin(admin.ModelAdmin):
@@ -41,18 +45,77 @@ class ReservaAdmin(admin.ModelAdmin):
 
     actions = ['exportar_a_excel', 'generar_reporte_pdf']
 
+    # def exportar_a_excel(self, request, queryset):
+    #     response = HttpResponse(content_type='text/csv')
+    #     response['Content-Disposition'] = 'attachment; filename="reservas.csv"'
+
+    #     writer = csv.writer(response)
+    #     writer.writerow(['Código de Reserva', 'Nombre', 'DUI', 'Teléfono', 'Correo Electrónico', 'Tour', 'Dirección', 'Cantidad de Adultos', 'Cantidad de Niños', 'Fecha de Reserva', 'Total a Pagar'])
+
+    #     for reserva in queryset:
+    #         writer.writerow([reserva.codigo_reserva, reserva.nombre, reserva.dui, reserva.telefono, reserva.correo_electronico, reserva.tour, reserva.direccion, reserva.cantidad_adultos, reserva.cantidad_ninos, reserva.fecha_reserva, reserva.total_pagar])
+
+    #     return response
+    
     def exportar_a_excel(self, request, queryset):
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="reservas.csv"'
+        # Crear un libro de trabajo de Excel y una hoja de cálculo
+        workbook = openpyxl.Workbook()
+        worksheet = workbook.active
 
-        writer = csv.writer(response)
-        writer.writerow(['Código de Reserva', 'Nombre', 'DUI', 'Teléfono', 'Correo Electrónico', 'Tour', 'Dirección', 'Cantidad de Adultos', 'Cantidad de Niños', 'Fecha de Reserva', 'Total a Pagar'])
+        # Establecer el estilo del encabezado
+        header_style = openpyxl.styles.NamedStyle(name="header")
+        header_style.font = openpyxl.styles.Font(bold=True)
+        header_style.fill = openpyxl.styles.PatternFill(start_color="DDDDDD", end_color="DDDDDD", fill_type="solid")
+        
+        # Aplicar estilo al encabezado
+        for cell in worksheet["1:1"]:
+            cell.style = header_style
 
+        # Agregar el logotipo
+        # Supongamos que tienes un logotipo llamado 'logo.png' en tu directorio de medios
+        # Ajusta la ruta del logotipo según tu configuración
+        logo_path = 'static\img\LOGO_VOLCANO.jpg'
+        img = openpyxl.drawing.image.Image(logo_path)
+        # Escalar la imagen para que se ajuste a 50x50 píxeles
+        img.width = 125
+        img.height = 125
+
+        img.anchor = 'A1'
+        worksheet.add_image(img)
+
+        # Agregar la fecha de generación
+        worksheet['C2'] = 'Fecha de Generación:'
+        worksheet['D2'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # Agregar el usuario que lo generó
+        user = request.user
+        worksheet['C3'] = 'Usuario que lo Generó:'
+        worksheet['D3'] = user.username if user.is_authenticated else 'Anónimo'
+        worksheet['A7'] = ''
+        worksheet['A8'] = ''
+
+        # Encabezados de la tabla
+        headers = ['Código de Reserva', 'Titulo', 'DUI', 'Teléfono', 'Correo Electrónico', 'Tour', 'Dirección', 'Cantidad de Adultos', 'Cantidad de Niños', 'Fecha de Reserva', 'Total a Pagar']
+        worksheet.append(headers)
+
+        # Rellenar la tabla con los datos
         for reserva in queryset:
-            writer.writerow([reserva.codigo_reserva, reserva.nombre, reserva.dui, reserva.telefono, reserva.correo_electronico, reserva.tour, reserva.direccion, reserva.cantidad_adultos, reserva.cantidad_ninos, reserva.fecha_reserva, reserva.total_pagar])
+            worksheet.append([reserva.codigo_reserva, reserva.nombre, reserva.dui, reserva.telefono, reserva.correo_electronico, reserva.tour.titulo, reserva.direccion, reserva.cantidad_adultos, reserva.cantidad_ninos, reserva.fecha_reserva, reserva.total_pagar])
+
+        # Calcular el total de la columna total_pagar
+        total_pagar_column = worksheet['K'][1:]
+        total_pagar = sum(cell.value for cell in total_pagar_column if isinstance(cell.value, (int, float)))
+        worksheet.append(['Total:', '', '', '', '', '', '', '', '', '', total_pagar])
+
+        # Crear una respuesta HTTP con el contenido del libro de trabajo de Excel
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="reservas.xlsx"'
+
+        # Guardar el libro de trabajo de Excel en la respuesta
+        workbook.save(response)
 
         return response
-
+    
     exportar_a_excel.short_description = "Exportar a Excel"
 
     def generar_reporte_pdf(self, request, queryset):
