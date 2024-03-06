@@ -74,25 +74,25 @@ class ReservaAdmin(admin.ModelAdmin):
         # Agregar el logotipo
         # Supongamos que tienes un logotipo llamado 'logo.png' en tu directorio de medios
         # Ajusta la ruta del logotipo según tu configuración
-        logo_path = 'static\img\LOGO_VOLCANO.jpg'
-        img = openpyxl.drawing.image.Image(logo_path)
-        # Escalar la imagen para que se ajuste a 50x50 píxeles
-        img.width = 125
-        img.height = 125
+        # logo_path = 'static\img\LOGO_VOLCANO.jpg'
+        # img = openpyxl.drawing.image.Image(logo_path)
+        # # Escalar la imagen para que se ajuste a 50x50 píxeles
+        # img.width = 125
+        # img.height = 125
 
-        img.anchor = 'A1'
-        worksheet.add_image(img)
+        # img.anchor = 'A1'
+        # worksheet.add_image(img)
 
         # Agregar la fecha de generación
-        worksheet['C2'] = 'Fecha de Generación:'
-        worksheet['D2'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        worksheet['A2'] = 'Fecha de Generación:'
+        worksheet['B2'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         # Agregar el usuario que lo generó
         user = request.user
-        worksheet['C3'] = 'Usuario que lo Generó:'
-        worksheet['D3'] = user.username if user.is_authenticated else 'Anónimo'
-        worksheet['A7'] = ''
-        worksheet['A8'] = ''
+        worksheet['A3'] = 'Usuario que lo Generó:'
+        worksheet['B3'] = user.username if user.is_authenticated else 'Anónimo'
+        worksheet['A4'] = ''
+        worksheet['A5'] = ''
 
         # Encabezados de la tabla
         headers = ['Código de Reserva', 'Titulo', 'DUI', 'Teléfono', 'Correo Electrónico', 'Tour', 'Dirección', 'Cantidad de Adultos', 'Cantidad de Niños', 'Fecha de Reserva', 'Total a Pagar']
