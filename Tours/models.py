@@ -16,6 +16,10 @@ import os
 from ckeditor.fields import RichTextField
 from azure.storage.blob import ContentSettings
 from azure.communication.email import EmailClient
+
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
 # from Transacciones.models import EnlacePago
 
 
@@ -224,6 +228,42 @@ class Reserva(models.Model):
 
         # Obtén la URL de la imagen
         return self.qr_code.url
+    
+    #generar el detalle de la reserva en pdf
+    
+    def generar_detalle_reserva_en_pdf(self):
+        buffer = BytesIO()
+
+        # Crear un objeto PDF
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        styles = getSampleStyleSheet()
+
+        # Contenido del PDF
+        contenido = []
+
+        # Agregar información de la reserva al PDF
+        contenido.append(Paragraph(f'Tour: {self.tour.titulo}', styles['Normal']))
+        contenido.append(Paragraph(f'Código de Reserva: {self.codigo_reserva}', styles['Normal']))
+        contenido.append(Paragraph(f'Nombre: {self.nombre}', styles['Normal']))
+        contenido.append(Paragraph(f'DUI: {self.dui}', styles['Normal']))
+        contenido.append(Paragraph(f'Tipo de Documento: {self.tipo_documento}', styles['Normal']))
+        contenido.append(Paragraph(f'Teléfono: {self.telefono}', styles['Normal']))
+        contenido.append(Paragraph(f'Correo Electrónico: {self.correo_electronico}', styles['Normal']))
+        contenido.append(Paragraph(f'País de Residencia: {self.pais_residencia}', styles['Normal']))
+        contenido.append(Paragraph(f'Dirección: {self.direccion}', styles['Normal']))
+        contenido.append(Paragraph(f'Cantidad de Adultos: {self.cantidad_adultos}', styles['Normal']))
+        contenido.append(Paragraph(f'Cantidad de Niños: {self.cantidad_ninos}', styles['Normal']))
+        contenido.append(Paragraph(f'Fecha de Reserva: {self.fecha_reserva}', styles['Normal']))
+        contenido.append(Paragraph(f'Total a Pagar: {self.total_pagar}', styles['Normal']))
+
+        # Construir el PDF
+        doc.build(contenido)
+
+        # Obtener los bytes del PDF
+        pdf_bytes = buffer.getvalue()
+        buffer.close()
+
+        return pdf_bytes
 
     def enviar_codigo_por_correo(self):
         try:
@@ -247,24 +287,9 @@ class Reserva(models.Model):
             img.save(qr_io)
             qr_io.seek(0)
 
-            # Renderiza el contenido del correo utilizando un template
-            context = {
-                'tour_titulo': self.tour.titulo,
-                'codigo_reserva': self.codigo_reserva,
-                'nombre': self.nombre,
-                'dui': self.dui,
-                'tipo_documento': self.tipo_documento,
-                'telefono': self.telefono,
-                'correo_electronico': self.correo_electronico,
-                'pais_residencia': self.pais_residencia,
-                'direccion': self.direccion,
-                'cantidad_adultos': self.cantidad_adultos,
-                'cantidad_ninos': self.cantidad_ninos,
-                'fecha_reserva': self.fecha_reserva,
-                'total_pagar': self.total_pagar
-            }
-            html_content = render_to_string('email/correo_reserva.html', context)
-            text_content = strip_tags(html_content)
+            # Genera el detalle de la reserva en PDF
+            # (Suponiendo que tienes una función que genera el PDF)
+            pdf_bytes = self.generar_detalle_reserva_en_pdf()
 
             # Configuración del mensaje
             message = {
@@ -273,12 +298,15 @@ class Reserva(models.Model):
                     "to": [
                         {"address": self.correo_electronico},
                         {"address": "volcanosanmiguel.sv@gmail.com"}
-                        ],
+                    ],
                 },
                 "content": {
                     "subject": "Código de Reserva para el Tour",
-                    "html": html_content,
-                    "plainText": text_content,
+                    "html": "Adjunto encontrará el código QR y el detalle de la reserva.",
+                    "attachments": [
+                        {"fileName": "codigo_qr.png", "content": qr_io.getvalue(), "contentType": "image/png"},
+                        {"fileName": "detalle_reserva.pdf", "content": pdf_bytes, "contentType": "application/pdf"}
+                    ]
                 }
             }
 

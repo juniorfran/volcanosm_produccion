@@ -6,7 +6,6 @@ from ckeditor.fields import RichTextField
 def upload_to_transactions(instance, filename):
     # La función toma la instancia del modelo y el nombre del archivo y construye la ruta de almacenamiento
     return f'Transacciones/ImagenProducto/{filename}'
-    
 
 class EnlacePago(models.Model):
     reserva = models.ForeignKey(Reserva, on_delete=models.CASCADE)
