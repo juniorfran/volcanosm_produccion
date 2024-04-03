@@ -1,0 +1,80 @@
+
+{% load static %}
+<head>
+    <meta charset="utf-8">
+    <title>Reporte de Aperturas de Cajas por Fecha</title>
+    <style>
+        /* Estilos CSS para el reporte */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+    <h2>Reporte de Aperturas de Cajas por Fecha</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Caja</th>
+                <th>Apertura</th>
+                <th>Fecha y Hora de Apertura</th>
+                <th>Monto de Apertura</th>
+                <th>Responsable</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for apertura in aperturas %}
+            <tr>
+                <td>{{ apertura.caja.nombre_caja }}</td>
+                <td>{{ forloop.counter }}</td> <!-- Número de apertura en la caja -->
+                <td>{{ apertura.fecha_hora_apertura }}</td>
+                <td>{{ apertura.efectivo_inicial }}</td>
+                <td>{{ apertura.usuario_responsable }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</head>
+<br>
+<hr>
+<h2>Reporte de Cierre de Cajas por Fecha</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Caja</th>
+            <th>Cierre</th>
+            <th>Fecha y Hora de Cierre</th>
+            <th>Monto de Cierre</th>
+            <th>Responsable</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cierre in cierres %}
+        <tr>
+            <td>{{ cierre.caja.nombre_caja }}</td>
+            <td>{{ forloop.counter }}</td> <!-- Número de apertura en la caja -->
+            <td>{{ cierre.fecha_hora_cierre }}</td>
+            <td>{{ cierre.efectivo_cierre }}</td>
+            <td>{{ cierre.usuario_responsable }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+
+</script>
+
+

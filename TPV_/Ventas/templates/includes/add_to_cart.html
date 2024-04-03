@@ -1,0 +1,104 @@
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <span class="text-primary">Fecha:</span>
+                <span class="ms-2">{{ current_date }}</span>
+                <span class="text-primary ms-3">Caja:</span>
+                <span class="ms-2">{{ caja_nombre }}</span>
+                <span class="text-primary ms-3">Usuario:</span>
+                <span class="ms-2">{{ user.username }}</span>
+            </div>
+            {% if cart %}
+                <a href="{% url 'shopping_cart' %}">Carrito de Compras | {{ product_counts }}</a>
+            {% endif %}
+                        
+        </div>
+        <div class="product-list">
+            <ul class="list-group">
+                {% for product in productos %}
+                <li class="list-group-item">
+                    <a href="{% url 'add_to_cart' product.id %}">{{ product.nombre }} - {{ product.codigo_de_barras }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-auto">
+            <div class="fab">
+                <button type="button" class="btn btn-primary position-relative" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <i class="bi bi-plus-circle"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        +
+                      <span class="visually-hidden">Agregar producto</span>
+                    </span>
+                  </button>
+            </div>
+        </div>
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Seleccionar Productos</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <ul class="list-group">
+                            {% for product in productos %}
+                            <li class="list-group-item">
+                                <form action="{% url 'add_to_cart' product.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary">Agregar al carrito</button>
+                                    <a href="{% url 'add_to_cart' product.id %}">{{ product.nombre }} - {{ product.codigo_de_barras }}</a>
+                                </form>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Agrega esta sección al final de tu template -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtener el elemento donde se mostrarán los mensajes de alerta
+        const alertPlaceholder = document.getElementById('liveAlertPlaceholder');
+
+        // Obtener todos los botones de "Agregar al carrito"
+        const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+
+        // Agregar un event listener a cada botón de "Agregar al carrito"
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevenir la acción predeterminada del botón (enviar el formulario)
+
+                // Obtener el nombre del producto del botón
+                const productName = button.getAttribute('data-product-name');
+
+                // Construir el mensaje de alerta
+                const alertMessage = document.createElement('div');
+                alertMessage.classList.add('alert', 'alert-success');
+                alertMessage.setAttribute('role', 'alert');
+                alertMessage.textContent = `Producto "${productName}" añadido al carrito de compras.`;
+
+                // Limpiar el contenido anterior del placeholder de alerta
+                alertPlaceholder.innerHTML = '';
+
+                // Agregar el mensaje de alerta al placeholder
+                alertPlaceholder.appendChild(alertMessage);
+
+                // Desvanecer el mensaje de alerta después de unos segundos
+                setTimeout(function() {
+                    alertMessage.classList.add('fade');
+                }, 3000);
+            });
+        });
+    });
+</script>

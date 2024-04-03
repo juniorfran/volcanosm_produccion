@@ -1,0 +1,50 @@
+{% extends 'base_utilities.html' %}
+{% load custom_filters %}
+
+{% block content %}
+<h1>Ventas por caja</h1>
+
+<form method="get">
+  <div class="row">
+    <div class="col-md-4">
+      <label for="start_date">Fecha de inicio:</label>
+      <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request.GET.start_date }}">
+    </div>
+    <div class="col-md-4">
+      <label for="end_date">Fecha de fin:</label>
+      <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request.GET.end_date }}">
+    </div>
+    <div class="col-md-4">
+      <button type="submit" class="btn btn-primary">Filtrar</button>
+    </div>
+  </div>
+</form>
+
+<hr>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Fecha</th>
+      <th>Caja</th>
+      <th>Total</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for venta in ventas %}
+    <tr>
+      <td>{{ venta.id }}</td>
+      <td>{{ venta.fecha_hora_venta }}</td>
+      <td>{{ venta.caja }}</td>
+      <td>{{ venta.total }}</td>
+      <td>
+        <a href="{% url 'venta_detalle' venta.id %}" class="btn btn-primary">Ver detalle</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
