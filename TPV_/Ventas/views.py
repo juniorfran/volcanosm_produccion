@@ -113,22 +113,31 @@ def process_sale(request):
 
 @login_required
 def punto_ventas(request):
-    productos = Producto.objects.filter(status='A')
-    caja_abierta = Cajas.objects.filter(estado='abierto').first()
-    caja_usuario = Cajas.objects.get(usuario_responsable=request.user)
+    
+    caja = Cajas.objects.all()
+    
+    if caja:
+        productos = Producto.objects.filter(status='A')
+        caja_abierta = Cajas.objects.filter(estado='abierto').first()
+        caja_usuario = Cajas.objects.get(usuario_responsable=request.user)
 
-    current_date = timezone.now().date()
-    
-    caja_nombre = caja_usuario.nombre_caja
-    
-    context = {
-        'productos': productos, 
-        'caja_abierta': caja_abierta,
-        'current_date': current_date,
-        'caja_nombre': caja_nombre,
-    }
-    
-    return render(request, 'tpv/punto_ventas.html', context)
+        current_date = timezone.now().date()
+        
+        caja_nombre = caja_usuario.nombre_caja
+        
+        context = {
+            'productos': productos, 
+            'caja_abierta': caja_abierta,
+            'current_date': current_date,
+            'caja_nombre': caja_nombre,
+        }
+        
+        return render(request, 'tpv/punto_ventas.html', context)
+    else:
+        #escribir un mensaje en el caso de que toque crear una nueva caja
+        messages.error(request, "No se han creado cajas")
+        return redirect('cajas_create')
+        
 
 
 def calcular_impuesto(cart):

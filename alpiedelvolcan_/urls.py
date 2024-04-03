@@ -43,12 +43,17 @@ urlpatterns = [
     
     #url para contactanos
     path('contactanos/', include('Contactanos.urls')),
+      #url para TPV
+    path('TPV/Cajas/', include('TPV_.Cajas.urls')),
+    path('TPV/Productos/', include('TPV_.Productos.urls')),
+    path('TPV/Ventas/', include('TPV_.Ventas.urls')),
     
     # Otras URLs de la aplicación
     path('utilidades/', include('Utilidades.urls')),
     
     path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
+    
     
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
