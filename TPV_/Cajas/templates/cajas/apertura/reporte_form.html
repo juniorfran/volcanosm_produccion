@@ -1,0 +1,22 @@
+{% extends "base_utilities.html" %}
+{% load static %}
+
+{% block tittle_sections %}
+<h1>Seleccione la caja:</h1>
+{% endblock %}
+
+{% block content %}
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.caja.label_tag }}
+    {{ form.caja }}
+    {{ form.start_date.label_tag }}
+    {{ form.start_date }}
+    {{ form.end_date.label_tag }}
+    {{ form.end_date }}
+    <br>
+    <button type="submit" class="btn btn-primary btn-sm">Generar Reporte</button>
+</form>
+    
+{% endblock content%}

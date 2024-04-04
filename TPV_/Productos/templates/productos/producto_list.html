@@ -1,0 +1,35 @@
+{% extends 'base_utilities.html' %}
+
+{% block content %}
+  <h1>Productos</h1>
+  <a href="{% url 'producto_create' %}">Agregar producto</a>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Precio de compra</th>
+        <th>Precio de venta</th>
+        <th>Stock</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for producto in productos %}
+        <tr>
+          <td>{{ producto.nombre }}</td>
+          <td>{{ producto.precio_de_compra }}</td>
+          <td>{{ producto.precio_de_venta }}</td>
+          <td>{{ producto.stock }}</td>
+          <td>
+            <a href="{% url 'producto_update' pk=producto.pk %}">Editar</a>
+            <a href="{% url 'producto_delete' pk=producto.pk %}">Eliminar</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5">No hay productos</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

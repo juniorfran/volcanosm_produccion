@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.http import HttpResponse
 from django.template.loader import get_template
 from .forms import CajasForm, CajasUpdateForm, CloseCajaForm, CountCajaForm, OpenCajaForm, CashBoxForm
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from reportlab.lib import colors
 
@@ -119,7 +119,6 @@ def caja_count(request, pk):
         form = CountCajaForm(instance=caja)
     return render(request, 'cajas/caja_count.html', {'form': form, 'caja': caja})
 
-
 def generar_reporte(request):
     if request.method == 'POST':
         form = CashBoxForm(request.POST)
@@ -130,36 +129,38 @@ def generar_reporte(request):
             aperturas = AperturaCaja.objects.filter(caja=caja, fecha_hora_apertura__range=[start_date, end_date]).order_by('fecha_hora_apertura')
             cierres = CierreCaja.objects.filter(caja=caja, fecha_hora_cierre__range=[start_date, end_date]).order_by('fecha_hora_cierre')
 
-            # Crear el PDF
-            pdf_filename = 'reporte_aperturas_cajas.pdf'
-            pdf = SimpleDocTemplate(pdf_filename, pagesize=letter)
-            table_data = [['Fecha de Apertura', 'Monto de Apertura', 'Fecha de Cierre', 'Monto de Cierre']]
-            
-            # Agregar datos de aperturas y cierres a la tabla
+            # Prepare data for the table
+            table_data = [['Fecha Hora Apertura', 'Monto Apertura', 'Fecha Hora Cierre', 'Monto Cierre']]
             for apertura, cierre in zip(aperturas, cierres):
                 table_data.append([apertura.fecha_hora_apertura, apertura.monto_apertura, cierre.fecha_hora_cierre, cierre.monto_cierre])
-            
-            # Crear la tabla en el PDF
-            table = Table(table_data)
-            table.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-                                       ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                                       ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                                       ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                                       ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                                       ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-                                       ('GRID', (0, 0), (-1, -1), 1, colors.black)]))
-            
-            # Construir el PDF
-            pdf.build([table])
 
-            # Descargar el PDF
-            with open(pdf_filename, 'rb') as pdf_file:
-                response = HttpResponse(pdf_file.read(), content_type='application/pdf')
-                response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+            # Create the PDF
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="reporte_aperturas_cajas.pdf"'
+            doc = SimpleDocTemplate("reporte_pdf.pdf", pagesize=landscape(letter))
+
+            # Generate the table
+            table = Table(table_data)
+            table.setTableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 14),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ])
+
+            # Add the table to the PDF
+            doc.build([table])
+
             return response
-        
     else:
         form = CashBoxForm()
 
-    context = {'form': form}
+    context = {
+        'form': form,
+    }
+
     return render(request, 'cajas/apertura/reporte_form.html', context)

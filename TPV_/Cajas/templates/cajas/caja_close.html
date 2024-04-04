@@ -1,0 +1,15 @@
+{% extends "base_utilities.html" %}
+{% load static %}
+
+{% block tittle_sections %}
+<h1>Cierre de Caja</h1>
+{% endblock %}
+
+{% block content %}
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Cerrar Caja</button>
+</form>
+{% endblock content %}
