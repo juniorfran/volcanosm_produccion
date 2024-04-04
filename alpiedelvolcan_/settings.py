@@ -74,16 +74,6 @@ INSTALLED_APPS = [
     'ckeditor',
     'ckeditor_uploader',
     'Utilidades',
-    'TPV_.Cajas',
-    'TPV_.Clientes',
-    'TPV_.Contabilidad',
-    'TPV_.Facturas',
-    'TPV_.Inventario',
-    'TPV_.Kardex',
-    'TPV_.Productos',
-    'TPV_.Proveedores',
-    'TPV_.Ventas',
-    'TPV_.Reportes',
 ]
 
 LOGIN_REDIRECT_URL = 'utilidades:utilidades'
@@ -97,7 +87,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    #'TPV_.Ventas.middleware.CreateCartMiddleware',
 ]
 
 ROOT_URLCONF = 'alpiedelvolcan_.urls'
@@ -123,7 +112,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'TPV_.Ventas.context_processors.categorias_context_processor',
             ],
         },
     },
