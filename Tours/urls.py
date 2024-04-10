@@ -7,6 +7,10 @@ urlpatterns = [
     path('reservar/<int:tour_id>/', views.reservar_tour, name='reservar_tour'),
     path('reservar_exitosa/<int:reserva_id>/', views.reserva_exitosa, name='reserva_exitosa'),
     #path('consulta-enlace-pago/', views.consulta_enlace_pago, name='consulta_enlace_pago'),
+    
+    # path('abrir_enlace_pago/', views.abrir_enlace_pago, name='abrir_enlace_pago'),
+    # path('espera_confirmacion_pago/', views.espera_confirmacion_pago, name='espera_confirmacion_pago'),
+
 
 
     # Agrega más URL según sea necesario

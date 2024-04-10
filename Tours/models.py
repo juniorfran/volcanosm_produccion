@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils import timezone
 from django.conf import settings
 from django.db import models
@@ -20,7 +20,12 @@ from azure.communication.email import EmailClient
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
+from Transacciones.wompi_connect import authenticate_wompi
+from Transacciones.wompi_consulta import make_wompi_get_request
+#from Transacciones.models import EnlacePago
 # from Transacciones.models import EnlacePago
+import schedule
+import time
 
 
 #modelos para tours
@@ -154,8 +159,15 @@ class Reserva(models.Model):
     fecha_reserva = models.DateField(editable=True)
     qr_code_url = models.URLField(blank=True)
     qr_code = models.ImageField(upload_to='qrcodes', blank=True, null=True)
-    
-    
+    ESTADOS_RESERVA = (
+        (' ', ' '),
+        ('RESERVADO', 'Reserva realizada sin pago'),
+        ('PENDIENTE', 'Pendiente de Pago'),
+        ('PAGADO', 'Reserva pagada y realizada'),
+        ('CANCELADO', 'Reserva Cancelada'),
+        ('Otro', 'Otro'),
+        )
+    estado_reserva = models.CharField(max_length=50, choices=ESTADOS_RESERVA, default='RESERVADO')
     #campos extras
     #lista de tipos de documentos
     DOCUMENTOS_VALIDOS = (

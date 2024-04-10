@@ -39,7 +39,7 @@ class ResenaAdmin(admin.ModelAdmin):
 
 @admin.register(Reserva)
 class ReservaAdmin(admin.ModelAdmin):
-    list_display = ('codigo_reserva', 'nombre', 'dui', 'telefono', 'correo_electronico','tour', 'direccion', 'cantidad_adultos', 'cantidad_ninos', 'fecha_reserva', 'total_pagar',)
+    list_display = ('codigo_reserva', 'estado_reserva', 'nombre', 'dui', 'telefono', 'correo_electronico','tour', 'direccion', 'cantidad_adultos', 'cantidad_ninos', 'fecha_reserva', 'total_pagar',)
     search_fields = ('tour__titulo', 'codigo_reserva', 'nombre', 'telefono', 'dui', 'correo_electronico',)
     list_filter = ('fecha_reserva',)
 

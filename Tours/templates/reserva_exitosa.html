@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load humanize %}
+
+
 {% block content %}
   <div class="container mt-5">
     <div class="row">
@@ -50,9 +52,122 @@
     </div>
     
   </div>
-  
 
-  <!-- Scripts de Bootstrap y jQuery -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+<!-- Div de superposición para mostrar el mensaje "Esperando el pago" -->
+<div id="overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.95); z-index: 1000;">
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: white;">
+    <h1 class="text-red">Esperando el pago...</h1>
+    <h2 id="countdown" class="text-yellow">Tiempo restante: 30 segundos</h2>
+    <a href="#" class="btn btn-primary mt-3" id="verificarPagoButton">Verificar Pago</a>
+      <!-- Botón de verificar pago -->
+    {% comment %} <button id="verificarPagoButton" style="display: none;">Verificar Pago</button> {% endcomment %}
+  
+  </div>
+</div>
+</div>
+
+<!-- Scripts de Bootstrap y jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+
+<script>
+  // Función para mostrar el div de superposición cuando el estado de la reserva es "PENDIENTE"
+  function mostrarEsperandoPago() {
+    document.getElementById("overlay").style.display = "block";
+  }
+  
+  // Función para ocultar el div de superposición cuando el estado de la reserva cambia a "PAGADO"
+  function ocultarEsperandoPago() {
+    document.getElementById("overlay").style.display = "none";
+  }
+  
+  // Función para mostrar el botón de verificar pago
+  function mostrarBotonVerificarPago() {
+    document.getElementById("verificarPagoButton").style.display = "block";
+  }
+  
+  // Función para ocultar el botón de verificar pago
+  function ocultarBotonVerificarPago() {
+    document.getElementById("verificarPagoButton").style.display = "none";
+  }
+  
+  // Verificar el estado de la reserva y llamar a las funciones correspondientes
+  {% if reserva.estado_reserva == 'RESERVADO' %}
+  mostrarEsperandoPago();
+  {% elif reserva.estado_reserva == 'PAGADO' %}
+  ocultarEsperandoPago();
+  {% endif %}
+  
+  // Contador de tiempo de 30 segundos
+  {% if reserva.estado_reserva != 'PAGADO' %}
+  var tiempoRestante = 30; // Inicializar el contador
+  
+  // Verificar si existe una entrada en sessionStorage para el contador de recargas
+  var recargas = sessionStorage.getItem('recargas');
+  // Si no hay entrada en sessionStorage, inicializar el contador en 0
+  if (recargas === null) {
+    recargas = 0;
+  }
+  // Incrementar el contador de recargas
+  recargas++;
+  // Almacenar el nuevo valor del contador en sessionStorage
+  sessionStorage.setItem('recargas', recargas);
+  
+  // Mostrar u ocultar el botón de verificar pago según el número de recargas
+  if (tiempoRestante < 1) {
+    mostrarBotonVerificarPago();
+  } else {
+    ocultarBotonVerificarPago();
+  }
+  
+  // Iniciar el contador de tiempo
+  var intervalo = setInterval(function() {
+    tiempoRestante--;
+    document.getElementById("countdown").textContent = "Tiempo restante: " + tiempoRestante + " segundos";
+    if (tiempoRestante == 0) {
+      clearInterval(intervalo);
+      document.getElementById("countdown").textContent = "Se agotó el tiempo de espera, verifica de forma manual tu pago";
+      mostrarBotonVerificarPago();
+    }
+  }, 1000);
+  {% endif %}
+
+</script>
+
+
+<script>
+
+{% if reserva.estado_reserva != 'PAGADO' %}
+  var ventanaEnlacePagoAbierta = false;
+  // Función para abrir el enlace de pago en una nueva pestaña
+  function abrirEnlacePago(enlacePago) {
+      // Si la ventana emergente ya está abierta o la reserva tiene un estado de "PAGADO", no abra la ventana emergente
+      if (ventanaEnlacePagoAbierta || "{{ reserva.estado_reserva }}" == "PAGADO") {
+          return;
+      }
+      // Abre el enlace en una nueva pestaña
+      var ventanaEnlacePago = window.open(enlacePago, '_blank');
+      ventanaEnlacePagoAbierta = true;
+
+      // Cierra la ventana emergente después de 30 segundos
+      setTimeout(function() {
+          ventanaEnlacePago.close();
+          ventanaEnlacePagoAbierta = false;
+      }, 30000);
+  }
+
+  // Llama a la función para abrir el enlace de pago cuando se cargue la página
+  window.onload = function() {
+      var enlacePago = "{{ enlace_pago.url_enlace }}"; // Aquí deberías pasar la URL del enlace de pago desde tu vista Django
+      abrirEnlacePago(enlacePago);
+  };
+{% endif %}
+
+// Función para recargar la página cuando se haga clic en el botón
+document.getElementById("verificarPagoButton").addEventListener("click", function() {
+  location.reload(); // Recargar la página
+});
+</script>
+
+
 {% endblock %}

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abrir Enlace de Pago</title>
+</head>
+<body>
+    <script>
+        // Abrir el enlace de pago en una nueva pestaña
+        window.open("{{ enlace_pago }}", "_blank");
+        // Redirigir a la página de espera de confirmación de pago después de abrir el enlace
+        window.location.href = "{% url 'espera_confirmacion_pago' %}";
+    </script>
+</body>
+</html>
