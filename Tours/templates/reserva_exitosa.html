@@ -92,11 +92,11 @@
   }
   
   // Verificar el estado de la reserva y llamar a las funciones correspondientes
-  {% if reserva.estado_reserva != 'PAGADO' %}
+  {% comment %} {% if reserva.estado_reserva != 'PAGADO' %}
   mostrarEsperandoPago();
   {% elif reserva.estado_reserva == 'PAGADO' %}
   ocultarEsperandoPago();
-  {% endif %}
+  {% endif %} {% endcomment %}
   
   // Contador de tiempo de 30 segundos
   {% if reserva.estado_reserva != 'PAGADO' %}
