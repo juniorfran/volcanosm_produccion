@@ -104,18 +104,31 @@ def actualizar_estado(request):
 
 
 def actualizar_estado_reserva():
-    # Obtener la última reserva registrada
     ultima_reserva = Reserva.objects.latest('id')
+    iteraciones = 0
+
     while True:
         try:
             if Reserva.objects.exists():
                 r = Reserva.objects.order_by('id').first()
                 actualizar_estado(r)
                 print("Actualizando estados...")
+                time.sleep(10)
+                iteraciones += 1
+
+                if iteraciones == 20:
+                    print("reiniciando el bluche")
+                    iteraciones = 0
+                    time.sleep(10)
+
+            else:
+                print("No hay reservas para actualizar")
+                time.sleep(10)
+
         except Exception as e:
             print("Error al actualizar estados:", str(e))
-            
-        time.sleep(10)
+            iteraciones += 1
+            time.sleep(30)
         
 # Lanzar el hilo en el inicio del servidor
 def start_background_thread():
