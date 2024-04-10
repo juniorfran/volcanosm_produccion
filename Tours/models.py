@@ -167,7 +167,7 @@ class Reserva(models.Model):
         ('CANCELADO', 'Reserva Cancelada'),
         ('Otro', 'Otro'),
         )
-    estado_reserva = models.CharField(max_length=50, choices=ESTADOS_RESERVA, default='RESERVADO')
+    estado_reserva = models.CharField(max_length=50, choices=ESTADOS_RESERVA, default='RESERVADO', null=True)
     #campos extras
     #lista de tipos de documentos
     DOCUMENTOS_VALIDOS = (
