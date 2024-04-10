@@ -211,6 +211,7 @@ class Reserva(models.Model):
         
         super().save(*args, **kwargs)
 
+
     def generar_codigo_reserva(self):
         import random
         from datetime import datetime
@@ -231,17 +232,24 @@ class Reserva(models.Model):
         return codigo
     
     def guardar_qr_code_image(self, qr_io):
-        from django.core.files.base import ContentFile
+        # Conexión al servicio Blob de Azure
+        blob_service_client = BlobServiceClient.from_connection_string(settings.AZURE_CONNECTION_STRING)
+        container_client = blob_service_client.get_container_client(settings.AZURE_CONTAINER_NAME)
 
-        # Guarda la imagen en el sistema de archivos
+        # Nombre del archivo en Azure
         image_name = f"qrcode_{self.codigo_reserva}.png"
-        self.qr_code.save(image_name, ContentFile(qr_io.getvalue()), save=False)
+
+        # Guarda la imagen en Azure Blob Storage
+        blob_client = container_client.get_blob_client(image_name)
+        if not blob_client.exists():
+            blob_client.upload_blob(qr_io.getvalue(), content_settings=ContentSettings(content_type='image/png'))
+
+        # Guarda la URL de la imagen en el modelo
+        self.qr_code_url = blob_client.url
         self.save()
 
-        # Obtén la URL de la imagen
-        return self.qr_code.url
-    
-    #generar el detalle de la reserva en pdf
+        # Retorna la URL de la imagen
+        return self.qr_code_url
     
     def generar_detalle_reserva_en_pdf(self):
         buffer = BytesIO()
@@ -270,12 +278,31 @@ class Reserva(models.Model):
 
         # Construir el PDF
         doc.build(contenido)
-
+        
         # Obtener los bytes del PDF
         pdf_bytes = buffer.getvalue()
         buffer.close()
 
-        return pdf_bytes
+        # Conexión al servicio Blob de Azure
+        blob_service_client = BlobServiceClient.from_connection_string(settings.AZURE_CONNECTION_STRING)
+
+        # Obtén el contenedor donde se almacenarán los archivos PDF
+        container_client = blob_service_client.get_container_client(settings.AZURE_CONTAINER_NAME)
+
+        # Nombre del archivo PDF en Azure
+        pdf_name = f"detalle_reserva_{self.codigo_reserva}.pdf"
+
+        # Guarda el PDF en Azure Blob Storage
+        blob_client = container_client.get_blob_client(pdf_name)
+        if not blob_client.exists():
+            blob_client.upload_blob(pdf_bytes, content_settings=ContentSettings(content_type='application/pdf'))
+
+        # Guarda la URL del PDF en el modelo
+        self.detalle_reserva_url = blob_client.url
+        self.save()
+
+        return self.detalle_reserva_url
+
 
     def enviar_codigo_por_correo(self):
         try:
@@ -300,12 +327,34 @@ class Reserva(models.Model):
             qr_io.seek(0)
 
             # Genera el detalle de la reserva en PDF
-            # (Suponiendo que tienes una función que genera el PDF)
             pdf_bytes = self.generar_detalle_reserva_en_pdf()
+
+            # Obtener la URL del código QR
+            qr_url = self.guardar_qr_code_image(qr_io)
+
+            # Renderizar el template del correo electrónico con la información de la reserva
+            correo_html = render_to_string('email/correo_reserva.html', {
+                'codigo_reserva': self.codigo_reserva,
+                'nombre': self.nombre,
+                'tipo_documento': self.tipo_documento,
+                'dui': self.dui,
+                'telefono': self.telefono,
+                'correo_electronico': self.correo_electronico,
+                'pais_residencia': self.pais_residencia,
+                'direccion': self.direccion,
+                'cantidad_adultos': self.cantidad_adultos,
+                'cantidad_ninos': self.cantidad_ninos,
+                'fecha_reserva': self.fecha_reserva,
+                'total_pagar': self.total_pagar,
+                'qr_url': qr_url,
+            })
+
+            # Eliminar etiquetas HTML del cuerpo del correo
+            correo_texto_plano = strip_tags(correo_html)
 
             # Configuración del mensaje
             message = {
-                "senderAddress": settings.EMAIL_HOST_USER,  # Reemplaza con el remitente real
+                "senderAddress": settings.EMAIL_HOST_USER,
                 "recipients": {
                     "to": [
                         {"address": self.correo_electronico},
@@ -314,7 +363,8 @@ class Reserva(models.Model):
                 },
                 "content": {
                     "subject": "Código de Reserva para el Tour",
-                    "html": "Adjunto encontrará el código QR y el detalle de la reserva.",
+                    "html": correo_html,
+                    "plainText": correo_texto_plano,
                     "attachments": [
                         {"fileName": "codigo_qr.png", "content": qr_io.getvalue(), "contentType": "image/png"},
                         {"fileName": "detalle_reserva.pdf", "content": pdf_bytes, "contentType": "application/pdf"}
