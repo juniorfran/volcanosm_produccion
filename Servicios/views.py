@@ -5,6 +5,7 @@ from Configuraciones.models import Barra_Principal, Contacts, Direccionamiento, 
 
 # Create your views here.
 def index_servicios(request):
+    servicio = Servicios.objects.first()
     # Obtener los servicios ordenados por fecha de creación de forma descendente
     servicios = Servicios.objects.all().order_by('-fecha_creacion')
     tours = Tour.objects.all().order_by('-tipo_tour')
@@ -20,6 +21,7 @@ def index_servicios(request):
     
     
     context = {
+        'servicio': servicio,
         'servicios': servicios,
         'tours': tours,
         'barra_principal':barra_principal,

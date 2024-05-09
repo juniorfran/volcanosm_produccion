@@ -34,6 +34,7 @@ class Servicios(models.Model):
     imagen = models.ImageField(upload_to='servicios/{nombre}')
     url_azure = models.CharField(max_length=255, blank=True, null=True)  # Solo una URL para la imagen en Azure
     fecha_creacion = models.DateTimeField(auto_now_add=True)
+    url_servicio = models.CharField(max_length=200, null=True)
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 

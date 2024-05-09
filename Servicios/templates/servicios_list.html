@@ -3,22 +3,8 @@
 {% load static %}
 
 {% block content %}
-{% comment %} <!-- Header Start -->
-<div class="container-fluid page-header">
-    <div class="container">
-        <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 400px">
-            <h3 class="display-4 text-white text-uppercase">Servicios</h3>
-            <div class="d-inline-flex text-white">
-                <p class="m-0 text-uppercase"><a class="text-white" href="">inicio</a></p>
-                <i class="fa fa-angle-double-right pt-1 px-3"></i>
-                <p class="m-0 text-uppercase">Servicios</p>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Header End --> {% endcomment %}
 
-{% include "direccionamiento.html" %}
+{% include "direccionamiento.html" with servicio=servicio %}
 
 
 <!-- Service Start -->
@@ -32,7 +18,9 @@
             {% for servicio in servicios %}
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="service-item bg-white text-center mb-2 py-5 px-4">
-                    <img src="{{ servicio.url_azure }}" alt="{{ servicio.nombre }}" class="img-fluid mb-4">
+                    <a href="{{ servicio.url_servicio }}">
+                        <img src="{{ servicio.url_azure }}" alt="{{ servicio.nombre }}" class="img-fluid mb-4">
+                    </a>
                     <h5 class="mb-2">{{ servicio.nombre }}</h5>
                     <p class="m-0">{{ servicio.descripcion | safe}}</p>
                 </div>
@@ -45,30 +33,6 @@
 
 
 <!-- Testimonial Start -->
-{% comment %} <div class="container-fluid py-5">
-    <div class="container py-5">
-        <div class="text-center mb-3 pb-3">
-            <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">Tours</h6>
-            <h1>Descubre un Tour</h1>
-        </div>
-        <div class="owl-carousel testimonial-carousel">
-            {% for tour in tours %}
-            <div class="text-center pb-4">
-                <img class="img-fluid mx-auto" src="{{ tour.url_azure }}" style="width: 100px; height: 100px;" >
-                <div class="testimonial-text bg-white p-4 mt-n5">
-                    <p class="mt-5">{{ tour.descripcion |safe }}</p>
-                    <h5 class="text-truncate">{{ tour.titulo }}</h5>
-                    <p>Duration: {{ tour.duracion }} hours</p>
-                    <p>Price (Adult): ${{ tour.precio_adulto }}</p>
-                    <p>Price (Child): ${{ tour.precio_nino }}</p>
-                    <p>{{ tour.incluye_tour | safe }}</p>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</div> {% endcomment %}
-
 <div class="container-fluid py-5">
     <div class="container pt-5 pb-3">
         <div class="text-center mb-3 pb-3">
@@ -79,7 +43,6 @@
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="service-item bg-white text-center mb-2 py-5 px-4">
                     <h5 class="text-truncate">{{ tour.titulo }}</h5>
-                    <img class="img-fluid mx-auto" src="{{ tour.url_azure }}" class="img-fluid mb-4">
                     <p>Duración: {{ tour.duracion }} Horas</p>
                     <p>Precio Adultos: ${{ tour.precio_adulto }}</p>
                     <p>Precio Niños: ${{ tour.precio_nino }}</p>
