@@ -7,6 +7,7 @@ urlpatterns = [
         #UTILIDADES URL
     path("", views.index_utilidades, name="utilidades"),
     path('detalle/', views.consultar_detalle, name='detalle'),
+    path('upload-data/', views.upload_data, name='upload_data'),
 
     # Agrega más URL según sea necesario
 ]

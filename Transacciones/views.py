@@ -38,8 +38,9 @@ def consultar_enlace_pago(enlace_pago_id, client_id, client_secret):
 
     if enlace_pago_info:
         # Imprimir la información del enlace de pago
-        print("Información del enlace de pago:")
-        print(enlace_pago_info)
+        # print("Información del enlace de pago:")
+        # print(enlace_pago_info)
+        pass
     else:
         print("Error al obtener información del enlace de pago.")
 

@@ -9,29 +9,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 #BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'alpiedelvolcan_.settings')
 
-app = Celery('Tours')
-app.config_from_object('django.conf:settings', namespace='CELERY')
+# app = Celery('Tours')
+# app.config_from_object('django.conf:settings', namespace='CELERY')
 
 #####################################################################################################################
 ######### configuraciones para celery ###############################################################################
 #####################################################################################################################
 
 # Configuración de Azure Service Bus como backend de mensajería
-app.conf.broker_url = 'azureservicebus://volcanocelery.servicebus.windows.net/?operation_timeout=60&'
-app.conf.broker_transport_options = {
-    'polling_interval': 1,
-    'max_retries': 3,
-    'interval_start': 0,
-}
-app.autodiscover_tasks()
+# app.conf.broker_url = 'azureservicebus://volcanocelery.servicebus.windows.net/?operation_timeout=60&'
+# app.conf.broker_transport_options = {
+#     'polling_interval': 1,
+#     'max_retries': 3,
+#     'interval_start': 0,
+# }
+# app.autodiscover_tasks()
 
 
-CELERY_BEAT_SCHEDULE = {
-    'actualizar-estado-reserva': {
-        'task': 'Tours.tasks.actualizar_estado_reserva',
-        'schedule': 5.0,  # Ejecutar cada 10 segundos
-    },
-}
+# CELERY_BEAT_SCHEDULE = {
+#     'actualizar-estado-reserva': {
+#         'task': 'Tours.tasks.actualizar_estado_reserva',
+#         'schedule': 5.0,  # Ejecutar cada 10 segundos
+#     },
+# }
 
 #####################################################################################################################
 ######### configuraciones para celery #################################################################
@@ -103,6 +103,7 @@ INSTALLED_APPS = [
     'TPV_.Ventas',
     'TPV_.Reportes',
     'django_celery_beat',
+    'Internet',
     
 ]
 

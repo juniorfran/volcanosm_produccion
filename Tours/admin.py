@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.contrib import admin
 from django.http import HttpResponse
 from django.utils.html import format_html
-from .models import TipoTour, Tour, ImagenTour, Resena, Reserva
+from .models import TipoTour, Tour, ImagenTour, Resena, Reserva, EnlacePagoTour
 import csv
 import openpyxl
 from reportlab.pdfgen import canvas
@@ -171,3 +171,15 @@ class ReservaAdmin(admin.ModelAdmin):
         return response
 
     generar_reporte_pdf.short_description = "Generar Reporte en PDF"
+    
+    
+@admin.register(EnlacePagoTour)
+class EnlacePagoAdmin(admin.ModelAdmin):
+    list_display = ('id', 'comercio_id', 'reserva', 'monto', 'nombre_producto', 'url_enlace', 'esta_productivo')
+    search_fields = ['comercio_id', 'nombre_producto', 'reserva']
+    list_filter = ['esta_productivo']
+    readonly_fields = ('id', 'comercio_id', 'monto', 'nombre_producto', 'url_qr_code', 'url_enlace', 'esta_productivo')
+    exclude = []
+
+    def has_add_permission(self, request):
+        return False

@@ -121,6 +121,16 @@
                         </ul>
                     </div>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="collapse" href="#collapseInternet" role="button" aria-expanded="false" aria-controls="collapseInternet">
+                        <span class="fa fa-industry"></span> INTERNET
+                    </a>
+                    <div class="collapse" id="collapseInternet">
+                        <ul class="nav-item">
+                            {% include "opciones_menu/internet.html" %}
+                        </ul>
+                    </div>
+                </li>
             </ul>
     
             <div class="footer">
@@ -152,6 +162,11 @@
                                     Consultar Reserva
                                 </a>
                             </li>
+                            {% comment %} <li class="nav-item">
+                                <a class="nav-link active" href="{% url 'procesar_pago' %}">
+                                    PRUEBA DE PAGO 3Ds
+                                </a>
+                            </li> {% endcomment %}
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Perfil

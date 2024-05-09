@@ -13,6 +13,7 @@
                     <a href="{% url "index" %}" class="nav-item nav-link {% if request.path == '/' %}active{% endif %}">Inicio</a>
                     <a href="{% url 'nosotros' %}" class="nav-item nav-link {% if request.path == '/nosotros/' %}active{% endif %}">Nosotros</a>
                     <a href="{% url 'servicios' %}" class="nav-item nav-link {% if request.path == '/servicios/' %}active{% endif %}">Servicios</a>
+                    <a href="{% url 'servicio_inter' %}" class="nav-item nav-link {% if request.path == '/internet/' %}active{% endif %}">VolcanoSM Internet</a>
                     <a href="{% url 'tours' %}" class="nav-item nav-link {% if request.path == '/tours/' %}active{% endif %}">Tours</a>
                     <a href="{% url 'contacto' %}" class="nav-item nav-link {% if request.path == '/contacto/' %}active{% endif %}">Contactanos</a>
                     

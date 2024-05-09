@@ -1,13 +1,10 @@
-from datetime import datetime, timedelta
 from django.utils import timezone
 from django.conf import settings
 from django.db import models
 from decimal import Decimal
 from django.core.validators import MinValueValidator
-from django.core.mail import EmailMultiAlternatives
 import qrcode
 from io import BytesIO
-from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
@@ -16,16 +13,11 @@ import os
 from ckeditor.fields import RichTextField
 from azure.storage.blob import ContentSettings
 from azure.communication.email import EmailClient
-
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
-from Transacciones.wompi_connect import authenticate_wompi
-from Transacciones.wompi_consulta import make_wompi_get_request
-#from Transacciones.models import EnlacePago
-# from Transacciones.models import EnlacePago
-import schedule
-import time
+import random
+from datetime import datetime
 
 
 #modelos para tours
@@ -47,7 +39,6 @@ class Tour(models.Model):
     imagen = models.ImageField(upload_to='tours')  
     url_azure = models.URLField(max_length=400, blank=True, null=True)
     tipo_tour = models.ForeignKey(TipoTour, on_delete=models.SET_NULL, null=True, blank=True)
-    
     
     # Nuevo campo para el rango de fechas disponibles
     fecha_inicio = models.DateTimeField(default=timezone.now)
@@ -84,10 +75,8 @@ def get_upload_path(instance, filename):
     # Obtiene el nombre del modelo y el ID de la instancia
     model_name = instance.__class__.__name__
     model_id = instance.id
-
     # Construye la ruta de la carpeta con el nombre del modelo y el ID
     folder_path = f"{model_name}/{model_id}/"
-
     # Combina la ruta de la carpeta con el nombre del archivo
     return os.path.join(folder_path, filename)
 
@@ -119,7 +108,6 @@ class ImagenTour(models.Model):
             if imagen:
                 # Generar un nombre único para la imagen en Azure
                 blob_name = f"{self.id}_{field_name}_{os.path.basename(imagen.name)}"
-
                 # Verificar si el blob ya existe antes de subirlo
                 blob_client = container_client.get_blob_client(blob_name)
                 if not blob_client.exists():
@@ -129,7 +117,6 @@ class ImagenTour(models.Model):
                 else:
                     # Si el blob ya existe, obtener la URL existente
                     setattr(self, url_field_name, blob_client.url)
-
         # Guardar la instancia del modelo una vez que se han procesado todas las imágenes
         super().save(*args, **kwargs)
 
@@ -167,9 +154,7 @@ class Reserva(models.Model):
         ('CANCELADO', 'Reserva Cancelada'),
         ('Otro', 'Otro'),
         )
-    estado_reserva = models.CharField(max_length=50, choices=ESTADOS_RESERVA, default='RESERVADO', null=True)
-    #campos extras
-    #lista de tipos de documentos
+    estado_reserva = models.CharField(max_length=50, choices=ESTADOS_RESERVA, default='RESERVADO')
     DOCUMENTOS_VALIDOS = (
         (' ', ' '),
         ('DUI', 'Documento Unico de Identidad'),
@@ -194,7 +179,6 @@ class Reserva(models.Model):
 
     def save(self, *args, **kwargs):
         # Calcular el total a pagar antes de guardar la reserva
-        
         if self.tour.iva == True:
             total_sin_iva = self.cantidad_adultos * self.precio_adulto
             iva_calculado = total_sin_iva * Decimal('0.13')  # Calcular el valor del IVA
@@ -203,64 +187,44 @@ class Reserva(models.Model):
         else:
             total_sin_iva = self.cantidad_adultos * self.precio_adulto
             self.total_pagar = total_sin_iva
-        
         # Generar código de reserva único antes de guardar
         if not self.codigo_reserva:
             self.codigo_reserva = self.generar_codigo_reserva()
             self.enviar_codigo_por_correo()  # Envía el código por correo al crear la reserva
-        
         super().save(*args, **kwargs)
 
-
     def generar_codigo_reserva(self):
-        import random
-        from datetime import datetime
-
         # Obtén la fecha actual en formato YYYYMMDD
         fecha_actual = datetime.now().strftime("%Y%m")
-
         # Genera un número correlativo desde 001
         correlativo = str(random.randint(1, 9999)).zfill(4)
-
-        # # Si fecha_reserva es una cadena, conviértela a un objeto datetime
-        # if isinstance(self.fecha_reserva, str):
-        #     self.fecha_reserva = datetime.strptime(self.fecha_reserva, "%m")
-
         # Combina los elementos para formar el código de reserva
         codigo = f"re-{fecha_actual}f{self.dui}{correlativo}"
-
         return codigo
     
     def guardar_qr_code_image(self, qr_io):
         # Conexión al servicio Blob de Azure
         blob_service_client = BlobServiceClient.from_connection_string(settings.AZURE_CONNECTION_STRING)
         container_client = blob_service_client.get_container_client(settings.AZURE_CONTAINER_NAME)
-
         # Nombre del archivo en Azure
         image_name = f"qrcode_{self.codigo_reserva}.png"
-
         # Guarda la imagen en Azure Blob Storage
         blob_client = container_client.get_blob_client(image_name)
         if not blob_client.exists():
             blob_client.upload_blob(qr_io.getvalue(), content_settings=ContentSettings(content_type='image/png'))
-
         # Guarda la URL de la imagen en el modelo
         self.qr_code_url = blob_client.url
         self.save()
-
         # Retorna la URL de la imagen
         return self.qr_code_url
     
     def generar_detalle_reserva_en_pdf(self):
         buffer = BytesIO()
-
         # Crear un objeto PDF
         doc = SimpleDocTemplate(buffer, pagesize=letter)
         styles = getSampleStyleSheet()
-
         # Contenido del PDF
         contenido = []
-
         # Agregar información de la reserva al PDF
         contenido.append(Paragraph(f'Tour: {self.tour.titulo}', styles['Normal']))
         contenido.append(Paragraph(f'Código de Reserva: {self.codigo_reserva}', styles['Normal']))
@@ -275,41 +239,31 @@ class Reserva(models.Model):
         contenido.append(Paragraph(f'Cantidad de Niños: {self.cantidad_ninos}', styles['Normal']))
         contenido.append(Paragraph(f'Fecha de Reserva: {self.fecha_reserva}', styles['Normal']))
         contenido.append(Paragraph(f'Total a Pagar: {self.total_pagar}', styles['Normal']))
-
         # Construir el PDF
         doc.build(contenido)
-        
         # Obtener los bytes del PDF
         pdf_bytes = buffer.getvalue()
         buffer.close()
-
         # Conexión al servicio Blob de Azure
         blob_service_client = BlobServiceClient.from_connection_string(settings.AZURE_CONNECTION_STRING)
-
         # Obtén el contenedor donde se almacenarán los archivos PDF
         container_client = blob_service_client.get_container_client(settings.AZURE_CONTAINER_NAME)
-
         # Nombre del archivo PDF en Azure
         pdf_name = f"detalle_reserva_{self.codigo_reserva}.pdf"
-
         # Guarda el PDF en Azure Blob Storage
         blob_client = container_client.get_blob_client(pdf_name)
         if not blob_client.exists():
             blob_client.upload_blob(pdf_bytes, content_settings=ContentSettings(content_type='application/pdf'))
-
         # Guarda la URL del PDF en el modelo
         self.detalle_reserva_url = blob_client.url
         self.save()
-
         return self.detalle_reserva_url
-
-
+    
     def enviar_codigo_por_correo(self):
         try:
             # Configuración de la conexión al servicio de correo electrónico de Azure
             connection_string = "endpoint=https://emailvolcanosm.unitedstates.communication.azure.com/;accesskey=SkW7u9s6sgjkska6ncJ8iOQutZdU1f+iIH9rfMto3j+NFLi8bpmcM4PF+4oJ3A+gQkAOXVFvhxaNqa8UTdtcUg=="
             client = EmailClient.from_connection_string(connection_string)
-
             # Genera el código QR
             qr = qrcode.QRCode(
                 version=1,
@@ -320,18 +274,14 @@ class Reserva(models.Model):
             qr.add_data(self.codigo_reserva)
             qr.make(fit=True)
             img = qr.make_image(fill_color="black", back_color="white")
-
             # Guarda el código QR en un BytesIO
             qr_io = BytesIO()
             img.save(qr_io)
             qr_io.seek(0)
-
             # Genera el detalle de la reserva en PDF
             pdf_bytes = self.generar_detalle_reserva_en_pdf()
-
             # Obtener la URL del código QR
             qr_url = self.guardar_qr_code_image(qr_io)
-
             # Renderizar el template del correo electrónico con la información de la reserva
             correo_html = render_to_string('email/correo_reserva.html', {
                 'codigo_reserva': self.codigo_reserva,
@@ -348,10 +298,8 @@ class Reserva(models.Model):
                 'total_pagar': self.total_pagar,
                 'qr_url': qr_url,
             })
-
             # Eliminar etiquetas HTML del cuerpo del correo
             correo_texto_plano = strip_tags(correo_html)
-
             # Configuración del mensaje
             message = {
                 "senderAddress": settings.EMAIL_HOST_USER,
@@ -375,6 +323,21 @@ class Reserva(models.Model):
             # Envía el correo electrónico utilizando el servicio de correo electrónico de Azure
             poller = client.begin_send(message)
             result = poller.result()
-
         except Exception as ex:
             print(ex)
+
+class EnlacePagoTour(models.Model):
+    reserva = models.ForeignKey(Reserva, on_delete=models.CASCADE, related_name='enlace_pago_set')
+    comercio_id = models.CharField(max_length=500)
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    nombre_producto = models.CharField(max_length=500)
+    url_qr_code = models.URLField()
+    url_enlace = models.URLField()
+    esta_productivo = models.BooleanField()
+    descripcionProducto = RichTextField()
+    cantidad = models.CharField(max_length=5)
+    imagenProducto = models.URLField(max_length=250, null=True)
+    idEnlace = models.CharField(max_length=150)
+
+    def __str__(self):
+        return f"EnlacePago {self.id}: {self.nombre_producto}"

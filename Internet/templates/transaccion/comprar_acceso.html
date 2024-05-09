@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Destination Start -->
+<div class="container-fluid py-5">
+    <div class="container pt-5 pb-3">
+        <div class="row justify-content-center">
+            <!-- Formulario a la izquierda -->
+            <div class="col-lg-6 col-md-6 mb-4">
+                <form method="post" class="shadow p-3 mb-5 bg-white rounded">
+                    {% csrf_token %}
+                    <h2 class="mb-3">Información del cliente</h2>
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre:</label>
+                        <input type="text" id="nombre" name="nombre" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="apellido" class="form-label">Apellido:</label>
+                        <input type="text" id="apellido" name="apellido" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="direccion" class="form-label">Dirección:</label>
+                        <textarea id="direccion" name="direccion" class="form-control" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="dui" class="form-label">DUI:</label>
+                        <input type="text" id="dui" name="dui" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email:</label>
+                        <input type="email" id="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="telefono" class="form-label">Teléfono:</label>
+                        <input type="tel" id="telefono" name="telefono" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Continuar al Pago</button>
+                </form>
+            </div>
+
+            <!-- Información del tipo de acceso a la derecha -->
+            <div class="col-lg-6 col-md-6 mb-4">
+                {% if tipo_acceso %}
+
+                <div class="card text-center" style="width: 28rem;">
+                    <img class="card-img-top" src="{{ tipo_acceso.url_azure }}" alt="{{ tipo_acceso.nombre }}" style="width: 250px">
+                    <div class="card-body">
+                      <h5 class="card-title">{{ tipo_acceso.nombre }}</h5>
+                      <p class="card-text">{{ tipo_acceso.descripcion }}</p>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item">Precio: $ {{ tipo_acceso.precio }} </li>
+                      <li class="list-group-item">Velocidad: {{ tipo_acceso.velocidad_mb }} MB</li>
+                      <li class="list-group-item">Tiempo: {{ tipo_acceso.tiempo_conexion }} Horas</li>
+                    </ul>
+                  </div>
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Destination End -->
+
+{% endblock content %}

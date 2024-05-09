@@ -1,0 +1,27 @@
+<ul class="list-unstyled components mb-5">
+    <!-- Punto de venta -->
+    <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="collapse" href="#collapseButtonInternet" role="button" aria-expanded="false" aria-controls="collapseButtonInternet">
+            Administracion
+        </a>
+        <div class="collapse" id="collapseButtonInternet">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><a href="{% url "utilidades:upload_data" %}" class="text-dark">Subir Usuarios</a></li>
+                <li class="list-group-item"><a href="#" class="text-dark">Sistema de red MIKROTIK</a></li>
+            </ul>
+        </div>
+    </li>
+    
+    <!-- Promociones y descuentos -->
+    <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="collapse" href="#collapseReportesInternet" role="button" aria-expanded="false" aria-controls="collapseReportesInternet">
+            Reportes
+        </a>
+        <div class="collapse" id="collapseReportesInternet">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><a href="#" class="text-dark">Reporte de Ventas</a></li>
+                <li class="list-group-item"><a href="#" class="text-dark">Reporte de Usuarios</a></li>
+            </ul>
+        </div>
+    </li>
+</ul>

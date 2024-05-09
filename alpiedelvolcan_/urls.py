@@ -6,7 +6,7 @@ from django.urls import include, path
 from . import views
 from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from Tours.utils import actualizar_estado_reserva, start_background_thread
+#from Tours.utils import actualizar_estado_reserva, start_background_thread
 
 urlpatterns = [
     #url para la pagina principal
@@ -37,13 +37,16 @@ urlpatterns = [
     # Otras URLs de la aplicación
     path('utilidades/', include('Utilidades.urls')),
     
+        #url para Internet
+    path('internet/', include('Internet.urls')),
+    
     path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
     
     
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-start_background_thread()
+# start_background_thread()
 
 # Configuración para servir archivos estáticos en entorno de desarrollo
 urlpatterns += staticfiles_urlpatterns()

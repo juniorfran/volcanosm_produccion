@@ -42,13 +42,19 @@
       </div>
 
       <!-- Parte derecha con el código QR y botón de pago -->
-      <div class="col-md-6 mb-4 mt-4">
-        <div class="text-center">
-          <img src="{{ enlace_pago.url_qr_code }}" alt="Código QR" class="img-fluid img-thumbnail" style="max-width: 350px;     margin-top: 30%;">
-          <a href="{{ enlace_pago.url_enlace }}" class="btn btn-primary mt-3" target="_blank">Proceder con el pago</a>
-        </div>
+    <div class="col-md-6 mb-4 mt-4">
+      <div class="text-center">
+        <img src="#" alt="Código QR" class="img-fluid img-thumbnail" style="max-width: 350px; margin-top: 30%;">
+        <p>Actualmente estamos realizando mantenimiento en nuestros métodos de pago para los tours. Por favor, realiza tus pagos en efectivo en nuestra caseta o mediante transferencia bancaria. Para más información:</p>
+        <ul class="list-unstyled">
+          <li><strong>Teléfono:</strong> <a href="https://api.whatsapp.com/send?phone=77296225" target="_blank">+503 77296225</a></li>
+          <li><strong>Correo Electrónico:</strong> <a href="mailto:volcanosanmiguel.sv@hotmail.com">volcanosanmiguel.sv@hotmail.com</a></li>
+        </ul>
+        <a href="{% url 'contacto' %}" class="btn btn-primary mt-3" target="_blank">Contactanos</a>
       </div>
-      
+    </div>
+
+          
     </div>
     
   </div>
@@ -58,7 +64,10 @@
   <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: white;">
     <h1 class="text-red">Esperando el pago...</h1>
     <h2 id="countdown" class="text-yellow">Tiempo restante: 30 segundos</h2>
-    <a href="#" class="btn btn-primary mt-3" id="verificarPagoButton">Verificar Pago</a>
+    <form id="actualizarForm">
+      {% csrf_token %}
+      <button type="button" class="btn btn-primary mt-3" id="actualizarBtn">Verificar Pago</button>
+    </form>
       <!-- Botón de verificar pago -->
     {% comment %} <button id="verificarPagoButton" style="display: none;">Verificar Pago</button> {% endcomment %}
   
@@ -70,104 +79,6 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
 
-<script>
-  // Función para mostrar el div de superposición cuando el estado de la reserva es "PENDIENTE"
-  function mostrarEsperandoPago() {
-    document.getElementById("overlay").style.display = "block";
-  }
-  
-  // Función para ocultar el div de superposición cuando el estado de la reserva cambia a "PAGADO"
-  function ocultarEsperandoPago() {
-    document.getElementById("overlay").style.display = "none";
-  }
-  
-  // Función para mostrar el botón de verificar pago
-  function mostrarBotonVerificarPago() {
-    document.getElementById("verificarPagoButton").style.display = "block";
-  }
-  
-  // Función para ocultar el botón de verificar pago
-  function ocultarBotonVerificarPago() {
-    document.getElementById("verificarPagoButton").style.display = "none";
-  }
-  
-  // Verificar el estado de la reserva y llamar a las funciones correspondientes
-  {% comment %} {% if reserva.estado_reserva != 'PAGADO' %}
-  mostrarEsperandoPago();
-  {% elif reserva.estado_reserva == 'PAGADO' %}
-  ocultarEsperandoPago();
-  {% endif %} {% endcomment %}
-  
-  // Contador de tiempo de 30 segundos
-  {% if reserva.estado_reserva != 'PAGADO' %}
-  var tiempoRestante = 30; // Inicializar el contador
-  
-  // Verificar si existe una entrada en sessionStorage para el contador de recargas
-  var recargas = sessionStorage.getItem('recargas');
-  // Si no hay entrada en sessionStorage, inicializar el contador en 0
-  if (recargas === null) {
-    recargas = 0;
-  }
-  // Incrementar el contador de recargas
-  recargas++;
-  // Almacenar el nuevo valor del contador en sessionStorage
-  sessionStorage.setItem('recargas', recargas);
-  
-  // Mostrar u ocultar el botón de verificar pago según el número de recargas
-  if (tiempoRestante < 1) {
-    mostrarBotonVerificarPago();
-  } else {
-    ocultarBotonVerificarPago();
-  }
-  
-  // Iniciar el contador de tiempo
-  var intervalo = setInterval(function() {
-    tiempoRestante--;
-    document.getElementById("countdown").textContent = "Tiempo restante: " + tiempoRestante + " segundos";
-    if (tiempoRestante == 0) {
-      clearInterval(intervalo);
-      document.getElementById("countdown").textContent = "Se agotó el tiempo de espera, verifica de forma manual tu pago";
-      mostrarBotonVerificarPago();
-    }
-  }, 1000);
-  {% endif %}
-
-</script>
-
-
-<script>
-
-{% if reserva.estado_reserva != 'PAGADO' %}
-  var ventanaEnlacePagoAbierta = false;
-  // Función para abrir el enlace de pago en una nueva pestaña
-  function abrirEnlacePago(enlacePago) {
-      // Si la ventana emergente ya está abierta o la reserva tiene un estado de "PAGADO", no abra la ventana emergente
-      if (ventanaEnlacePagoAbierta || "{{ reserva.estado_reserva }}" == "PAGADO") {
-          return;
-      }
-      // Abre el enlace en una nueva pestaña
-      var ventanaEnlacePago = window.open(enlacePago, '_blank');
-      ventanaEnlacePagoAbierta = true;
-
-      // Cierra la ventana emergente después de 30 segundos
-      setTimeout(function() {
-          ventanaEnlacePago.close();
-          ventanaEnlacePagoAbierta = false;
-      }, 30000);
-  }
-
-  // Llama a la función para abrir el enlace de pago cuando se cargue la página
-  window.onload = function() {
-      var enlacePago = "{{ enlace_pago.url_enlace }}"; // Aquí deberías pasar la URL del enlace de pago desde tu vista Django
-      abrirEnlacePago(enlacePago);
-  };
-{% endif %}
-
-// Función para recargar la página cuando se haga clic en el botón
-document.getElementById("verificarPagoButton").addEventListener("click", function() {
-  location.reload(); // Recargar la página
-});
-</script>
 
 
 {% endblock %}

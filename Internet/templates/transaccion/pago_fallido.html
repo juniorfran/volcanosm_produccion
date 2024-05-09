@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="alert alert-warning" role="alert">
+            <strong>No tenemos accesos disponibles por el momento para solicitar servicio de internet.</strong> Puedes solicitarlo en la caseta de VOLCANO SM o por medio de nuestros métodos de contacto.
+            <br>
+            <br>
+            <small>Si has sido redirigido desde el portal cautivo al conectarte a la red wifi, recarga la página nuevamente en 10 segundos para adquirir tu servicio de internet.</small>
+            <br>
+            <br>
+            Somos VOLCANO SM dándote la mejor experiencia al aire libre...
+            <br>
+            <ul class="list-unstyled">
+                <li><strong>Teléfono:</strong> <a href="https://api.whatsapp.com/send?phone=77296225" target="_blank">+503 77296225</a></li>
+                <li><strong>Correo Electrónico:</strong> <a href="mailto:volcanosanmiguel.sv@hotmail.com">volcanosanmiguel.sv@hotmail.com</a></li>
+            </ul>
+            <a href="{% url 'contacto' %}" class="btn btn-primary mt-3">Contáctanos</a>
+        </div>
+    </div>
+{% endblock content %}

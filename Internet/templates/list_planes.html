@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Destination Start -->
+<div class="container-fluid py-5">
+    <div class="container pt-5 pb-3">
+        <div class="text-center mb-3 pb-3">
+            <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">INTERNET Volcano SM</h6>
+            <h1>Explora nuestros servicios de internet</h1>
+        </div>
+        <div class="row justify-content-center">
+            {% for tipo_acceso in tipos_accesos %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                {% if tipo_acceso.disponible %}
+                <div class="destination-item position-relative overflow-hidden mb-2">
+                    <img class="img-fluid" src="{{ tipo_acceso.url_azure }}" alt="{{ tipo_acceso.nombre }}">
+                    <a class="destination-overlay text-white text-decoration-none" href="{% url 'comprar_acceso' tipo_acceso.id %}">
+                        <h5 class="text-white">{{ tipo_acceso.nombre }}</h5>
+                        <p class="text-white">Precio: ${{ tipo_acceso.precio }}</p>
+                        <p class="text-white">Velocidad : {{ tipo_acceso.velocidad_mb }} MB</p>
+                        <p class="text-white">Tiempo : {{ tipo_acceso.tiempo_conexion }} Horas</p>
+                    </a>
+                </div>
+                {% else %}
+                <div class="destination-item position-relative overflow-hidden mb-2">
+                    <img class="img-fluid" src="{{ tipo_acceso.url_azure }}" alt="{{ tipo_acceso.nombre }}">
+                    <div class="destination-overlay text-white text-decoration-none">
+                            <h5 class="text-white">{{ tipo_acceso.nombre }}</h5>
+                            <p class="text-white">Precio: ${{ tipo_acceso.precio }}</p>
+                            <p class="text-white">Velocidad : {{ tipo_acceso.velocidad_mb }} MB</p>
+                            <p class="text-white">Tiempo : {{ tipo_acceso.tiempo_conexion }} Horas</p>
+                        <div class="alert alert-danger" role="alert" style="background-color: rgba(255, 235, 59, 0.5);">
+                            <h4 class="alert-heading text-white">¡No disponible!</h4>
+                            <p class="text-white">Por el momento este servicio no se encuentra disponible.</p>
+                            <hr>
+                            <p class="mb-0 text-white"><a class="text-white" href="{% url 'contacto'%}">Solicitar Ayuda</a></p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<!-- Destination End -->
+
+
+{% endblock content %}

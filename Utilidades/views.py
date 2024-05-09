@@ -1,13 +1,18 @@
 from datetime import datetime, timedelta
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from Transacciones.wompi_connect import authenticate_wompi
 from Transacciones.wompi_consulta import make_wompi_get_request
 from Transacciones.wompi_envio import create_payment_link
 from Tours.models import ImagenTour, Resena, Tour, Reserva
-from Transacciones.models import EnlacePago
+from Tours.models import EnlacePagoTour
 from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+
+from django.contrib import messages
+from Internet.models import Accesos, Tipos
+import csv
+import pandas as pd
 
 Client_id = settings.CLIENT_ID
 Client_secret = settings.CLIENT_SECRET
@@ -80,4 +85,35 @@ def consultar_detalle (request):
             return render(request, 'detalle.html', {'error_message': 'Enlace de pago no encontrada.'})
     else:
         return render(request, 'detalle.html', {})
-    
+
+def upload_data(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        file = request.FILES['file']
+        if file.name.endswith('.csv'):
+            data = csv.DictReader(file.read().decode('utf-8').splitlines())
+        elif file.name.endswith('.xlsx'):
+            data = pd.read_excel(file)
+            data = data.to_dict('records')
+        else:
+            messages.error(request, 'Formato de archivo no válido. Solo se admiten archivos CSV o Excel.')
+            return redirect('upload_data')
+        
+        for row in data:
+            tipo_acceso_id = row.get('tipo_acceso_id')  # Obtener el ID del tipo de acceso
+            tipo_acceso_instance = Tipos.objects.get(id=tipo_acceso_id)  # Obtener la instancia del tipo de acceso
+            
+            acceso = Accesos(
+                usuario=row.get('usuario'),
+                password=row.get('password'),
+                descripcion=row.get('descripcion'),
+                cant_usuarios=row.get('cant_usuarios'),
+                acceso_tipo=tipo_acceso_instance,  # Asignar la instancia del tipo de acceso
+                fecha_expiracion=row.get('fecha_expiracion'),
+                estado=row.get('estado')
+            )
+            acceso.save()
+        
+        messages.success(request, 'Los datos se han cargado correctamente.')
+        return redirect('utilidades:upload_data')
+    return render(request, 'internet/upload_data.html')
+

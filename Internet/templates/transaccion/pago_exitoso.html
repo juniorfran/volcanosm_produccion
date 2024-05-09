@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Hola {{ cliente.nombre }} {{ cliente.apellido }}!</strong> ¡Realiza el pago y luego confirma!.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div class="card-header">
+        Confirmacion de Pago.
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">Realiza el pago y confirma.</h5>
+        <p class="card-text">Se han generado tus credenciales, realiza el pago dando clic en 
+            <a data-bs-toggle="modal" data-bs-target="#enlacePagoModal"> PAGAR AHORA </a>
+            Realiza el pago con tarjeta de credito o devito y obtendras las credenciales por correo 
+            electronico.
+        </p>
+
+        <div class="card" style="width: 22rem;">
+            <div class="card-header">
+                Detalles del Plan
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Tipo de Plan: {{ tipo_acceso.nombre }}</li>
+                <li class="list-group-item">Precio: ${{ tipo_acceso.precio }}</li>
+                <li class="list-group-item">Descripción: {{ tipo_acceso.descripcion }}</li>
+                <li class="list-group-item">Tipo: {{ tipo_acceso.tiempo_conexion }} Hrs</li>
+                <li class="list-group-item">Velocidad: {{ tipo_acceso.velocidad_mb }} MB</li>
+                <li class="list-group-item">idEnlace: {{ enlace_pago.idEnlace }} </li>
+            </ul>
+        </div>
+
+        <!-- Botón para abrir el modal -->
+        <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#enlacePagoModal">PAGAR AHORA</button>
+        <!-- Agrega un campo oculto para almacenar el IDEnlace del enlace de pago -->
+        <button class="btn btn-primary mt-3" onclick="verificarTransaccionExitosa('{{ enlace_pago.idEnlace }}')">Finalizar Compra</button>
+    </div>
+</div>
+
+<!-- Modal para mostrar el contenido del enlace de pago -->
+<div class="modal fade" id="enlacePagoModal" tabindex="-1" aria-labelledby="enlacePagoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="enlacePagoModalLabel">Pagar Ahora</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Aquí se cargará el contenido del enlace de pago -->
+                <iframe src="{{ enlace_pago.url_enlace }}" style="width: 100%; height: 600px; border: none;"></iframe>
+            </div>
+            <div class="modal-footer">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para mostrar la información del acceso -->
+<div class="modal fade" id="accesoModal" tabindex="-1" aria-labelledby="accesoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="accesoModalLabel">Transacción Exitosa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4>Información de Acceso</h4>
+                <p>Estimado/a <span id="modalClienteNombre"></span> <span id="modalClienteApellido"> {{ cliente.nombre }} {{ cliente.apellido }} </span>,</p>
+                <p>A continuación, se presenta la información de acceso:</p>
+                <ul>
+                    <li><strong>Usuario:</strong> <span id="modalAccesoUsuario">{{ acceso_transaccion.usuario }}</span></li>
+                    <li><strong>Password:</strong> <span id="modalAccesoPassword">{{ acceso_transaccion.password }}</span></li>
+                    <li><strong>Descripción:</strong> <span id="modalAccesoDescripcion">{{ acceso_transaccion.descripcion }}</span></li>
+                    <li><strong>Cantidad de usuarios:</strong> <span id="modalAccesoCantUsuarios">{{ acceso_transaccion.cant_usuarios }}</span></li>
+                    <li><strong>Tipo de acceso:</strong> <span id="modalAccesoTipo">{{ acceso_transaccion.acceso_tipo.nombre }}</span></li>
+                    {% comment %} <li><strong>Fecha de creación:</strong> <span id="modalAccesoFechaCreacion"></span></li> {% endcomment %}
+                    <li><strong>Fecha de expiración:</strong> <span id="modalAccesoFechaExpiracion">{{ acceso_transaccion.fecha_expiracion }}</span></li>
+                </ul>
+                <p>¡Gracias por tu compra!</p>
+                <p>¡Esta informacion tambien la recibiras por correo electronico a: {{ cliente.email }}!</p>
+            </div>
+            <div class="modal-footer">
+                <!-- Botón para cerrar el modal -->
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Scripts de Bootstrap y jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function verificarTransaccionExitosa(idEnlace) {
+        // Realiza la solicitud AJAX para verificar la transacción
+        $.ajax({
+            url: "{% url 'verificar_transaccion_exitosa' %}",
+            type: "POST",
+            data: { 
+                enlace_pago_id: idEnlace,
+                csrfmiddlewaretoken: '{{ csrf_token }}'  // Incluye el token CSRF directamente en la solicitud AJAX
+            },
+            dataType: "json",
+            success: function(response) {
+                if (response.success) {
+                    // Mostrar el modal con la información del acceso
+                    mostrarInformacionAcceso(response);
+                } else {
+                    if (response.message) {
+                        alert(response.message);
+                    } else {
+                        alert("Aún no has pagado o no se ha registrado el pago.");
+                    }
+                }
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                var errorMessage = "Error al verificar la transacción.";
+                if (xhr.responseText) {
+                    var jsonResponse = JSON.parse(xhr.responseText);
+                    if (jsonResponse && jsonResponse.message) {
+                        errorMessage += " Detalles: " + jsonResponse.message;
+                    }
+                }
+                alert(errorMessage);
+            }
+        });
+    }
+
+    function mostrarInformacionAcceso(response) {
+        // Mostrar modal con la información del acceso
+        $('#accesoModal').modal('show');
+    
+        // Mostrar la información del acceso en el modal
+        var cliente = response.cliente;
+        var acceso = response.acceso;
+    }
+    
+</script>
+
+{% comment %} $('#modalClienteNombre').text(cliente.nombre);
+$('#modalClienteApellido').text(cliente.apellido);
+$('#modalAccesoUsuario').text(acceso.usuario);
+$('#modalAccesoPassword').text(acceso.password);
+$('#modalAccesoDescripcion').text(acceso.descripcion);
+$('#modalAccesoCantUsuarios').text(acceso.cant_usuarios);
+$('#modalAccesoTipo').text(acceso.acceso_tipo);
+$('#modalAccesoFechaCreacion').text(acceso.fecha_creacion);
+
+// Formatear la fecha de expiración
+var fechaExpiracion = new Date(acceso.fecha_expiracion);
+$('#modalAccesoFechaExpiracion').text(fechaExpiracion.toLocaleDateString()); {% endcomment %}
+
+{% endblock content %}
