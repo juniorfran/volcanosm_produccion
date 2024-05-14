@@ -67,7 +67,7 @@ def consultar_detalle (request):
                 reserva = reservas.first()
 
                 # Buscar enlace relacionado a la reserva
-                enlace_pago = EnlacePago.objects.filter(reserva=reserva).first()
+                enlace_pago = EnlacePagoTour.objects.filter(reserva=reserva).first()
 
                 # Si se encuentra un enlace, consultar la información
                 if enlace_pago:
