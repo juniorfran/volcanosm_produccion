@@ -117,3 +117,8 @@ def upload_data(request):
         return redirect('utilidades:upload_data')
     return render(request, 'internet/upload_data.html')
 
+
+def view_mikrotik_manager(request):
+    
+    return render(request, 'internet/mikrotik_manager.html')
+
