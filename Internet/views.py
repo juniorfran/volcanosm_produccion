@@ -183,7 +183,7 @@ def comprar_acceso(request, tipo_acceso_id):
                 transaccion_compra_id = transaccion_compra_instance.pk
                 
                 # Desactivar el acceso disponible para que no esté disponible para otras compras
-                acceso_disponible.estado = False
+                acceso_disponible.estado = True
                 acceso_disponible.save()
 
 
