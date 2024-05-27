@@ -50,7 +50,7 @@
                       <p class="card-text">{{ tipo_acceso.descripcion }}</p>
                     </div>
                     <ul class="list-group list-group-flush">
-                      <li class="list-group-item">Precio: $ {{ tipo_acceso.precio }} </li>
+                      <li class="list-group-item">Precio: $ {{ tipo_acceso.precio|floatformat:2  }} </li>
                       <li class="list-group-item">Velocidad: {{ tipo_acceso.velocidad_mb }} MB</li>
                       <li class="list-group-item">Tiempo: {{ tipo_acceso.tiempo_conexion }} Horas</li>
                     </ul>

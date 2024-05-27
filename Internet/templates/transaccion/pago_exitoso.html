@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 
 <div class="card">
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
         <strong>Hola {{ cliente.nombre }} {{ cliente.apellido }}!</strong> ¡Realiza el pago y luego confirma!.
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
     </div>
     <div class="card-header">
         Confirmacion de Pago.
@@ -24,7 +25,7 @@
             </div>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">Tipo de Plan: {{ tipo_acceso.nombre }}</li>
-                <li class="list-group-item">Precio: ${{ tipo_acceso.precio }}</li>
+                <li class="list-group-item">Precio: ${{ tipo_acceso.precio|floatformat:2 }}</li>
                 <li class="list-group-item">Descripción: {{ tipo_acceso.descripcion }}</li>
                 <li class="list-group-item">Tipo: {{ tipo_acceso.tiempo_conexion }} Hrs</li>
                 <li class="list-group-item">Velocidad: {{ tipo_acceso.velocidad_mb }} MB</li>
@@ -35,7 +36,7 @@
         <!-- Botón para abrir el modal -->
         <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#enlacePagoModal">PAGAR AHORA</button>
         <!-- Agrega un campo oculto para almacenar el IDEnlace del enlace de pago -->
-        <button class="btn btn-primary mt-3" onclick="verificarTransaccionExitosa('{{ enlace_pago.idEnlace }}')">Finalizar Compra</button>
+        <button class="btn btn-primary mt-3" onclick="verificarTransaccionExitosa('{{ enlace_pago.idEnlace }}')">Confirmar Pago</button>
     </div>
 </div>
 
@@ -45,7 +46,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="enlacePagoModalLabel">Pagar Ahora</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
             </div>
             <div class="modal-body">
                 <!-- Aquí se cargará el contenido del enlace de pago -->
@@ -64,7 +65,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="accesoModalLabel">Transacción Exitosa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
             </div>
             <div class="modal-body">
                 <h4>Información de Acceso</h4>
@@ -92,10 +93,17 @@
 
 
 <!-- Scripts de Bootstrap y jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static "js/jquery-3.6.0.min.js" %}"></script>
+<script src="{% static "js/bootstrap5.3.bundle.min.js" %}"></script>
 
 <script>
+    $(document).ready(function() {
+        // Mostrar el modal al cargar la página
+        $('#enlacePagoModal').modal('show');
+    });
+
+    
+    
     function verificarTransaccionExitosa(idEnlace) {
         // Realiza la solicitud AJAX para verificar la transacción
         $.ajax({
