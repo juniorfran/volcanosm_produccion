@@ -93,6 +93,13 @@ def get_wompi_headers(access_token):
 
 
 def servicio_inter_index(request):
+    
+    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
+    data_contact = Contacts.objects.latest()
+    urls_info = Urls_info.objects.all()
+    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    urls_interes = Urls_interes.objects.all()
+    
     #obtener fecha actual
     fecha_actual = timezone.now()
     
@@ -107,7 +114,12 @@ def servicio_inter_index(request):
             
     context = {
         'tipos_accesos':tipos_accesos,
-    }
+        'barra_principal': barra_principal,
+        'data_contact': data_contact,
+        'urls_info': urls_info,
+        'ultima_descripcion': ultima_descripcion,
+        'urls_interes': urls_interes,
+}
     
     return render(request, 'list_planes.html', context)
 
@@ -177,14 +189,15 @@ def comprar_acceso(request, tipo_acceso_id):
                     cliente=cliente,
                     acceso=acceso_disponible,
                 )
+                # Desactivar el acceso disponible para que no esté disponible para otras compras
+                acceso_disponible.estado = False
+                acceso_disponible.save()
                 
                 #obetner la instancia de transaccion_compra despues de guardarla
                 transaccion_compra_instance = get_object_or_404(TransaccionCompra, pk=transaccion_compra.pk)
                 transaccion_compra_id = transaccion_compra_instance.pk
                 
-                # Desactivar el acceso disponible para que no esté disponible para otras compras
-                acceso_disponible.estado = True
-                acceso_disponible.save()
+                
 
 
                 context = {
