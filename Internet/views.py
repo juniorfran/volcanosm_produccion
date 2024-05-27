@@ -127,11 +127,7 @@ def comprar_acceso(request, tipo_acceso_id):
     enlace_pago_acceso = EnlacePagoAcceso.objects.filter(acceso__acceso_tipo=tipo_acceso).order_by('-fecha_creacion').first()
     
     if acceso_disponible:
-        # Desactivar el acceso disponible para que no esté disponible para otras compras
-        acceso_disponible.estado = False
-        acceso_disponible.save()
-        
-        
+              
         
         if request.method == 'POST':
             nombre = request.POST.get('nombre')
@@ -182,9 +178,13 @@ def comprar_acceso(request, tipo_acceso_id):
                     acceso=acceso_disponible,
                 )
                 
-                #obetner la instranacia de transaccion_compra despues de guardarla
+                #obetner la instancia de transaccion_compra despues de guardarla
                 transaccion_compra_instance = get_object_or_404(TransaccionCompra, pk=transaccion_compra.pk)
                 transaccion_compra_id = transaccion_compra_instance.pk
+                
+                # Desactivar el acceso disponible para que no esté disponible para otras compras
+                acceso_disponible.estado = False
+                acceso_disponible.save()
 
 
                 context = {
