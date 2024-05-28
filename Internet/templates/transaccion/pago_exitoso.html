@@ -14,7 +14,7 @@
     <div class="card-body">
         <h5 class="card-title">Realiza el pago y confirma.</h5>
         <p class="card-text">Se han generado tus credenciales, realiza el pago dando clic en 
-            <a data-bs-toggle="modal" data-bs-target="#enlacePagoModal"> PAGAR AHORA </a>
+            <a href="{{ enlace_pago.url_enlace }}" target="_blank">PAGAR AHORA</a>
             Realiza el pago con tarjeta de credito o devito y obtendras las credenciales de acceso a VOLCANOSM Internet.
         </p>
 
@@ -96,10 +96,19 @@
 <script src="{% static "js/bootstrap5.3.bundle.min.js" %}"></script>
 
 <script>
+
     $(document).ready(function() {
+        // Obtiene el enlace de pago
+        var enlacePago = '{{ enlace_pago.url_enlace }}';
+        
+        // Abre el enlace en una nueva pestaña al cargar la página
+        window.open(enlacePago, '_blank');
+    });
+
+    {% comment %} $(document).ready(function() {
         // Mostrar el modal al cargar la página
         $('#enlacePagoModal').modal('show');
-    });
+    }); {% endcomment %}
 
     
     
