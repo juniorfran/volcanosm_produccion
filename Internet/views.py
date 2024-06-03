@@ -11,7 +11,6 @@ from Transacciones.wompi_connect import authenticate_wompi
 from Transacciones.wompi_consulta import make_wompi_get_request
 from Transacciones.wompi_envio import create_payment_link
 
-
 from azure.communication.email import EmailClient
 from django.conf import settings
 import qrcode
@@ -167,6 +166,7 @@ def comprar_acceso(request, tipo_acceso_id):
                 descripcion_producto,
                 imagen_producto,
                 cantidad
+                
             )
             
             # Obtener el objeto EnlacePagoAcceso relacionado con el acceso
@@ -196,9 +196,6 @@ def comprar_acceso(request, tipo_acceso_id):
                 #obetner la instancia de transaccion_compra despues de guardarla
                 transaccion_compra_instance = get_object_or_404(TransaccionCompra, pk=transaccion_compra.pk)
                 transaccion_compra_id = transaccion_compra_instance.pk
-                
-                
-
 
                 context = {
                     'tipo_acceso': tipo_acceso,
