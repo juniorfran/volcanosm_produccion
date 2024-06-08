@@ -2,7 +2,7 @@ from django.utils import timezone
 import json
 from django.shortcuts import get_object_or_404, redirect, render
 import requests
-from .models import EnlacePagoAcceso, Accesos, Tipos, Clientes, TransaccionCompra
+from .models import EnlacePagoAcceso, Accesos, Tipos, Clientes, TransaccionCompra, Transaccion3DS, Transaccion3DS_Respuesta, TransaccionCompra3DS
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from Configuraciones.models import Barra_Principal, Contacts, Direccionamiento, General_Description, Urls_info, Urls_interes
@@ -10,6 +10,7 @@ from Configuraciones.models import Barra_Principal, Contacts, Direccionamiento, 
 from Transacciones.wompi_connect import authenticate_wompi
 from Transacciones.wompi_consulta import make_wompi_get_request
 from Transacciones.wompi_envio import create_payment_link
+
 
 from azure.communication.email import EmailClient
 from django.conf import settings
@@ -20,6 +21,88 @@ from django.utils.html import strip_tags
 
 Client_id = settings.CLIENT_ID
 Client_secret = settings.CLIENT_SECRET
+
+def crear_transaccion_3ds(acceso_id, numeroTarjeta, cvv, mesVencimiento, anioVencimiento, monto, nombre, apellido, email, ciudad, direccion, telefono, client_id, client_secret, **kwargs):
+    access_token = authenticate_wompi(client_id, client_secret)
+    acceso_instance = get_object_or_404(Accesos, pk=acceso_id)
+    
+    if not access_token:
+        print("Error: No se pudo obtener el token de acceso")
+        return None
+    
+    try:
+        # Construir la solicitud JSON
+        request_data = {
+            "tarjetaCreditoDebido": {
+                "numeroTarjeta": numeroTarjeta,
+                "cvv": cvv,
+                "mesVencimiento": mesVencimiento,
+                "anioVencimiento": anioVencimiento
+            },
+            "monto": monto,
+            "urlRedirect": "https://volcanosm.net/internet",
+            "nombre": nombre,
+            "apellido": apellido,
+            "email": email,
+            "ciudad": ciudad,
+            "direccion": direccion,
+            "idPais": "SV",
+            "idRegion": "SV-SM",
+            "codigoPostal": "2401",
+            "telefono": telefono,
+            **kwargs
+        }
+        # Log request data
+        print("Request Data:", request_data)
+        
+        # Realizar la solicitud POST para la transacción 3DS
+        response = requests.post("https://api.wompi.sv/TransaccionCompra/3Ds", json=request_data, headers=get_wompi_headers(access_token))
+        response.raise_for_status()
+        transaccion_data = response.json()
+        
+        # Log response status and content
+        print("Response Status Code:", response.status_code)
+        if response.content:
+            print("Response Content:", response.content)
+        else:
+            print("Response content is empty")
+        
+        # Guardar la información de la transacción en la base de datos
+        transaccion3ds = Transaccion3DS.objects.create(
+            #cliente=get_object_or_404(Clientes, pk=client_id),  # Asumiendo que `client_id` es el ID del cliente
+            acceso=acceso_instance,
+            numeroTarjeta=numeroTarjeta,
+            mesVencimiento=mesVencimiento,
+            anioVencimiento=anioVencimiento,
+            cvv=cvv,
+            monto=monto,
+            nombre=nombre,
+            apellido=apellido,
+            email=email,
+            ciudad=ciudad,
+            direccion=direccion,
+            telefono=telefono,
+            estado=True
+        )
+        
+        transaccion3ds_respuesta = Transaccion3DS_Respuesta.objects.create(
+            transaccion3ds=transaccion3ds,
+            idTransaccion=transaccion_data["idTransaccion"],
+            esReal=transaccion_data["esReal"],
+            urlCompletarPago3Ds=transaccion_data["urlCompletarPago3Ds"],
+            monto=transaccion_data["monto"]
+        )
+        
+        return transaccion_data
+    
+    except requests.exceptions.RequestException as e:
+        print(f"Error during POST request: {e}")
+        if e.response is not None:
+            if e.response.content:
+                print(f"Response content: {e.response.content}")
+            else:
+                print("Error: Response content is empty")
+        return None
 
 
 def create_payment_link_acceso(acceso_id, client_id, client_secret, comercio_id, monto, nombre_producto, descripcion_Producto, imagenProducto, cantidad, **kwargs):
@@ -85,11 +168,9 @@ def create_payment_link_acceso(acceso_id, client_id, client_secret, comercio_id,
 
 def get_wompi_headers(access_token):
     return {
-        "content-type": "application/json",
-        "authorization": f"Bearer {access_token}"
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {access_token}'
     }
-
-
 
 def servicio_inter_index(request):
     
@@ -121,6 +202,178 @@ def servicio_inter_index(request):
 }
     
     return render(request, 'list_planes.html', context)
+
+
+#########################################################################33
+
+#Transaccion comprar acceso
+
+def transaccion3ds_compra_acceso(request, tipo_acceso_id):
+    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
+    data_contact = Contacts.objects.latest()
+    urls_info = Urls_info.objects.all()
+    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    urls_interes = Urls_interes.objects.all()
+    
+    tipo_acceso = get_object_or_404(Tipos, id=tipo_acceso_id)
+    acceso_disponible = Accesos.objects.filter(acceso_tipo=tipo_acceso, estado=True).last()
+    
+    accesos_relacionados = Accesos.objects.filter(acceso_tipo=tipo_acceso)
+    transacciones_3ds = Transaccion3DS.objects.filter(acceso__in=accesos_relacionados)
+    transaccion3ds_respuesta = Transaccion3DS_Respuesta.objects.filter(transaccion3ds__in=transacciones_3ds).first()
+    
+    if acceso_disponible:
+        if request.method == 'POST':
+            nombre = request.POST.get('nombre')
+            apellido = request.POST.get('apellido')
+            direccion = request.POST.get('direccion')
+            ciudad = request.POST.get('ciudad')
+            email = request.POST.get('email')
+            telefono = request.POST.get('telefono')
+            numtarjeta = request.POST.get('numtarjeta')
+            cvv = request.POST.get('cvv')
+            dui = request.POST.get('dui')
+            mesvencimiento = request.POST.get('mesvencimiento')
+            aniovencimiento = request.POST.get('aniovencimiento')
+            
+            monto = float(tipo_acceso.precio)
+            
+            #transaccion_id = transaccion3ds_compra.pk
+            
+            url_redireccion = "https://volcanosm.net/internet"
+            
+            print("Estos son los datos obtenidos:")
+            print(nombre, apellido, direccion, ciudad, email, telefono, numtarjeta, cvv, dui, mesvencimiento, aniovencimiento, monto)
+            
+            try:
+                transaccion_data = crear_transaccion_3ds(
+                    acceso_id=acceso_disponible.pk,
+                    numeroTarjeta=str(numtarjeta),
+                    cvv=str(cvv),
+                    mesVencimiento=mesvencimiento,
+                    anioVencimiento=aniovencimiento,
+                    #urlRedi=url_redireccion,
+                    monto=monto,
+                    nombre=nombre,
+                    apellido=apellido,
+                    email=email,
+                    ciudad=ciudad,
+                    direccion=direccion,
+                    telefono=str(telefono),
+                    client_id=Client_id,
+                    client_secret=Client_secret
+                )
+                print(transaccion_data)
+                 # Obtiene la última transacción 3DS
+                transaccion3ds = Transaccion3DS.objects.latest('fecha_creacion')
+
+                # Obtiene la última respuesta de la transacción 3DS
+                transaccion3ds_respuesta = Transaccion3DS_Respuesta.objects.filter(transaccion3ds=transaccion3ds).latest('fecha_creacion')                   
+                
+                if transaccion_data:
+                    cliente = Clientes.objects.create(
+                        nombre=nombre,
+                        apellido=apellido,
+                        direccion=direccion,
+                        dui=dui,
+                        email=email,
+                        telefono=telefono,
+                    )
+                    
+                   
+                    transaccion3ds_compra = TransaccionCompra3DS.objects.create(
+                        transaccion3ds=transaccion3ds,
+                        transaccion3ds_respuesta=transaccion3ds_respuesta,
+                        cliente=cliente,
+                        acceso=acceso_disponible,
+                    )
+                    
+                    return redirect('transaccion3ds_exitosa', transaccion3ds_id=transaccion3ds_compra.pk)
+                else:
+                    raise Exception("No se pudo realizar la transacción")
+            except Exception as e:
+                context = {
+                    'tipo_acceso': tipo_acceso,
+                    'barra_principal': barra_principal,
+                    'data_contact': data_contact,
+                    'urls_info': urls_info,
+                    'ultima_descripcion': ultima_descripcion,
+                    'urls_interes': urls_interes,
+                    'error_message': str(e),
+                }
+                return render(request, 'transaccion/pago_fallido.html', context)
+        
+        else:
+            context = {
+                'tipo_acceso': tipo_acceso,
+                'barra_principal': barra_principal,
+                'data_contact': data_contact,
+                'urls_info': urls_info,
+                'ultima_descripcion': ultima_descripcion,
+                'urls_interes': urls_interes,
+            }
+            return render(request, 'transaccion/comprar3ds_acceso.html', context)
+    
+    else:
+        context = {
+            'barra_principal': barra_principal,
+            'data_contact': data_contact,
+            'urls_info': urls_info,
+            'ultima_descripcion': ultima_descripcion,
+            'urls_interes': urls_interes,
+        }
+        
+        return render(request, 'transaccion/pago_fallido.html', context)
+
+
+    
+# Nueva vista para mostrar el mensaje de éxito
+def transaccion3ds_exitosa(request, transaccion3ds_id):
+    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
+    data_contact = Contacts.objects.latest()
+    urls_info = Urls_info.objects.all()
+    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    urls_interes = Urls_interes.objects.all()
+    
+    # Obtener la transacción3ds_compra
+    transaccion3ds_compra = get_object_or_404(TransaccionCompra3DS, pk=transaccion3ds_id)
+    
+    # Obtener tipo de acceso y acceso desde transaccion3ds_compra
+    tipo_acceso = transaccion3ds_compra.acceso.acceso_tipo
+    acceso = transaccion3ds_compra.acceso
+    
+    # Obtener la transacción 3DS respuesta correspondiente
+    transaccion3ds_respuesta = transaccion3ds_compra.transaccion3ds_respuesta
+    
+    # Obtener el cliente y acceso transaccion
+    cliente = transaccion3ds_compra.cliente
+    acceso_transaccion = acceso
+    
+    # Imprimir los IDs relacionados
+    print("ID de tipo de acceso:", tipo_acceso.pk)
+    print("ID de acceso:", acceso.pk)
+    print("ID de transacción 3DS:", transaccion3ds_compra.transaccion3ds.pk)
+    print("ID de transacción 3DS respuesta:", transaccion3ds_respuesta.pk)
+    
+    context = {
+        'tipo_acceso': tipo_acceso,
+        'transaccion_compra': transaccion3ds_compra,
+        'acceso': acceso,
+        'cliente': cliente,
+        'acceso_transaccion': acceso_transaccion,
+        'transaccion3ds_respuesta': transaccion3ds_respuesta,
+        
+        'barra_principal': barra_principal,
+        'data_contact': data_contact,
+        'urls_info': urls_info,
+        'ultima_descripcion': ultima_descripcion,
+        'urls_interes': urls_interes,
+    }
+    
+    return render(request, 'transaccion/transaccion_exitosa.html', context)
+
+
+#############################################################################333
 
 
 def comprar_acceso(request, tipo_acceso_id):
@@ -166,7 +419,6 @@ def comprar_acceso(request, tipo_acceso_id):
                 descripcion_producto,
                 imagen_producto,
                 cantidad
-                
             )
             
             # Obtener el objeto EnlacePagoAcceso relacionado con el acceso
@@ -196,7 +448,7 @@ def comprar_acceso(request, tipo_acceso_id):
                 #obetner la instancia de transaccion_compra despues de guardarla
                 transaccion_compra_instance = get_object_or_404(TransaccionCompra, pk=transaccion_compra.pk)
                 transaccion_compra_id = transaccion_compra_instance.pk
-
+                
                 context = {
                     'tipo_acceso': tipo_acceso,
                     'acceso': acceso_disponible,
@@ -239,6 +491,7 @@ def comprar_acceso(request, tipo_acceso_id):
     
 
 def transaccion_exitosa(request, transaccion_id):
+    # Obtener datos necesarios
     barra_principal = Barra_Principal.objects.latest('fecha_creacion')
     data_contact = Contacts.objects.latest()
     urls_info = Urls_info.objects.all()
@@ -252,30 +505,60 @@ def transaccion_exitosa(request, transaccion_id):
     
     cliente_transaccion = transaccion_compra.cliente
     acceso_transaccion = transaccion_compra.enlace_pago.acceso
+    
+    try:
+        # Configuración de la conexión al servicio de correo electrónico de Azure
+        connection_string = "endpoint=https://emailvolcanosm.unitedstates.communication.azure.com/;accesskey=SkW7u9s6sgjkska6ncJ8iOQutZdU1f+iIH9rfMto3j+NFLi8bpmcM4PF+4oJ3A+gQkAOXVFvhxaNqa8UTdtcUg=="
+        client = EmailClient.from_connection_string(connection_string)
         
+        # Renderizar contenido del correo
+        correo_html = render_to_string('correo/informacion_acceso.html', {
+            'cliente': cliente_transaccion,
+            'acceso': acceso_transaccion,
+        })
+        correo_texto_plano = strip_tags(correo_html)
+        
+        # Configuración del correo
+        message = {
+            "senderAddress": settings.EMAIL_HOST_USER,
+            "recipients": {
+                "to": [{"address": cliente_transaccion.email}],
+            },
+            "content": {
+                "subject": "Información de acceso a su servicio de internet",
+                "plainText": correo_texto_plano,
+                "html": correo_html,
+            }
+        }
+        
+        # Enviar correo
+        poller = client.begin_send(message)
+        result = poller.result()
+        
+    except Exception as ex:
+        print(ex)
+    
     # Imprimir los IDs relacionados
     print("ID de tipo de acceso:", tipo_acceso.pk)
     print("ID de acceso:", acceso.pk)
     print("ID de enlace de pago acceso:", enlace_pago_acceso.pk if enlace_pago_acceso else "No disponible")
     
+    # Contexto para la plantilla
     context = {
         'tipo_acceso': tipo_acceso,
         'transaccion_compra': transaccion_compra,
         'enlace_pago': enlace_pago_acceso,
         'acceso': acceso,
-        'cliente':cliente_transaccion,
-        'acceso_transaccion':acceso_transaccion,
-        
+        'cliente': cliente_transaccion,
+        'acceso_transaccion': acceso_transaccion,
         'barra_principal': barra_principal,
         'data_contact': data_contact,
         'urls_info': urls_info,
         'ultima_descripcion': ultima_descripcion,
         'urls_interes': urls_interes,
-        
     }
     
     return render(request, 'transaccion/pago_exitoso.html', context)
-
     
 
 #VERIFICAR EL PAGO:
@@ -418,3 +701,5 @@ def enviar_informacion_acceso_por_correo(transaccion_compra):
 
     except Exception as ex:
         print(ex)
+        
+        

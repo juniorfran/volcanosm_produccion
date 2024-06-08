@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Destination Start -->
+<div class="container-fluid py-5">
+    <div class="container pt-5 pb-3">
+        <div class="row justify-content-center">
+            <!-- Información del tipo de acceso a la izquierda -->
+            <div class="col-lg-6 col-md-6 mb-4">
+                {% if tipo_acceso %}
+                <div class="card text-center" style="width: 28rem;">
+                    <img class="card-img-top" src="{{ tipo_acceso.url_azure }}" alt="{{ tipo_acceso.nombre }}" style="width: 250px">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ tipo_acceso.nombre }}</h5>
+                        <p class="card-text">{{ tipo_acceso.descripcion }}</p>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Precio: $ {{ tipo_acceso.precio|floatformat:2  }} </li>
+                        <li class="list-group-item">Velocidad: {{ tipo_acceso.velocidad_mb }} MB</li>
+                        <li class="list-group-item">Tiempo: {{ tipo_acceso.tiempo_conexion }} Horas</li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            <!-- Formulario a la derecha -->
+            <div class="col-lg-6 col-md-6 mb-4">
+                <form method="post" class="shadow p-3 mb-5 bg-white rounded">
+                    {% csrf_token %}
+
+                    <h4 class="mb-3">Información de la tarjeta</h4>
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <input type="text" id="numtarjeta" placeholder="Numero de Tarjeta" name="numtarjeta" class="form-control" required>
+                            <div id="alerta-numtarjeta" class="text-danger" style="display: none;">Número de tarjeta incorrecto</div>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="password" id="cvv" placeholder="CVV" name="cvv" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="row mb-3">
+                        <div class="col">
+                            <input type="number" id="mesvencimiento" placeholder="Mes Vencimiento " name="mesvencimiento" class="form-control" required maxlength="2" max="12">
+                            <div id="alerta-mesvencimiento" class="text-danger" style="display: none;">Mes de vencimiento inválido</div>
+                        </div>
+                        <div class="col">
+                            <input type="number" id="aniovencimiento" placeholder="Año Vencimiento" name="aniovencimiento" class="form-control" required maxlength="4" min="2024">
+                            <div id="alerta-aniovencimiento" class="text-danger" style="display: none;">Año de vencimiento inválido</div>
+                        </div>
+                    </div>
+
+                    <!-- Resto de los campos de información del cliente -->
+                    <h4 class="mb-3">Información del cliente</h4>
+                    <div class="row mb-3">
+                        <div class="col ">
+                            <input type="text" id="nombre" placeholder="Nombre" name="nombre" class="form-control" required>
+                        </div>
+                        <div class="col">
+                            <input type="text" id="apellido" placeholder="Apellido" name="apellido" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="direccion" class="form-label">Dirección:</label>
+                        <textarea id="direccion" name="direccion" class="form-control" required maxlength="45"></textarea>
+                        <div id="alerta-direccion" class="text-danger" style="display: none;">Máximo 45 caracteres permitidos</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col ">
+                            <input type="text" id="ciudad" placeholder="Ciudad" name="ciudad" class="form-control" required>
+                        </div>
+                        <div class="col">
+                            <input type="text" id="dui" placeholder="DUI" name="dui" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col ">
+                            <input type="email" id="email" placeholder="Email" name="email" class="form-control" required>
+                        </div>
+                        <div class="col">
+                            <input type="tel" id="telefono" placeholder="Telefono" name="telefono" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <!-- Botón para enviar el formulario -->
+                    <button type="submit" class="btn btn-primary w-100">Pagar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function validarNumeroTarjeta(numero) {
+        // Eliminar espacios en blanco y guiones
+        numero = numero.replace(/\s/g, '').replace(/-/g, '');
+        // Convertir a array y revertir
+        var digits = numero.split('').reverse();
+        var sum = 0;
+
+        for (var i = 0; i < digits.length; i++) {
+            var digit = parseInt(digits[i]);
+
+            // Duplicar dígitos en posiciones impares
+            if (i % 2 !== 0) {
+                digit *= 2;
+                if (digit > 9) {
+                    digit -= 9;
+                }
+            }
+
+            sum += digit;
+        }
+
+        // La tarjeta es válida si la suma es divisible por 10
+        return sum % 10 === 0;
+    }
+
+    document.getElementById('numtarjeta').addEventListener('input', function() {
+        var numTarjeta = this.value;
+        var alerta = document.getElementById('alerta-numtarjeta');
+
+        if (validarNumeroTarjeta(numTarjeta)) {
+            alerta.style.display = 'none';
+            this.classList.remove('is-invalid');
+        } else {
+            alerta.style.display = 'block';
+            this.classList.add('is-invalid');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const direccionInput = document.getElementById('direccion');
+        const alertaDireccion = document.getElementById('alerta-direccion');
+    
+        direccionInput.addEventListener('input', function() {
+            if (direccionInput.value.length > 45) {
+                direccionInput.value = direccionInput.value.slice(0, 45);
+                alertaDireccion.style.display = 'block';
+            } else {
+                alertaDireccion.style.display = 'none';
+            }
+        });
+    });
+    
+</script>
+
+
+
+
+<script>
+    document.getElementById('mesvencimiento').addEventListener('input', function() {
+        var mesVencimiento = this.value;
+        var alerta = document.getElementById('alerta-mesvencimiento');
+
+        if (mesVencimiento.length === 2 && parseInt(mesVencimiento) <= 12) {
+            alerta.style.display = 'none';
+            this.classList.remove('is-invalid');
+        } else {
+            alerta.style.display = 'block';
+            this.classList.add('is-invalid');
+        }
+    });
+
+    document.getElementById('aniovencimiento').addEventListener('input', function() {
+        var anioVencimiento = this.value;
+        var alerta = document.getElementById('alerta-aniovencimiento');
+
+        if (anioVencimiento.length === 4 && parseInt(anioVencimiento) >= 2024) {
+            alerta.style.display = 'none';
+            this.classList.remove('is-invalid');
+        } else {
+            alerta.style.display = 'block';
+            this.classList.add('is-invalid');
+        }
+    });
+</script>
+
+{% endblock content %}

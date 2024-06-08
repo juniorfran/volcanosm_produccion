@@ -15,7 +15,7 @@
                 {% if tipo_acceso.disponible %}
                 <div class="destination-item position-relative overflow-hidden mb-2">
                     <img class="img-fluid" src="{{ tipo_acceso.url_azure }}" alt="{{ tipo_acceso.nombre }}">
-                    <a class="destination-overlay text-white text-decoration-none" href="{% url 'comprar_acceso' tipo_acceso.id %}">
+                    <a class="destination-overlay text-white text-decoration-none" href="{% url 'comprar_acceso_3ds' tipo_acceso.id %}">
                         <h5 class="text-white">{{ tipo_acceso.nombre }}</h5>
                         <p class="text-white">Precio: ${{ tipo_acceso.precio|floatformat:2 }}</p>
                         <p class="text-white">Velocidad : {{ tipo_acceso.velocidad_mb }} MB</p>

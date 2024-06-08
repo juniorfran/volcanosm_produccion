@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Sección de detalles del plan -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="card" style="width: 22rem;">
+                        <div class="card-header">
+                            Detalles del Plan
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Tipo de Plan: {{ tipo_acceso.nombre }}</li>
+                            <li class="list-group-item">Precio: ${{ tipo_acceso.precio|floatformat:2 }}</li>
+                            <li class="list-group-item">Descripción: {{ tipo_acceso.descripcion }}</li>
+                            <li class="list-group-item">Tiempo de Conexion: {{ tipo_acceso.tiempo_conexion }} Hrs</li>
+                            <li class="list-group-item">Velocidad: {{ tipo_acceso.velocidad_mb }} MB</li>
+                            <li class="list-group-item">idTransaccion: {{ transaccion3ds_respuesta.idTransaccion }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de información de acceso -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="card" style="width: 22rem;">
+                        <div class="card-header">
+                            Información de Acceso
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Usuario: {{ acceso.usuario }}</li>
+                            <li class="list-group-item">Password: {{ acceso.password }}</li>
+                            <li class="list-group-item">Descripción: {{ acceso.descripcion }}</li>
+                            <li class="list-group-item">Cantidad de usuarios: {{ acceso.cant_usuarios }}</li>
+                            <li class="list-group-item">Tipo de acceso: {{ acceso.acceso_tipo.nombre }}</li>
+                            <li class="list-group-item">Fecha de expiración: {{ acceso.fecha_expiracion }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts de Bootstrap y jQuery -->
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+<script src="{% static 'js/bootstrap5.3.bundle.min.js' %}"></script>
+
+<!-- Modal para mostrar el contenido del enlace de pago -->
+<div class="modal fade" id="completarPagoModal" tabindex="-1" aria-labelledby="enlacePagoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="enlacePagoModalLabel">Completa tu Pago</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+            </div>
+            <div class="modal-body">
+                <!-- Aquí se cargará el contenido del enlace de pago -->
+                <iframe id="paymentIframe" src="{{ transaccion3ds_respuesta.urlCompletarPago3Ds }}" style="width: 100%; height: 600px; border: none;"></iframe>
+                {% comment %} <iframe id="paymentIframe" src="https://google.com" style="width: 100%; height: 600px; border: none;"></iframe> {% endcomment %}
+                <div id="confirmationMessage" style="display: none; text-align: center;">
+                    <h2>¡Pago confirmado! ¡Muchas gracias!</h2>
+                    <p>Cierra este modal para ver tus credenciales.</p>
+                </div>
+            </div>
+            <div class="modal-footer"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Mostrar el modal al cargar la página
+        $('#completarPagoModal').modal('show');
+
+        // Detectar cuando el iframe ha terminado de cargar
+        $('#paymentIframe').on('load', function() {
+            setTimeout(function() {
+                // Ocultar el iframe y mostrar el mensaje de confirmación
+                $('#paymentIframe').hide();
+                $('#confirmationMessage').fadeIn('slow');
+            }, 3000); // Esperar 3 segundos antes de mostrar el mensaje
+        });
+    });
+</script>
+{% endblock content %}
