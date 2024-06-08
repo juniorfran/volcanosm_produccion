@@ -25,8 +25,8 @@
             </div>
         </div>
 
-        <!-- Sección de información de acceso -->
-        <div class="col-md-6">
+        <!-- Sección de información de acceso, solo mostrar si el pago ha sido aprobado -->
+        <div class="col-md-6" id="infoAcceso">
             <div class="card">
                 <div class="card-body">
                     <div class="card" style="width: 22rem;">
@@ -63,10 +63,15 @@
             <div class="modal-body">
                 <!-- Aquí se cargará el contenido del enlace de pago -->
                 <iframe id="paymentIframe" src="{{ transaccion3ds_respuesta.urlCompletarPago3Ds }}" style="width: 100%; height: 600px; border: none;"></iframe>
-                {% comment %} <iframe id="paymentIframe" src="https://google.com" style="width: 100%; height: 600px; border: none;"></iframe> {% endcomment %}
                 <div id="confirmationMessage" style="display: none; text-align: center;">
                     <h2>¡Pago confirmado! ¡Muchas gracias!</h2>
                     <p>Cierra este modal para ver tus credenciales.</p>
+                </div>
+
+                <div id="confirmationMessageFaile" style="display: none; text-align: center;">
+                    <h2>¡No se realizo el pago! ¡fondos insuficientes.!</h2>
+                    <p>Intenta nuevamente realizar el pago.</p>
+                    <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'comprar_acceso_3ds' tipo_acceso.id %}'">Volver a Intentar</button>
                 </div>
             </div>
             <div class="modal-footer"></div>
@@ -74,19 +79,65 @@
     </div>
 </div>
 
+<!-- Modal para pago fallido -->
+<div class="modal fade" id="pagoFallidoModal" tabindex="-1" aria-labelledby="pagoFallidoModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pagoFallidoModalLabel">Pago Fallido</h5>
+            </div>
+            <div class="modal-body">
+                <p>No se completó el pago, fondos insuficientes. Intenta con otra tarjeta o consulta tu saldo.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'comprar_acceso_3ds' tipo_acceso.id %}'">Volver a Intentar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     $(document).ready(function() {
-        // Mostrar el modal al cargar la página
+        $('#infoAcceso').hide();
+        // Mostrar el modal de completar pago al cargar la página
         $('#completarPagoModal').modal('show');
 
         // Detectar cuando el iframe ha terminado de cargar
         $('#paymentIframe').on('load', function() {
             setTimeout(function() {
-                // Ocultar el iframe y mostrar el mensaje de confirmación
-                $('#paymentIframe').hide();
-                $('#confirmationMessage').fadeIn('slow');
-            }, 3000); // Esperar 3 segundos antes de mostrar el mensaje
+                // Hacer una verificación después de un tiempo
+                verificarPago();
+            }, 5000); // Esperar 3 segundos antes de verificar el pago
         });
     });
+
+    function verificarPago() {
+        $.ajax({
+            url: "{% url 'verificar_pago' transaccion3ds_respuesta.idTransaccion %}",
+            method: "GET",
+            success: function(data) {
+                if (data.es_aprobada) {
+                    localStorage.setItem('pago_aprobado', 'true'); // Guardar en localStorage
+                    $('#paymentIframe').hide();
+                    $('#confirmationMessage').fadeIn('slow');
+                    $('#infoAcceso').fadeIn('slow');
+                    //location.reload(); // Recargar la página para actualizar la vista
+                } else {
+                    //$('#infoAcceso').hide();
+                    $('#paymentIframe').hide();
+                    $('#confirmationMessageFaile').fadeIn('slow');
+                    $('#pagoFallidoModal').modal('show');
+                }
+            },
+            error: function() {
+                alert('Error al verificar el estado del pago. Intenta nuevamente.');
+            }
+        });
+    }
+
+    // Evitar recarga infinita
+    if (localStorage.getItem('pago_aprobado') === 'true') {
+        $('#completarPagoModal').modal('hide');
+    }
 </script>
 {% endblock content %}

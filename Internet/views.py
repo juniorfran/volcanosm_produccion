@@ -95,6 +95,8 @@ def crear_transaccion_3ds(acceso_id, numeroTarjeta, cvv, mesVencimiento, anioVen
         
         return transaccion_data
     
+    
+    
     except requests.exceptions.RequestException as e:
         print(f"Error during POST request: {e}")
         if e.response is not None:
@@ -204,6 +206,8 @@ def servicio_inter_index(request):
     return render(request, 'list_planes.html', context)
 
 
+
+
 #########################################################################33
 
 #Transaccion comprar acceso
@@ -287,6 +291,9 @@ def transaccion3ds_compra_acceso(request, tipo_acceso_id):
                         cliente=cliente,
                         acceso=acceso_disponible,
                     )
+                    # idtransac = transaccion3ds_respuesta.idTransaccion
+                    # consulta_transaccion = consultar_transaccion_3ds(idtransac, Client_id, Client_secret)
+                    # print(consulta_transaccion)
                     
                     return redirect('transaccion3ds_exitosa', transaccion3ds_id=transaccion3ds_compra.pk)
                 else:
@@ -335,25 +342,17 @@ def transaccion3ds_exitosa(request, transaccion3ds_id):
     ultima_descripcion = General_Description.objects.latest('fecha_creacion')
     urls_interes = Urls_interes.objects.all()
     
-    # Obtener la transacción3ds_compra
     transaccion3ds_compra = get_object_or_404(TransaccionCompra3DS, pk=transaccion3ds_id)
-    
-    # Obtener tipo de acceso y acceso desde transaccion3ds_compra
     tipo_acceso = transaccion3ds_compra.acceso.acceso_tipo
     acceso = transaccion3ds_compra.acceso
-    
-    # Obtener la transacción 3DS respuesta correspondiente
     transaccion3ds_respuesta = transaccion3ds_compra.transaccion3ds_respuesta
-    
-    # Obtener el cliente y acceso transaccion
     cliente = transaccion3ds_compra.cliente
     acceso_transaccion = acceso
     
-    # Imprimir los IDs relacionados
-    print("ID de tipo de acceso:", tipo_acceso.pk)
-    print("ID de acceso:", acceso.pk)
-    print("ID de transacción 3DS:", transaccion3ds_compra.transaccion3ds.pk)
-    print("ID de transacción 3DS respuesta:", transaccion3ds_respuesta.pk)
+    idtransac = transaccion3ds_respuesta.idTransaccion
+    consulta_transaccion = consultar_transaccion_3ds(idtransac)
+
+    es_aprobada = consulta_transaccion.get('esAprobada', False)
     
     context = {
         'tipo_acceso': tipo_acceso,
@@ -362,7 +361,8 @@ def transaccion3ds_exitosa(request, transaccion3ds_id):
         'cliente': cliente,
         'acceso_transaccion': acceso_transaccion,
         'transaccion3ds_respuesta': transaccion3ds_respuesta,
-        
+        'es_aprobada': es_aprobada,
+        'consulta_transaccion': consulta_transaccion,
         'barra_principal': barra_principal,
         'data_contact': data_contact,
         'urls_info': urls_info,
@@ -371,6 +371,55 @@ def transaccion3ds_exitosa(request, transaccion3ds_id):
     }
     
     return render(request, 'transaccion/transaccion_exitosa.html', context)
+
+
+def transaccion3ds_fallida(request):
+    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
+    data_contact = Contacts.objects.latest()
+    urls_info = Urls_info.objects.all()
+    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    urls_interes = Urls_interes.objects.all()
+    
+   
+    context = {        
+        'barra_principal': barra_principal,
+        'data_contact': data_contact,
+        'urls_info': urls_info,
+        'ultima_descripcion': ultima_descripcion,
+        'urls_interes': urls_interes,
+    }
+    
+    return render(request, 'transaccion/pago_fallido.html', context)
+
+
+def consultar_transaccion_3ds(id_transaccion):
+    # Autenticar con Wompi
+    access_token = authenticate_wompi(Client_id, Client_secret)
+    
+    if not access_token:
+        print("Error: 'id_transaccion' not provided.")
+        return None
+    
+    endpoint = f"TransaccionCompra/{id_transaccion}"
+    transaccion_info = make_wompi_get_request(endpoint, access_token)
+    
+    if transaccion_info:
+        # Imprimir la información del enlace de pago
+        print("Información de la transaccion:")
+        print(transaccion_info)
+        print("este es el id del enlace", id_transaccion)
+        return transaccion_info
+    else:
+        print("Error: Failed to obtain information for the provided 'id_transaccion'.")
+        return None
+    
+def verificar_pago(request, transaccion_id):
+    # Obtén la transacción y verifica su estado
+    transaccion = get_object_or_404(Transaccion3DS_Respuesta, idTransaccion=transaccion_id)
+    consulta_transaccion = consultar_transaccion_3ds(transaccion.idTransaccion)
+    es_aprobada = consulta_transaccion['esAprobada']
+
+    return JsonResponse({'es_aprobada': es_aprobada})
 
 
 #############################################################################333

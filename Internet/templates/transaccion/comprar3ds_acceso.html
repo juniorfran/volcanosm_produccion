@@ -63,9 +63,9 @@
                     </div>
                     <div class="mb-3">
                         <label for="direccion" class="form-label">Dirección:</label>
-                        <textarea id="direccion" name="direccion" class="form-control" required maxlength="45"></textarea>
-                        <div id="alerta-direccion" class="text-danger" style="display: none;">Máximo 45 caracteres permitidos</div>
+                        <textarea id="direccion" name="direccion" class="form-control" required></textarea>
                     </div>
+
                     <div class="row mb-3">
                         <div class="col ">
                             <input type="text" id="ciudad" placeholder="Ciudad" name="ciudad" class="form-control" required>
@@ -131,25 +131,7 @@
             this.classList.add('is-invalid');
         }
     });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const direccionInput = document.getElementById('direccion');
-        const alertaDireccion = document.getElementById('alerta-direccion');
-    
-        direccionInput.addEventListener('input', function() {
-            if (direccionInput.value.length > 45) {
-                direccionInput.value = direccionInput.value.slice(0, 45);
-                alertaDireccion.style.display = 'block';
-            } else {
-                alertaDireccion.style.display = 'none';
-            }
-        });
-    });
-    
 </script>
-
-
-
 
 <script>
     document.getElementById('mesvencimiento').addEventListener('input', function() {

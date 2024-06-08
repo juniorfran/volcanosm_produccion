@@ -6,9 +6,9 @@
     <div class="container pt-5 pb-3">
         <div class="row justify-content-center">
             <div class="col-lg-8 col-md-10 mb-4 text-center">
-                <h1>Error en la Transacción</h1>
+                <h1>No se pudo completar el pago por favor, verifica el saldo de tu cuenta o intenta con otra tarjeta.</h1>
                 <p>{{ error_message }}</p>
-                <a href="{% url 'comprar_acceso_3ds' tipo_acceso.pk %}" class="btn btn-primary">Intentar de nuevo</a>
+                <a href="{% url 'servicio_inter'%}" class="btn btn-primary">Intentar de nuevo</a>
             </div>
         </div>
     </div>
