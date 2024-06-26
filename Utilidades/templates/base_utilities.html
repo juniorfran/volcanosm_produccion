@@ -153,6 +153,44 @@
                     </button>
     
                     <div class=" navbar-nav collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="nav navbar-nav mr-auto">
+                            {% if is_logged_in %}
+                                <!-- Menús del lado izquierdo -->
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url "utilidades:mikrotik_status" %}">Estado</a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Configuraciones</a>
+                                    <ul class="dropdown-menu dropdown-menu-dark">
+                                        <li><a class="dropdown-item" href="{% url "utilidades:create_mikrotik_config" %}">Acceso</a></li>
+                                        <li><a class="dropdown-item" href="#">Detalles</a></li>
+                                        <li><a class="dropdown-item" href="#">Portal Cautivo</a></li>
+                                    </ul>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Seguridad</a>
+                                    <ul class="dropdown-menu dropdown-menu-dark">
+                                        <li><a class="dropdown-item" href="#">Firewall</a></li>
+                                        <li><a class="dropdown-item" href="#">PPP0E</a></li>
+                                        <li><a class="dropdown-item" href="#">VPN</a></li>
+                                        <li><a class="dropdown-item" href="#">SMB</a></li>
+                                        <li><a class="dropdown-item" href="#">Rutes</a></li>
+                                        <li><a class="dropdown-item" href="#">POOL</a></li>
+                                        <li><a class="dropdown-item" href="#">UPnP</a></li>
+                                        <li><a class="dropdown-item" href="#">Web Proxy</a></li>
+                                    </ul>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Hostpot</a>
+                                    <ul class="dropdown-menu dropdown-menu-dark">
+                                        <li><a class="dropdown-item" href="#">Estatus</a></li>
+                                        <li><a class="dropdown-item" href="{% url "utilidades:create_hotspot_user" %}">Usuarios</a></li>
+                                        <li><a class="dropdown-item" href="{% url "utilidades:create_hotspot_user_profile" %}">Perfiles de Usuarios</a></li>
+                                    </ul>
+                                </li>
+
+                            {% endif %}
+                        </ul>
                         <ul class="nav navbar-nav ml-auto">
                             <li class="nav-item active">
                                 <a class="nav-link" href="{% url "utilidades:utilidades" %}">Inicio <span class="sr-only">(current)</span></a>

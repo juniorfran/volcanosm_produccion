@@ -2,9 +2,27 @@
 
 {% block content %}
 
-<div class="container">
-    <iframe src="https://mikoritkmanager.azurewebsites.net/login.php" style="width: 1250px; height: 675px; border: none;"></iframe>
-</div>
+<h1>Gestor MikroTik - Interfaces</h1>
+
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    {% if active_interfaces or inactive_interfaces %}
+        <h2>Interfaces Activas</h2>
+        <ul>
+            {% for iface in active_interfaces %}
+                <li>{{ iface.name }}</li>
+            {% endfor %}
+        </ul>
+
+        <h2>Interfaces Inactivas</h2>
+        <ul>
+            {% for iface in inactive_interfaces %}
+                <li>{{ iface.name }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
 {% endblock content %}
 

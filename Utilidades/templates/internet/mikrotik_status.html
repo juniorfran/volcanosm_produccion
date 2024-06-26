@@ -1,0 +1,122 @@
+{% extends "base_utilities.html" %}
+{% load custom_filters %}
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+{% block content %}
+<h1>Estado General del Router MikroTik</h1>
+
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% else %}
+        <h2>Interfaces</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>TX (Bytes)</th>
+                    <th>RX (Bytes)</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for iface in interfaces %}
+                    <tr>
+                        <td>{{ iface.name }}</td>
+                        <td>{{ iface.type }}</td>
+                        <td>{{ iface|get_item:'tx-byte' }}</td>
+                        <td>{{ iface|get_item:'rx-byte' }}</td>
+                        <td>
+                            {% if iface.running %}
+                                Activo
+                            {% else %}
+                                Inactivo
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Direcciones IP</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Interface</th>
+                    <th>Dirección IP</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ip in ip_addresses %}
+                    <tr>
+                        <td>{{ ip.interface }}</td>
+                        <td>{{ ip.address }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Servidores DHCP</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Interface</th>
+                    <th>Tiempo de Arrendamiento</th>
+                    <th>Pool de Direcciones</th>
+                    <th>Dinámico</th>
+                    <th>Deshabilitado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dhcp in dhcp_servers %}
+                    <tr>
+                        <td>{{ dhcp.name }}</td>
+                        <td>{{ dhcp.interface }}</td>
+                        <td>{{ dhcp|get_item:'lease-time' }}</td>
+                        <td>{{ dhcp|get_item:'address-pool' }}</td>
+                        <td>
+                            {% if dhcp.dynamic %}
+                                Sí
+                            {% else %}
+                                No
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if dhcp.disabled %}
+                                Sí
+                            {% else %}
+                                No
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Leases DHCP</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Dirección IP</th>
+                    <th>MAC Address</th>
+                    <th>Expira en</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lease in dhcp_leases %}
+                    <tr>
+                        <td>{{ lease.address }}</td>
+                        <td>{{ lease|get_item:'mac-address' }}</td>
+                        <td>{{ lease|get_item:'expires-after' }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+{% endblock content %}

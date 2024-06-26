@@ -1,0 +1,48 @@
+{% extends "base_utilities.html" %}
+{% load custom_filters %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="mb-4">Crear Usuario Hotspot</h1>
+        <a type="button" class="btn btn-success mb-3" href="{% url 'utilidades:list_hotspot_user' %}">Ver Usuarios</a>
+
+        {% if error %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="server_id" class="form-label">Servidor:</label>
+                <select class="form-select" name="server_id" id="server_id">
+                    {% for server in servers %}
+                        <option value="{{ server.name }}">{{ server.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="username" class="form-label">Nombre de Usuario:</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña:</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="profile" class="form-label">Perfil de Usuario:</label>
+                <select class="form-select" name="profile" id="profile">
+                    {% for profile in profiles %}
+                        <option value="{{ profile.name }}">{{ profile.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Crear Usuario</button>
+        </form>
+    </div>
+{% endblock %}

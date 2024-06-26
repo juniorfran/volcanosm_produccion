@@ -13,6 +13,8 @@ from django.contrib import messages
 from Internet.models import Accesos, Tipos
 import csv
 import pandas as pd
+from django.http import HttpResponse
+
 
 Client_id = settings.CLIENT_ID
 Client_secret = settings.CLIENT_SECRET
@@ -118,7 +120,372 @@ def upload_data(request):
     return render(request, 'internet/upload_data.html')
 
 
-def view_mikrotik_manager(request):
-    
-    return render(request, 'internet/mikrotik_manager.html')
 
+###################################################################################################################
+            # VISTAS PARA MANEJAR EL ROUTER MIKROTIK #
+###################################################################################################################
+
+from librouteros import connect
+from librouteros.query import Key
+import ssl
+from functools import partial
+import librouteros as ros
+from Internet.models import MikrotikConfig
+
+def connect_to_router(router_ip, username, password, use_ssl=False):
+    if use_ssl:
+        api = ros.connect_ssl(router_ip, username=username, password=password)
+    else:
+        api = ros.connect(router_ip, username=username, password=password)
+    return api
+
+
+def mikrotik_login(request):
+    if request.method == 'POST':
+        router_ip = request.POST.get('router_ip')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        use_ssl = request.POST.get('use_ssl') == 'on'
+
+        try:
+            if use_ssl:
+                ctx = ssl.create_default_context()
+                ctx.check_hostname = False
+                ctx.set_ciphers('ADH:@SECLEVEL=0')
+                ssl_wrapper = partial(ctx.wrap_socket, server_hostname=router_ip)
+                api = connect(
+                    username=username,
+                    password=password,
+                    host=router_ip,
+                    ssl_wrapper=ssl_wrapper,
+                    port=8729
+                )
+            else:
+                api = connect(
+                    username=username,
+                    password=password,
+                    host=router_ip,
+                )
+
+            request.session['router_ip'] = router_ip
+            request.session['username'] = username
+            request.session['password'] = password
+            request.session['use_ssl'] = use_ssl
+
+            return redirect('utilidades:mikrotik_interfaces')
+
+        except Exception as e:
+            return render(request, 'internet/mikrotik_login.html', {'error': f'Error: {str(e)}'})
+
+    return render(request, 'internet/mikrotik_login.html')
+
+def mikrotik_interfaces(request):
+    router_ip = request.session.get('router_ip')
+    username = request.session.get('username')
+    password = request.session.get('password')
+    use_ssl = request.session.get('use_ssl')
+
+    if not all([router_ip, username, password]):
+        return redirect('utilidades:mikrotik_manager')
+
+    try:
+        if use_ssl:
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.set_ciphers('ADH:@SECLEVEL=0')
+            ssl_wrapper = partial(ctx.wrap_socket, server_hostname=router_ip)
+            api = connect(
+                username=username,
+                password=password,
+                host=router_ip,
+                ssl_wrapper=ssl_wrapper,
+                port=8729
+            )
+        else:
+            api = connect(
+                username=username,
+                password=password,
+                host=router_ip,
+            )
+
+        interfaces = list(api('/interface/print'))
+
+        active_interfaces = [iface for iface in interfaces if 'disabled' not in iface or not iface['disabled']]
+        inactive_interfaces = [iface for iface in interfaces if 'disabled' in iface and iface['disabled']]
+
+        context = {
+            'active_interfaces': active_interfaces,
+            'inactive_interfaces': inactive_interfaces,
+            'error': None,
+            'is_logged_in': True  # Indica que se ha iniciado sesión en el router MikroTik
+        }
+        return render(request, 'internet/mikrotik_manager.html', context)
+
+    except Exception as e:
+        return render(request, 'internet/mikrotik_manager.html', {'error': f'Error: {str(e)}'})
+    
+    
+def mikrotik_status(request):
+    router_ip = request.session.get('router_ip')
+    username = request.session.get('username')
+    password = request.session.get('password')
+    use_ssl = request.session.get('use_ssl')
+
+    if not all([router_ip, username, password]):
+        return redirect('mikrotik_manager')
+
+    try:
+        if use_ssl:
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.set_ciphers('ADH:@SECLEVEL=0')
+            ssl_wrapper = partial(ctx.wrap_socket, server_hostname=router_ip)
+            api = connect(
+                username=username,
+                password=password,
+                host=router_ip,
+                ssl_wrapper=ssl_wrapper,
+                port=8729
+            )
+        else:
+            api = connect(
+                username=username,
+                password=password,
+                host=router_ip,
+            )
+
+        interfaces = list(api.path('interface').select(
+            Key('name'),
+            Key('type'),
+            Key('tx-byte'),
+            Key('rx-byte'),
+            Key('running'),
+            Key('disabled')
+        ))
+
+        ip_addresses = list(api.path('ip', 'address').select(
+            Key('interface'),
+            Key('address')
+        ))
+
+        dhcp_servers = list(api.path('ip', 'dhcp-server').select(
+            Key('name'),
+            Key('interface'),
+            Key('lease-time'),
+            Key('address-pool'),
+            Key('dynamic'),
+            Key('disabled')
+        ))
+
+        dhcp_leases = list(api.path('ip', 'dhcp-server', 'lease').select(
+            Key('address'),
+            Key('mac-address'),
+            Key('expires-after')
+        ))
+
+        context = {
+            'interfaces': interfaces,
+            'ip_addresses': ip_addresses,
+            'dhcp_servers': dhcp_servers,
+            'dhcp_leases': dhcp_leases,
+            'error': None,
+            'is_logged_in': True  # Indica que se ha iniciado sesión en el router MikroTik
+        }
+        return render(request, 'internet/mikrotik_status.html', context)
+
+    except Exception as e:
+        return render(request, 'internet/mikrotik_status.html', {'error': f'Error: {str(e)}'})
+
+
+
+
+def create_hotspot_user(request):
+    if request.method == 'POST':
+        router_ip = request.session.get('router_ip')
+        username = request.session.get('username')
+        password = request.session.get('password')
+        use_ssl = request.session.get('use_ssl', False)
+
+        try:
+            api = connect_to_router(router_ip, username, password, use_ssl)
+
+            # Obtener datos del formulario
+            server_id = request.POST.get('server_id')
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            profile = request.POST.get('profile')
+
+            # Crear el usuario del hotspot
+            # api(cmd='/ip/hotspot/user/add', 
+            #     server=server_id, 
+            #     name=username, 
+            #     password=password, 
+            #     profile=profile)
+            
+            api.path('/ip/hotspot/user').add(
+                server=server_id, 
+                name=username, 
+                password=password, 
+                profile=profile
+            )
+
+            return redirect('utilidades:list_hotspot_user')
+
+        except Exception as e:
+            error_message = f'Error al crear usuario de hotspot: {str(e)}'
+            # Renderizar de nuevo el formulario con el mensaje de error
+            return render(request, 'internet/hostpot/create_hotspot_user.html', {'error': error_message, 'servers': servers, 'profiles': profiles, 'is_logged_in': True})
+
+    else:
+        router_ip = request.session.get('router_ip')
+        username = request.session.get('username')
+        password = request.session.get('password')
+        use_ssl = request.session.get('use_ssl', False)
+
+        try:
+            api = connect_to_router(router_ip, username, password, use_ssl)
+
+            # Obtener lista de servidores de hotspot para el selector
+
+            servers = api('/ip/hotspot/print')
+
+            # Obtener lista de perfiles de usuarios de hotspot para el selector
+            profiles = api('/ip/hotspot/profile/print')
+
+            context = {
+                'servers': servers,
+                'profiles': profiles,
+                'is_logged_in': True,
+            }
+
+        except Exception as e:
+            context = {
+                'error': f'Error al obtener datos del router: {str(e)}',
+            }
+
+        return render(request, 'internet/hostpot/create_hotspot_user.html', context)
+
+
+def create_hotspot_user_profile(request):
+    router_ip = request.session.get('router_ip')
+    username = request.session.get('username')
+    password = request.session.get('password')
+    use_ssl = request.session.get('use_ssl', False)
+    
+    api = connect_to_router(router_ip, username, password, use_ssl)
+    #obetener los pool
+    pools1 = api('/ip/pool/print')
+    
+    if request.method == 'POST':
+        router_ip = request.session.get('router_ip')
+        username = request.session.get('username')
+        password = request.session.get('password')
+        use_ssl = request.session.get('use_ssl', False)
+        
+        try:
+            api = connect_to_router(router_ip, username, password, use_ssl)
+
+            # Obtener datos del formulario
+            name = request.POST.get('name')
+            rate_limit = request.POST.get('rate_limit')
+            session_timeout = request.POST.get('session_timeout')
+            mac_timeout = request.POST.get('mac_timeout')
+            address_pool = request.POST.get('address_pool')
+
+            api.path('/ip/hotspot/user/profile').add(**{
+                'name': name,
+                'address-pool': address_pool,
+                'session-timeout': session_timeout,
+                'rate-limit': rate_limit,
+                'mac-cookie-timeout': mac_timeout
+            })
+                        
+            return redirect('utilidades:list_hotspot_user_profile')
+
+        except Exception as e:
+            error_message = f'Error al crear perfil de usuario de hotspot: {str(e)}'
+            # Renderizar de nuevo el formulario con el mensaje de error
+            return render(request, 'internet/hostpot/create_hotspot_user_profile.html', {'error': error_message, 'is_logged_in': True})
+
+    else:
+        return render(request, 'internet/hostpot/create_hotspot_user_profile.html', {'pools':pools1, 'is_logged_in': True})
+
+def list_hotspot_users(request):
+    router_ip = request.session.get('router_ip')
+    username = request.session.get('username')
+    password = request.session.get('password')
+    use_ssl = request.session.get('use_ssl', False)
+    
+    api = connect_to_router(router_ip, username, password, use_ssl)
+    
+    # Obtener lista de perfiles de usuarios de hotspot para el selector
+    #profiles = api('/ip/hotspot/user/profile/print')
+    
+    users = list(api.path('/ip/hotspot/user').select(
+        #Key('id'),
+        Key('server'),
+        Key('name'),
+        Key('address'),
+        Key('profile'),
+        Key('updtime'),
+    ))
+
+    
+    context={
+        'users':users,
+        'is_logged_in': True,
+    }
+    
+    return render(request, 'internet/hostpot/list_hotspot_user.html', context)
+
+
+def list_hotspot_user_profile(request):
+    router_ip = request.session.get('router_ip')
+    username = request.session.get('username')
+    password = request.session.get('password')
+    use_ssl = request.session.get('use_ssl', False)
+    
+    api = connect_to_router(router_ip, username, password, use_ssl)
+    
+    # Obtener lista de perfiles de usuarios de hotspot para el selector
+    #profiles = api('/ip/hotspot/user/profile/print')
+    
+    profiles = list(api.path('/ip/hotspot/user/profile').select(
+        #Key('id'),
+        Key('name'),
+        Key('address-pool'),
+        Key('session-timeout'),
+        Key('rate-limit'),
+        Key('mac-cookie-timeout'),
+        Key('keepalive-timeout')
+    ))
+
+    
+    context={
+        'profiles':profiles,
+        'is_logged_in': True,
+    }
+    
+    return render(request, 'internet/hostpot/list_hotspot_user_profile.html', context)
+
+def create_mikrotik_config(request):
+    if request.method == 'POST':
+        servidor = request.POST.get('servidor')
+        usuario = request.POST.get('usuario')
+        password = request.POST.get('password')
+        puerto = request.POST.get('puerto')
+        use_ssl = request.POST.get('use_ssl') == 'on'  # Convertir el valor de 'on' a True
+
+        MikrotikConfig.objects.create(
+            servidor=servidor,
+            usuario=usuario,
+            password=password,
+            puerto=puerto,
+            use_ssl=use_ssl,
+        )
+
+        return redirect('utilidades:create_mikrotik_config')  # Redirigir a la misma vista para ver la lista actualizada
+
+    configs = MikrotikConfig.objects.all()  # Obtener todas las configuraciones
+
+    return render(request, 'internet/config_mikrotik/create_mikrotik_config.html', {'configs': configs, 'is_logged_in': True,})

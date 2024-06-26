@@ -1,0 +1,99 @@
+{% extends "base_utilities.html" %}
+
+{% block content %}
+<h1 class="mb-4">Guardar Configuración de Mikrotik</h1>
+<div class="container mt-5">
+    <h3 class="mb-5">Nueva Configuracion</h3>
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+
+                <div class="form-group mb-3">
+                    <label for="servidor" class="form-label">Servidor:</label>
+                    <input type="text" class="form-control" id="servidor" name="servidor" required>
+                    <div class="invalid-feedback">
+                        Por favor ingresa el servidor.
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="usuario" class="form-label">Usuario:</label>
+                    <input type="text" class="form-control" id="usuario" name="usuario" required>
+                    <div class="invalid-feedback">
+                        Por favor ingresa el usuario.
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="password" class="form-label">Contraseña:</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                    <div class="invalid-feedback">
+                        Por favor ingresa la contraseña.
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="puerto" class="form-label">Puerto:</label>
+                    <input type="text" class="form-control" id="puerto" name="puerto" required>
+                    <div class="invalid-feedback">
+                        Por favor ingresa el puerto.
+                    </div>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" id="use_ssl" name="use_ssl">
+                    <label class="form-check-label" for="use_ssl">Usar SSL</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+            {% comment %} <h3 class="mb-5">Configuraciones Guardadas</h3> {% endcomment %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Servidor</th>
+                        <th>Usuario</th>
+                        <th>Puerto</th>
+                        <th>Usar SSL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for config in configs %}
+                        <tr>
+                            <td>{{ config.servidor }}</td>
+                            <td>{{ config.usuario }}</td>
+                            <td>{{ config.puerto }}</td>
+                            <td>{{ config.use_ssl|yesno:"Sí,No" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Bootstrap 5 validation
+    (function () {
+        'use strict'
+
+        var forms = document.querySelectorAll('.needs-validation')
+
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+
+{% endblock %}

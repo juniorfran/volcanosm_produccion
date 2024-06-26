@@ -6,11 +6,11 @@ from .models import EnlacePagoAcceso, Accesos, Tipos, Clientes, TransaccionCompr
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from Configuraciones.models import Barra_Principal, Contacts, Direccionamiento, General_Description, Urls_info, Urls_interes
+from django.db import transaction
 
 from Transacciones.wompi_connect import authenticate_wompi
 from Transacciones.wompi_consulta import make_wompi_get_request
 from Transacciones.wompi_envio import create_payment_link
-
 
 from azure.communication.email import EmailClient
 from django.conf import settings
@@ -209,8 +209,29 @@ def servicio_inter_index(request):
 
 
 #########################################################################33
+from librouteros import connect
+from librouteros.query import Key
+import ssl
+from functools import partial
+import librouteros as ros
 
+def connect_to_router(router_ip, username, password, use_ssl=False):
+    if use_ssl:
+        api = ros.connect_ssl(router_ip, username=username, password=password)
+    else:
+        api = ros.connect(router_ip, username=username, password=password)
+    return api
+
+
+#funcion para hacer login en el router mikrotik
+
+def login_mikrotik(router_ip, username, password):
+    api = connect_to_router(router_ip, username, password, use_ssl=False)
+    return api
+
+#funcion para obtener la lista de clientes del router mikrotik
 #Transaccion comprar acceso
+
 
 def transaccion3ds_compra_acceso(request, tipo_acceso_id):
     barra_principal = Barra_Principal.objects.latest('fecha_creacion')
@@ -220,43 +241,49 @@ def transaccion3ds_compra_acceso(request, tipo_acceso_id):
     urls_interes = Urls_interes.objects.all()
     
     tipo_acceso = get_object_or_404(Tipos, id=tipo_acceso_id)
-    acceso_disponible = Accesos.objects.filter(acceso_tipo=tipo_acceso, estado=True).last()
-    
     accesos_relacionados = Accesos.objects.filter(acceso_tipo=tipo_acceso)
     transacciones_3ds = Transaccion3DS.objects.filter(acceso__in=accesos_relacionados)
     transaccion3ds_respuesta = Transaccion3DS_Respuesta.objects.filter(transaccion3ds__in=transacciones_3ds).first()
     
-    if acceso_disponible:
-        if request.method == 'POST':
-            nombre = request.POST.get('nombre')
-            apellido = request.POST.get('apellido')
-            direccion = request.POST.get('direccion')
-            ciudad = request.POST.get('ciudad')
-            email = request.POST.get('email')
-            telefono = request.POST.get('telefono')
-            numtarjeta = request.POST.get('numtarjeta')
-            cvv = request.POST.get('cvv')
-            dui = request.POST.get('dui')
-            mesvencimiento = request.POST.get('mesvencimiento')
-            aniovencimiento = request.POST.get('aniovencimiento')
-            
-            monto = float(tipo_acceso.precio)
-            
-            #transaccion_id = transaccion3ds_compra.pk
-            
-            url_redireccion = "https://volcanosm.net/internet"
-            
-            print("Estos son los datos obtenidos:")
-            print(nombre, apellido, direccion, ciudad, email, telefono, numtarjeta, cvv, dui, mesvencimiento, aniovencimiento, monto)
-            
-            try:
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre')
+        apellido = request.POST.get('apellido')
+        direccion = request.POST.get('direccion')
+        ciudad = request.POST.get('ciudad')
+        email = request.POST.get('email')
+        telefono = request.POST.get('telefono')
+        numtarjeta = request.POST.get('numtarjeta')
+        cvv = request.POST.get('cvv')
+        dui = request.POST.get('dui')
+        mesvencimiento = request.POST.get('mesvencimiento')
+        aniovencimiento = request.POST.get('aniovencimiento')
+        
+        monto = float(tipo_acceso.precio)
+        
+        # Generar el nombre de usuario y la contraseña
+        usuario = (nombre[:2] + apellido[:2]).lower()
+        password = dui[:2] + telefono[:2]
+        
+        # Crear el acceso en la base de datos
+        acceso_disponible = Accesos.objects.create(
+            usuario=usuario,
+            password=password,
+            descripcion=f"Acceso generado para {nombre} {apellido}",
+            cant_usuarios=1,
+            acceso_tipo=tipo_acceso,
+            fecha_expiracion=datetime.now() + timedelta(hours=int(tipo_acceso.tiempo_conexion)),
+            estado=True
+        )
+        
+        try:
+            with transaction.atomic():
+                # Crear la transacción 3DS
                 transaccion_data = crear_transaccion_3ds(
                     acceso_id=acceso_disponible.pk,
                     numeroTarjeta=str(numtarjeta),
                     cvv=str(cvv),
                     mesVencimiento=mesvencimiento,
                     anioVencimiento=aniovencimiento,
-                    #urlRedi=url_redireccion,
                     monto=monto,
                     nombre=nombre,
                     apellido=apellido,
@@ -268,11 +295,12 @@ def transaccion3ds_compra_acceso(request, tipo_acceso_id):
                     client_secret=Client_secret
                 )
                 print(transaccion_data)
-                 # Obtiene la última transacción 3DS
+                
+                # Obtiene la última transacción 3DS
                 transaccion3ds = Transaccion3DS.objects.latest('fecha_creacion')
-
+                
                 # Obtiene la última respuesta de la transacción 3DS
-                transaccion3ds_respuesta = Transaccion3DS_Respuesta.objects.filter(transaccion3ds=transaccion3ds).latest('fecha_creacion')                   
+                transaccion3ds_respuesta = Transaccion3DS_Respuesta.objects.filter(transaccion3ds=transaccion3ds).latest('fecha_creacion')
                 
                 if transaccion_data:
                     cliente = Clientes.objects.create(
@@ -284,33 +312,39 @@ def transaccion3ds_compra_acceso(request, tipo_acceso_id):
                         telefono=telefono,
                     )
                     
-                   
                     transaccion3ds_compra = TransaccionCompra3DS.objects.create(
                         transaccion3ds=transaccion3ds,
                         transaccion3ds_respuesta=transaccion3ds_respuesta,
                         cliente=cliente,
                         acceso=acceso_disponible,
                     )
-                    # idtransac = transaccion3ds_respuesta.idTransaccion
-                    # consulta_transaccion = consultar_transaccion_3ds(idtransac, Client_id, Client_secret)
-                    # print(consulta_transaccion)
                     
-                    return redirect('transaccion3ds_exitosa', transaccion3ds_id=transaccion3ds_compra.pk)
+                    # Conectar al router MikroTik y agregar el usuario de hotspot
+                    credenciales = MikrotikConfig.objects.latest('id')
+                    
+                    router_ip = credenciales.servidor
+                    username = credenciales.usuario
+                    password = credenciales.password
+                    use_ssl = credenciales.use_ssl
+                    
+                    api = connect_to_router(router_ip, username, password, use_ssl)
+                    
+                    if api:
+                        api.path('/ip/hotspot/user').add(
+                            server=tipo_acceso.nombre_servidor,
+                            name=acceso_disponible.usuario,
+                            password=acceso_disponible.password,
+                            profile=tipo_acceso.nombre_perfil
+                        )
+                        
+                        return redirect('transaccion3ds_exitosa', transaccion3ds_id=transaccion3ds_compra.pk)
+                    else:
+                        raise Exception("No se pudo conectar al router MikroTik")
+                
                 else:
                     raise Exception("No se pudo realizar la transacción")
-            except Exception as e:
-                context = {
-                    'tipo_acceso': tipo_acceso,
-                    'barra_principal': barra_principal,
-                    'data_contact': data_contact,
-                    'urls_info': urls_info,
-                    'ultima_descripcion': ultima_descripcion,
-                    'urls_interes': urls_interes,
-                    'error_message': str(e),
-                }
-                return render(request, 'transaccion/pago_fallido.html', context)
-        
-        else:
+        except Exception as e:
+            # Manejar errores y revertir la transacción si es necesario
             context = {
                 'tipo_acceso': tipo_acceso,
                 'barra_principal': barra_principal,
@@ -318,19 +352,20 @@ def transaccion3ds_compra_acceso(request, tipo_acceso_id):
                 'urls_info': urls_info,
                 'ultima_descripcion': ultima_descripcion,
                 'urls_interes': urls_interes,
+                'error_message': str(e),
             }
-            return render(request, 'transaccion/comprar3ds_acceso.html', context)
+            return render(request, 'transaccion/pago_fallido.html', context)
     
     else:
         context = {
+            'tipo_acceso': tipo_acceso,
             'barra_principal': barra_principal,
             'data_contact': data_contact,
             'urls_info': urls_info,
             'ultima_descripcion': ultima_descripcion,
             'urls_interes': urls_interes,
         }
-        
-        return render(request, 'transaccion/pago_fallido.html', context)
+        return render(request, 'transaccion/comprar3ds_acceso.html', context)
 
 
     

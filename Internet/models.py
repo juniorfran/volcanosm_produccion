@@ -23,6 +23,9 @@ class Tipos (models.Model):
     fecha_inicio = models.DateTimeField(default=timezone.now, null=True)
     fecha_fin = models.DateTimeField(default=timezone.now, null=True)
     
+    nombre_perfil = models.CharField(max_length=50, null=True)
+    nombre_servidor = models.CharField(max_length=50, null=True)
+    
     def save (self, *args, **kwargs):
         super().save(*args, **kwargs)
         
@@ -158,3 +161,13 @@ class TransaccionCompra3DS(models.Model):
     
     def __str__(self):
         return f"{self.cliente} - {self.acceso}"
+    
+class MikrotikConfig(models.Model):
+    servidor = models.CharField(max_length=50)
+    usuario = models.CharField(max_length=50)
+    password = models.CharField(max_length=50)
+    puerto = models.CharField(max_length=50)
+    use_ssl = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"{self.servidor} - {self.usuario}"

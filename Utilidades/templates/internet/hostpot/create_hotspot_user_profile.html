@@ -1,0 +1,78 @@
+{% extends "base_utilities.html" %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Crear Perfil de Usuario Hotspot</h1>
+    <a type="button" class="btn btn-success" aria-current="page" href="{% url 'utilidades:list_hotspot_user_profile' %}">Ver Perfiles</a>
+
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group mb-3">
+            <label for="name">Nombre:</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+            <div class="invalid-feedback">
+                Por favor ingresa el nombre del perfil.
+            </div>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="rate_limit">Límite de Velocidad (ej. 1M/512k):</label>
+            <input type="text" class="form-control" id="rate_limit" name="rate_limit">
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="session_timeout">Tiempo de Sesión (HH:MM:SS):</label>
+            <input type="text" class="form-control" id="session_timeout" name="session_timeout" pattern="^(?:[0-1]\d|2[0-3]):(?:[0-5]\d):(?:[0-5]\d)$" required>
+            <div class="invalid-feedback">
+                Por favor ingresa el tiempo de sesión en el formato HH:MM:SS.
+            </div>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="mac_timeout">Tiempo de Cookie MAC (HH:MM:SS):</label>
+            <input type="text" class="form-control" id="mac_timeout" name="mac_timeout" pattern="^(?:[0-1]\d|2[0-3]):(?:[0-5]\d):(?:[0-5]\d)$" required>
+            <div class="invalid-feedback">
+                Por favor ingresa el tiempo de cookie MAC en el formato HH:MM:SS.
+            </div>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="address_pool">Pool de Direcciones IP:</label>
+            <select class="form-control" id="address_pool" name="address_pool">
+                <option value="none">None</option>
+                {% for pool in pools %}
+                    <option value="{{ pool.name }}">{{ pool.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Crear Perfil</button>
+    </form>
+</div>
+
+<script>
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+{% endblock %}

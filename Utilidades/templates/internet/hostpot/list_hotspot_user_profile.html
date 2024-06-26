@@ -1,0 +1,37 @@
+{% extends "base_utilities.html" %}
+{% load custom_filters %}
+
+{% block content %}
+    <h1>Lista de Perfiles de Usuarios Hotspot</h1>
+    
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Local Address</th>
+                <th>Remote Address</th>
+                <th>Rate Limit</th>
+                <th>Session Timeout</th>
+                <th>Idle Timeout</th>
+                <th>Keepalive Timeout</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for profile in profiles %}
+            <tr>
+                <td>{{ profile|get_item:'id'}}</td>
+                <td>{{ profile|get_item:'name'}}</td>
+                <td>{{ profile|get_item:'address-pool' }}</td>
+                <td>{{ profile|get_item:'rate-limit' }}</td>
+                <td>{{ profile|get_item:'session-timeout' }}</td>
+                <td>{{ profile|get_item:'idle-timeout' }}</td>
+                <td>{{ profile|get_item:'keepalive-timeout' }}</td>
+                <td>{{ profile|get_item:'mac-cookie-timeout' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
