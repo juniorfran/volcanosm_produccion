@@ -4,6 +4,10 @@ FROM python:3.9-slim
 # Establece el directorio de trabajo
 WORKDIR /app
 
+# Instala las dependencias necesarias para mysqlclient
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc pkg-config libmariadb-dev
+
 # Copia los archivos de requerimientos y los instala
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
