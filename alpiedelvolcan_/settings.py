@@ -55,7 +55,7 @@ CSRF_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = False
 
 CORS_ALLOW_ALL_ORIGINS = True
-CSRF_TRUSTED_ORIGINS = ['https://volcano-sm.azurewebsites.net', 'https://volcanosm.net', '51.222.136.8:8000', '51.222.136.8']
+CSRF_TRUSTED_ORIGINS = ['https://volcano-sm.azurewebsites.net', 'https://volcanosm.net', 'https://51.222.136.8:8000', 'https://51.222.136.8']
 
 #WOMPI CONECTION
 CLIENT_ID = "86d5de4c-dd6a-42d2-8d5b-ff5aed09ae83"
