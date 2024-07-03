@@ -6,6 +6,7 @@ WORKDIR /app
 
 # Copiar los requisitos del archivo requirements.txt y luego instalarlos
 COPY requirements.txt .
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Instalar las dependencias necesarias para mysqlclient
