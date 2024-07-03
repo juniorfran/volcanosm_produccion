@@ -46,7 +46,20 @@ SECRET_KEY = 'django-insecure-71ilsry+%0yrbexaf^j!f41b0i=t!g+8%pvd!1d8a)azph_nd-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['volcano-sm.azurewebsites.net', 'http://0.0.0.0:8000/', '127.0.0.1', 'volcanosm.net', '51.222.136.8:8000', '51.222.136.8']
+ALLOWED_HOSTS = [
+    'volcano-sm.azurewebsites.net', 
+    'http://0.0.0.0:8000/', 
+    '127.0.0.1', 
+    'volcanosm.net', 
+    '51.222.136.8:8000', 
+    '51.222.136.8', 
+    'http://volcanosm.com', 
+    'https://volcanosm.com',
+    'http://www.volcanosm.com', 
+    'https://www.volcanosm.com',
+    'www.volcanosm.com', 
+    'volcanosm.com'
+]
 #CORS_ALLOWED_ORIGINS = ['https://alpiedelvolcan.azurewebsites.net/']
 
 # Security & HTTPS settings
@@ -55,7 +68,7 @@ CSRF_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = False
 
 CORS_ALLOW_ALL_ORIGINS = True
-CSRF_TRUSTED_ORIGINS = ['https://volcano-sm.azurewebsites.net', 'https://volcanosm.net', 'https://51.222.136.8:8000', 'https://51.222.136.8']
+CSRF_TRUSTED_ORIGINS = ['https://volcano-sm.azurewebsites.net', 'https://volcanosm.net', 'https://51.222.136.8:8000', 'https://51.222.136.8', 'https://www.volcanosm.com/', 'https://volcanosm.com/']
 
 #WOMPI CONECTION
 CLIENT_ID = "86d5de4c-dd6a-42d2-8d5b-ff5aed09ae83"
