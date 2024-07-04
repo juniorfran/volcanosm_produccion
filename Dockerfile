@@ -12,7 +12,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc pkg-config libmariadb-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-    
+
+# Actualizar pip
 RUN pip install --upgrade pip
 
 # Instalar los requisitos de Python
@@ -25,4 +26,4 @@ COPY . .
 EXPOSE 8000
 
 # Comando para correr la aplicación
-CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "volcanosm.wsgi:application"]
