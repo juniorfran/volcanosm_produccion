@@ -131,43 +131,34 @@ import ssl
 from functools import partial
 import librouteros as ros
 from Internet.models import MikrotikConfig
+import socket
 
 def connect_to_router(router_ip, username, password, use_ssl=False):
-    if use_ssl:
-        api = ros.connect_ssl(router_ip, username=username, password=password)
-    else:
-        api = ros.connect(router_ip, username=username, password=password)
-    return api
+    # Establish a TCP connection to the Cloudflare tunnel
+    tunnel_url = "mikrotik.dcobranza.com"
+    tunnel_port = 8728
 
+    sock = socket.create_connection((tunnel_url, tunnel_port))
+
+    # Create a ROS API connection object
+    api = ros.ApiRos(sock)
+
+    # Login to the router
+    api.login(username, password)
+
+    return api
 
 def mikrotik_login(request):
     if request.method == 'POST':
-        router_ip = request.POST.get('router_ip')
+        router_url = request.POST.get('router_url')
         username = request.POST.get('username')
         password = request.POST.get('password')
         use_ssl = request.POST.get('use_ssl') == 'on'
 
         try:
-            if use_ssl:
-                ctx = ssl.create_default_context()
-                ctx.check_hostname = False
-                ctx.set_ciphers('ADH:@SECLEVEL=0')
-                ssl_wrapper = partial(ctx.wrap_socket, server_hostname=router_ip)
-                api = connect(
-                    username=username,
-                    password=password,
-                    host=router_ip,
-                    ssl_wrapper=ssl_wrapper,
-                    port=8729
-                )
-            else:
-                api = connect(
-                    username=username,
-                    password=password,
-                    host=router_ip,
-                )
+            api = connect_to_router(router_url, username, password, use_ssl)
 
-            request.session['router_ip'] = router_ip
+            request.session['router_url'] = router_url
             request.session['username'] = username
             request.session['password'] = password
             request.session['use_ssl'] = use_ssl
@@ -178,6 +169,56 @@ def mikrotik_login(request):
             return render(request, 'internet/mikrotik_login.html', {'error': f'Error: {str(e)}'})
 
     return render(request, 'internet/mikrotik_login.html')
+
+# def connect_to_router(router_ip, username, password, use_ssl=False):
+#     if use_ssl:
+#         api = ros.connect_ssl(router_ip, username=username, password=password)
+#     else:
+#         api = ros.connect(router_ip, username=username, password=password)
+#     return api
+
+
+# def mikrotik_login(request):
+#     if request.method == 'POST':
+#         router_url = request.POST.get('router_url')
+#         username = request.POST.get('username')
+#         password = request.POST.get('password')
+#         use_ssl = request.POST.get('use_ssl') == 'on'
+
+#         try:
+#             if use_ssl:
+#                 ctx = ssl.create_default_context()
+#                 ctx.check_hostname = False
+#                 ctx.set_ciphers('ADH:@SECLEVEL=0')
+#                 ssl_wrapper = partial(ctx.wrap_socket, server_hostname=router_url)
+#                 api = connect(
+#                     username=username,
+#                     password=password,
+#                     host=router_url,
+#                     ssl_wrapper=ssl_wrapper,
+#                     port=8729  # Asegúrate de usar el puerto correcto aquí
+#                 )
+#             else:
+#                 api = connect(
+#                     username=username,
+#                     password=password,
+#                     host=router_url,
+#                     port=8728 # Asegúrate de usar el puerto correcto aquí
+#                 )
+
+#             request.session['router_url'] = router_url
+#             request.session['username'] = username
+#             request.session['password'] = password
+#             request.session['use_ssl'] = use_ssl
+
+#             return redirect('utilidades:mikrotik_interfaces')
+
+#         except Exception as e:
+#             return render(request, 'internet/mikrotik_login.html', {'error': f'Error: {str(e)}'})
+
+#     return render(request, 'internet/mikrotik_login.html')
+
+
 
 def mikrotik_interfaces(request):
     router_ip = request.session.get('router_ip')
