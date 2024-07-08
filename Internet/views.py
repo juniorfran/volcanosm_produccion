@@ -236,176 +236,52 @@ def login_mikrotik(router_ip, username, password):
 #Transaccion comprar acceso
 
 
-# def transaccion3ds_compra_acceso(request, tipo_acceso_id):
-#     barra_principal = Barra_Principal.objects.latest('fecha_creacion')
-#     data_contact = Contacts.objects.latest()
-#     urls_info = Urls_info.objects.all()
-#     ultima_descripcion = General_Description.objects.latest('fecha_creacion')
-#     urls_interes = Urls_interes.objects.all()
-    
-#     tipo_acceso = get_object_or_404(Tipos, id=tipo_acceso_id)
-#     accesos_relacionados = Accesos.objects.filter(acceso_tipo=tipo_acceso)
-#     transacciones_3ds = Transaccion3DS.objects.filter(acceso__in=accesos_relacionados)
-#     transaccion3ds_respuesta = Transaccion3DS_Respuesta.objects.filter(transaccion3ds__in=transacciones_3ds).first()
-    
-#     if request.method == 'POST':
-#         nombre = request.POST.get('nombre')
-#         apellido = request.POST.get('apellido')
-#         direccion = request.POST.get('direccion')
-#         ciudad = request.POST.get('ciudad')
-#         email = request.POST.get('email')
-#         telefono = request.POST.get('telefono')
-#         numtarjeta = request.POST.get('numtarjeta')
-#         cvv = request.POST.get('cvv')
-#         dui = request.POST.get('dui')
-#         mesvencimiento = request.POST.get('mesvencimiento')
-#         aniovencimiento = request.POST.get('aniovencimiento')
-        
-#         monto = float(tipo_acceso.precio)
-        
-#         # Generar el nombre de usuario y la contraseña
-#         usuario = (nombre[:2] + apellido[:2]).lower()
-#         password = dui[:2] + telefono[:2]
-        
-#         # Crear el acceso en la base de datos
-#         acceso_disponible = Accesos.objects.create(
-#             usuario=usuario,
-#             password=password,
-#             descripcion=f"Acceso generado para {nombre} {apellido}",
-#             cant_usuarios=1,
-#             acceso_tipo=tipo_acceso,
-#             fecha_expiracion=datetime.now() + timedelta(hours=int(tipo_acceso.tiempo_conexion)),
-#             estado=True
-#         )
-        
-#         try:
-#             with transaction.atomic():
-#                 # Crear la transacción 3DS
-#                 transaccion_data = crear_transaccion_3ds(
-#                     acceso_id=acceso_disponible.pk,
-#                     numeroTarjeta=str(numtarjeta),
-#                     cvv=str(cvv),
-#                     mesVencimiento=mesvencimiento,
-#                     anioVencimiento=aniovencimiento,
-#                     monto=monto,
-#                     nombre=nombre,
-#                     apellido=apellido,
-#                     email=email,
-#                     ciudad=ciudad,
-#                     direccion=direccion,
-#                     telefono=str(telefono),
-#                     client_id=Client_id,
-#                     client_secret=Client_secret
-#                 )
-#                 print(transaccion_data)
-                
-#                 # Obtiene la última transacción 3DS
-#                 transaccion3ds = Transaccion3DS.objects.latest('fecha_creacion')
-                
-#                 # Obtiene la última respuesta de la transacción 3DS
-#                 transaccion3ds_respuesta = Transaccion3DS_Respuesta.objects.filter(transaccion3ds=transaccion3ds).latest('fecha_creacion')
-                
-#                 if transaccion_data:
-#                     cliente = Clientes.objects.create(
-#                         nombre=nombre,
-#                         apellido=apellido,
-#                         direccion=direccion,
-#                         dui=dui,
-#                         email=email,
-#                         telefono=telefono,
-#                     )
-                    
-#                     transaccion3ds_compra = TransaccionCompra3DS.objects.create(
-#                         transaccion3ds=transaccion3ds,
-#                         transaccion3ds_respuesta=transaccion3ds_respuesta,
-#                         cliente=cliente,
-#                         acceso=acceso_disponible,
-#                     )
-                    
-#                     # Conectar al router MikroTik y agregar el usuario de hotspot
-#                     credenciales = MikrotikConfig.objects.latest('id')
-                    
-#                     router_ip = credenciales.servidor
-#                     username = credenciales.usuario
-#                     password = credenciales.password
-#                     use_ssl = credenciales.use_ssl
-                    
-#                     api = connect_to_router(router_ip, username, password, use_ssl)
-                    
-#                     if api:
-#                         api.path('/ip/hotspot/user').add(
-#                             server=tipo_acceso.nombre_servidor,
-#                             name=acceso_disponible.usuario,
-#                             password=acceso_disponible.password,
-#                             profile=tipo_acceso.nombre_perfil
-#                         )
-                        
-#                         return redirect('transaccion3ds_exitosa', transaccion3ds_id=transaccion3ds_compra.pk)
-#                     else:
-#                         raise Exception("No se pudo conectar al router MikroTik")
-                
-#                 else:
-#                     raise Exception("No se pudo realizar la transacción")
-#         except Exception as e:
-#             # Manejar errores y revertir la transacción si es necesario
-#             context = {
-#                 'tipo_acceso': tipo_acceso,
-#                 'barra_principal': barra_principal,
-#                 'data_contact': data_contact,
-#                 'urls_info': urls_info,
-#                 'ultima_descripcion': ultima_descripcion,
-#                 'urls_interes': urls_interes,
-#                 'error_message': str(e),
-#             }
-#             return render(request, 'transaccion/pago_fallido.html', context)
-    
-#     else:
-#         context = {
-#             'tipo_acceso': tipo_acceso,
-#             'barra_principal': barra_principal,
-#             'data_contact': data_contact,
-#             'urls_info': urls_info,
-#             'ultima_descripcion': ultima_descripcion,
-#             'urls_interes': urls_interes,
-#         }
-#         return render(request, 'transaccion/comprar3ds_acceso.html', context)
-
 def transaccion3ds_compra_acceso(request, tipo_acceso_id):
     barra_principal = Barra_Principal.objects.latest('fecha_creacion')
     data_contact = Contacts.objects.latest()
     urls_info = Urls_info.objects.all()
     ultima_descripcion = General_Description.objects.latest('fecha_creacion')
     urls_interes = Urls_interes.objects.all()
-
+    
     tipo_acceso = get_object_or_404(Tipos, id=tipo_acceso_id)
-    acceso_disponible = Accesos.objects.filter(acceso_tipo=tipo_acceso, estado=True).last()
-
     accesos_relacionados = Accesos.objects.filter(acceso_tipo=tipo_acceso)
     transacciones_3ds = Transaccion3DS.objects.filter(acceso__in=accesos_relacionados)
     transaccion3ds_respuesta = Transaccion3DS_Respuesta.objects.filter(transaccion3ds__in=transacciones_3ds).first()
-
-    if acceso_disponible:
-        if request.method == 'POST':
-            nombre = request.POST.get('nombre')
-            apellido = request.POST.get('apellido')
-            direccion = request.POST.get('direccion')
-            ciudad = request.POST.get('ciudad')
-            email = request.POST.get('email')
-            telefono = request.POST.get('telefono')
-            numtarjeta = request.POST.get('numtarjeta')
-            cvv = request.POST.get('cvv')
-            dui = request.POST.get('dui')
-            mesvencimiento = request.POST.get('mesvencimiento')
-            aniovencimiento = request.POST.get('aniovencimiento')
-
-            monto = float(tipo_acceso.precio)
-
-            print("Estos son los datos obtenidos:")
-            print(nombre, apellido, direccion, ciudad, email, telefono, numtarjeta, cvv, dui, mesvencimiento, aniovencimiento, monto)
-
-            try:
+    
+    acceso_disponible = Accesos.objects.filter(acceso_tipo=tipo_acceso, estado=True).first()
+    
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre')
+        apellido = request.POST.get('apellido')
+        direccion = request.POST.get('direccion')
+        ciudad = request.POST.get('ciudad')
+        email = request.POST.get('email')
+        telefono = request.POST.get('telefono')
+        numtarjeta = request.POST.get('numtarjeta')
+        cvv = request.POST.get('cvv')
+        dui = request.POST.get('dui')
+        mesvencimiento = request.POST.get('mesvencimiento')
+        aniovencimiento = request.POST.get('aniovencimiento')
+        
+        monto = float(tipo_acceso.precio)
+        
+        if not acceso_disponible:
+            context = {
+                'tipo_acceso': tipo_acceso,
+                'barra_principal': barra_principal,
+                'data_contact': data_contact,
+                'urls_info': urls_info,
+                'ultima_descripcion': ultima_descripcion,
+                'urls_interes': urls_interes,
+                'error_message': 'No hay accesos disponibles.',
+            }
+            return render(request, 'transaccion/pago_fallido.html', context)
+        
+        try:
+            with transaction.atomic():
+                # Crear la transacción 3DS
                 transaccion_data = crear_transaccion_3ds(
-                    acceso_id=acceso_disponible.pk,
+                    acceso_id=acceso_disponible.id,
                     numeroTarjeta=str(numtarjeta),
                     cvv=str(cvv),
                     mesVencimiento=mesvencimiento,
@@ -424,10 +300,10 @@ def transaccion3ds_compra_acceso(request, tipo_acceso_id):
                 
                 # Obtiene la última transacción 3DS
                 transaccion3ds = Transaccion3DS.objects.latest('fecha_creacion')
-
+                
                 # Obtiene la última respuesta de la transacción 3DS
                 transaccion3ds_respuesta = Transaccion3DS_Respuesta.objects.filter(transaccion3ds=transaccion3ds).latest('fecha_creacion')
-
+                
                 if transaccion_data:
                     cliente = Clientes.objects.create(
                         nombre=nombre,
@@ -437,35 +313,20 @@ def transaccion3ds_compra_acceso(request, tipo_acceso_id):
                         email=email,
                         telefono=telefono,
                     )
-
+                    
                     transaccion3ds_compra = TransaccionCompra3DS.objects.create(
                         transaccion3ds=transaccion3ds,
                         transaccion3ds_respuesta=transaccion3ds_respuesta,
                         cliente=cliente,
                         acceso=acceso_disponible,
                     )
-                    idtransac = transaccion3ds_respuesta.idTransaccion
-                    consulta_transaccion = consultar_transaccion_3ds(idtransac, Client_id, Client_secret)
-                    print(consulta_transaccion)
-
-                    if consulta_transaccion and consulta_transaccion.get("esAprobada"):
-                        return redirect('transaccion3ds_exitosa', transaccion3ds_id=transaccion3ds_compra.pk)
-                    else:
-                        return redirect('transaccion3ds_fallida')
+                    
+                    return redirect('transaccion3ds_exitosa', transaccion3ds_id=transaccion3ds.id)
+                                
                 else:
                     raise Exception("No se pudo realizar la transacción")
-            except Exception as e:
-                context = {
-                    'tipo_acceso': tipo_acceso,
-                    'barra_principal': barra_principal,
-                    'data_contact': data_contact,
-                    'urls_info': urls_info,
-                    'ultima_descripcion': ultima_descripcion,
-                    'urls_interes': urls_interes,
-                    'error_message': str(e),
-                }
-                return render(request, 'transaccion/pago_fallido.html', context)
-        else:
+        except Exception as e:
+            # Manejar errores y revertir la transacción si es necesario
             context = {
                 'tipo_acceso': tipo_acceso,
                 'barra_principal': barra_principal,
@@ -473,17 +334,23 @@ def transaccion3ds_compra_acceso(request, tipo_acceso_id):
                 'urls_info': urls_info,
                 'ultima_descripcion': ultima_descripcion,
                 'urls_interes': urls_interes,
+                'error_message': str(e),
             }
-            return render(request, 'transaccion/comprar3ds_acceso.html', context)
+            return render(request, 'transaccion/pago_fallido.html', context)
+    
     else:
         context = {
+            'tipo_acceso': tipo_acceso,
             'barra_principal': barra_principal,
             'data_contact': data_contact,
             'urls_info': urls_info,
             'ultima_descripcion': ultima_descripcion,
             'urls_interes': urls_interes,
         }
-        return render(request, 'transaccion/pago_fallido.html', context)
+        return render(request, 'transaccion/comprar3ds_acceso.html', context)
+
+
+
     
 # Nueva vista para mostrar el mensaje de éxito
 def transaccion3ds_exitosa(request, transaccion3ds_id):
