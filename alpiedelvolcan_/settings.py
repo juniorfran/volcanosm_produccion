@@ -117,7 +117,31 @@ INSTALLED_APPS = [
     'TPV_.Reportes',
     'django_celery_beat',
     'Internet',
-    
+    'rest_framework',
+    'corsheaders',
+]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+# O usar una lista específica de orígenes permitidos
+# CORS_ALLOWED_ORIGINS = [
+#     'http://127.0.0.1:8000',
+#     'http://localhost:8000',
+# ]
+
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
+]
+
+CORS_ALLOW_HEADERS = [
+    'content-type',
+    'authorization',
+    'x-csrftoken',
 ]
 
 LOGIN_REDIRECT_URL = 'utilidades:utilidades'
@@ -126,12 +150,23 @@ LOGOUT_REDIRECT_URL = 'login'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
+    
 ]
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
 
 ROOT_URLCONF = 'alpiedelvolcan_.urls'
 

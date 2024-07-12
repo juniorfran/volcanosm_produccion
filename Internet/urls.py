@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 
+
 urlpatterns = [
     #path('procesar-pago/', views.procesar_pago, name='procesar_pago'),
     path('', views.servicio_inter_index, name='servicio_inter'),
@@ -13,4 +14,6 @@ urlpatterns = [
     path('transaccion-exitosa/<int:transaccion3ds_id>/', views.transaccion3ds_exitosa, name='transaccion3ds_exitosa'),
     
     path('verificar-pago/<str:transaccion_id>/', views.verificar_pago, name='verificar_pago'),
+    
+
 ]
