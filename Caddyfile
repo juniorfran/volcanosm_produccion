@@ -1,23 +1,8 @@
-{
-
-    email your-email@example.com
-
+:80 {
+    reverse_proxy 0.0.0.0:8000
 }
 
-
-volcanosm.com {
-
-    reverse_proxy localhost:8000
-
-    log {
-
-        output stdout
-
-        format console
-
-    }
-
-    encode gzip
-
+:443 {
+    reverse_proxy 0.0.0.0:8000
+    tls juniorfran@hotmail.es
 }
-

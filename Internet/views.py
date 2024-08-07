@@ -1,4 +1,5 @@
 from django.utils import timezone
+from datetime import datetime, timedelta
 import json
 from django.shortcuts import get_object_or_404, redirect, render
 import requests
@@ -214,6 +215,8 @@ from librouteros.query import Key
 import ssl
 from functools import partial
 import librouteros as ros
+from .models import MikrotikConfig
+
 
 def connect_to_router(router_ip, username, password, use_ssl=False):
     if use_ssl:
@@ -245,6 +248,8 @@ def transaccion3ds_compra_acceso(request, tipo_acceso_id):
     transacciones_3ds = Transaccion3DS.objects.filter(acceso__in=accesos_relacionados)
     transaccion3ds_respuesta = Transaccion3DS_Respuesta.objects.filter(transaccion3ds__in=transacciones_3ds).first()
     
+    acceso_disponible = Accesos.objects.filter(acceso_tipo=tipo_acceso, estado=True).first()
+    
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
         apellido = request.POST.get('apellido')
@@ -260,26 +265,23 @@ def transaccion3ds_compra_acceso(request, tipo_acceso_id):
         
         monto = float(tipo_acceso.precio)
         
-        # Generar el nombre de usuario y la contraseña
-        usuario = (nombre[:2] + apellido[:2]).lower()
-        password = dui[:2] + telefono[:2]
-        
-        # Crear el acceso en la base de datos
-        acceso_disponible = Accesos.objects.create(
-            usuario=usuario,
-            password=password,
-            descripcion=f"Acceso generado para {nombre} {apellido}",
-            cant_usuarios=1,
-            acceso_tipo=tipo_acceso,
-            fecha_expiracion=datetime.now() + timedelta(hours=int(tipo_acceso.tiempo_conexion)),
-            estado=True
-        )
+        if not acceso_disponible:
+            context = {
+                'tipo_acceso': tipo_acceso,
+                'barra_principal': barra_principal,
+                'data_contact': data_contact,
+                'urls_info': urls_info,
+                'ultima_descripcion': ultima_descripcion,
+                'urls_interes': urls_interes,
+                'error_message': 'No hay accesos disponibles.',
+            }
+            return render(request, 'transaccion/pago_fallido.html', context)
         
         try:
             with transaction.atomic():
                 # Crear la transacción 3DS
                 transaccion_data = crear_transaccion_3ds(
-                    acceso_id=acceso_disponible.pk,
+                    acceso_id=acceso_disponible.id,
                     numeroTarjeta=str(numtarjeta),
                     cvv=str(cvv),
                     mesVencimiento=mesvencimiento,
@@ -319,28 +321,8 @@ def transaccion3ds_compra_acceso(request, tipo_acceso_id):
                         acceso=acceso_disponible,
                     )
                     
-                    # Conectar al router MikroTik y agregar el usuario de hotspot
-                    credenciales = MikrotikConfig.objects.latest('id')
-                    
-                    router_ip = credenciales.servidor
-                    username = credenciales.usuario
-                    password = credenciales.password
-                    use_ssl = credenciales.use_ssl
-                    
-                    api = connect_to_router(router_ip, username, password, use_ssl)
-                    
-                    if api:
-                        api.path('/ip/hotspot/user').add(
-                            server=tipo_acceso.nombre_servidor,
-                            name=acceso_disponible.usuario,
-                            password=acceso_disponible.password,
-                            profile=tipo_acceso.nombre_perfil
-                        )
-                        
-                        return redirect('transaccion3ds_exitosa', transaccion3ds_id=transaccion3ds_compra.pk)
-                    else:
-                        raise Exception("No se pudo conectar al router MikroTik")
-                
+                    return redirect('transaccion3ds_exitosa', transaccion3ds_id=transaccion3ds.id)
+                                
                 else:
                     raise Exception("No se pudo realizar la transacción")
         except Exception as e:
@@ -366,6 +348,7 @@ def transaccion3ds_compra_acceso(request, tipo_acceso_id):
             'urls_interes': urls_interes,
         }
         return render(request, 'transaccion/comprar3ds_acceso.html', context)
+
 
 
     
