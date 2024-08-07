@@ -769,4 +769,6 @@ def enviar_informacion_acceso_por_correo(transaccion_compra):
     except Exception as ex:
         print(ex)
         
-        
+
+
+

@@ -43,6 +43,8 @@ urlpatterns = [
     path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
     
+    #urls de la api
+    path('api/', include('Internet.api_urls')),
     
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
