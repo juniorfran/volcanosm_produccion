@@ -1,0 +1,23 @@
+{
+
+    email your-email@example.com
+
+}
+
+
+volcanosm.com {
+
+    reverse_proxy localhost:8000
+
+    log {
+
+        output stdout
+
+        format console
+
+    }
+
+    encode gzip
+
+}
+
