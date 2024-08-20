@@ -17,7 +17,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'alpiedelvolcan_.settings')
 SECRET_KEY = 'django-insecure-71ilsry+%0yrbexaf^j!f41b0i=t!g+8%pvd!1d8a)azph_nd-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 DEBUG_PROPAGATE_EXCEPTIONS = True
 
 ALLOWED_HOSTS = [
@@ -33,7 +33,10 @@ ALLOWED_HOSTS = [
     'http://www.volcanosm.com', 
     'https://www.volcanosm.com',
     'www.volcanosm.com', 
-    'volcanosm.com'
+    'volcanosm.com',
+    'http://0.0.0.0/',
+    'http://0.0.0.0:8000/',
+    'http://172.17.0.2/'
 ]
 #CORS_ALLOWED_ORIGINS = ['https://alpiedelvolcan.azurewebsites.net/']
 
@@ -49,7 +52,18 @@ CSRF_TRUSTED_ORIGINS = [
     'https://51.222.136.8:8000',
     'https://51.222.136.8',
     'https://www.volcanosm.com/',
-    'https://volcanosm.com/'
+    'https://www.volcanosm.com',
+    'https://volcanosm.com/',
+    'https://volcanosm.com',
+    'http://www.volcanosm.com/',
+    'http://www.volcanosm.com',
+    'http://volcanosm.com/',
+    'http://volcanosm.com',
+    'https://0.0.0.0/',
+    'https://0.0.0.0:8000/',
+    'http://172.17.0.2/',
+    'http://0.0.0.0/',
+    
     ]
 
 #WOMPI CONECTION

@@ -347,6 +347,7 @@ def actualizar_estado_reserva(request):
                         # Si el mensaje de la transacción es AUTORIZADO, el estado es PAGADO
                         if mensaje_transaccion == 'AUTORIZADO':
                             ultima_reserva.estado_reserva = 'PAGADO'
+
                         else:
                             # Si no es AUTORIZADO, pero hay una transacción, el estado es PENDIENTE
                             ultima_reserva.estado_reserva = 'PENDIENTE'
