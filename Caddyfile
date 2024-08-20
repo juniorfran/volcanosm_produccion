@@ -1,0 +1,8 @@
+:80 {
+    reverse_proxy 0.0.0.0:8000
+}
+
+:443 {
+    reverse_proxy 0.0.0.0:8000
+    tls juniorfran@hotmail.es
+}

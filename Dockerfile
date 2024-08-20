@@ -9,15 +9,13 @@ COPY requirements.txt .
 
 # Instalar las dependencias necesarias para mysqlclient y pkg-config
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc pkg-config libmariadb-dev && \
+    apt-get install -y --no-install-recommends gcc pkg-config libmariadb-dev python3-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Actualizar pip
-RUN pip install --upgrade pip
-
 # Instalar los requisitos de Python
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip setuptools && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copiar el código fuente de la aplicación en el contenedor
 COPY . .
@@ -26,4 +24,4 @@ COPY . .
 EXPOSE 8000
 
 # Comando para correr la aplicación
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "volcanosm.wsgi:application"]
+CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
