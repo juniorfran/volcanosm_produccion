@@ -9,33 +9,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 #BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'alpiedelvolcan_.settings')
 
-# app = Celery('Tours')
-# app.config_from_object('django.conf:settings', namespace='CELERY')
-
-#####################################################################################################################
-######### configuraciones para celery ###############################################################################
-#####################################################################################################################
-
-# Configuración de Azure Service Bus como backend de mensajería
-# app.conf.broker_url = 'azureservicebus://volcanocelery.servicebus.windows.net/?operation_timeout=60&'
-# app.conf.broker_transport_options = {
-#     'polling_interval': 1,
-#     'max_retries': 3,
-#     'interval_start': 0,
-# }
-# app.autodiscover_tasks()
-
-
-# CELERY_BEAT_SCHEDULE = {
-#     'actualizar-estado-reserva': {
-#         'task': 'Tours.tasks.actualizar_estado_reserva',
-#         'schedule': 5.0,  # Ejecutar cada 10 segundos
-#     },
-# }
-
-#####################################################################################################################
-######### configuraciones para celery #################################################################
-#####################################################################################################################
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -45,11 +18,13 @@ SECRET_KEY = 'django-insecure-71ilsry+%0yrbexaf^j!f41b0i=t!g+8%pvd!1d8a)azph_nd-
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+DEBUG_PROPAGATE_EXCEPTIONS = True
 
 ALLOWED_HOSTS = [
     'volcano-sm.azurewebsites.net', 
     'http://0.0.0.0:8000/', 
-    '127.0.0.1', 
+    '127.0.0.1',
+    'localhost',
     'volcanosm.net', 
     '51.222.136.8:8000', 
     '51.222.136.8', 
@@ -68,12 +43,20 @@ CSRF_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = False
 
 CORS_ALLOW_ALL_ORIGINS = True
-CSRF_TRUSTED_ORIGINS = ['https://volcano-sm.azurewebsites.net', 'https://volcanosm.net', 'https://51.222.136.8:8000', 'https://51.222.136.8', 'https://www.volcanosm.com/', 'https://volcanosm.com/']
+CSRF_TRUSTED_ORIGINS = [
+    'https://volcano-sm.azurewebsites.net',
+    'https://volcanosm.net',
+    'https://51.222.136.8:8000',
+    'https://51.222.136.8',
+    'https://www.volcanosm.com/',
+    'https://volcanosm.com/'
+    ]
 
 #WOMPI CONECTION
 CLIENT_ID = "86d5de4c-dd6a-42d2-8d5b-ff5aed09ae83"
 CLIENT_SECRET = "c3bb69e4-7d19-486b-b9d8-1b2b592714d5"
 
+#EMAIL CONFIGURATION
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587  # El puerto para Gmail es 587
@@ -149,6 +132,7 @@ LOGOUT_REDIRECT_URL = 'login'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -156,8 +140,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
-    
 ]
 
 REST_FRAMEWORK = {
@@ -281,19 +263,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-# Configuración para archivos estáticos
+# Configuración de archivos estáticos
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-STATIC_URL = '/static/'
-
-CKEDITOR_BASEPATH = '/static/ckeditor/ckeditor/'
-
-
-# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Default primary key field type

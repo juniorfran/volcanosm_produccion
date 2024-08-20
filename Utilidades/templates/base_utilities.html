@@ -27,7 +27,7 @@
 <body>
 	<div class="wrapper d-flex align-items-stretch">
         <nav id="sidebar" class="nav flex-column">
-            <h1><a href="{% url "utilidades:utilidades" %}" class="logo">Volcano</a></h1>
+            <h1><a href="{% url 'utilidades:utilidades' %}" class="logo">Volcano</a></h1>
             <ul class="list-unstyled components mb-5">
                 <li class="nav-item">
                     <a class="nav-link active" data-bs-toggle="collapse" href="#collapseConsultas" role="button" aria-expanded="false" aria-controls="collapseConsultas">
@@ -157,12 +157,12 @@
                             {% if is_logged_in %}
                                 <!-- Menús del lado izquierdo -->
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{% url "utilidades:mikrotik_status" %}">Estado</a>
+                                    <a class="nav-link" href="{% url 'utilidades:mikrotik_status' %}">Estado</a>
                                 </li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Configuraciones</a>
                                     <ul class="dropdown-menu dropdown-menu-dark">
-                                        <li><a class="dropdown-item" href="{% url "utilidades:create_mikrotik_config" %}">Acceso</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'utilidades:create_mikrotik_config' %}">Acceso</a></li>
                                         <li><a class="dropdown-item" href="#">Detalles</a></li>
                                         <li><a class="dropdown-item" href="#">Portal Cautivo</a></li>
                                     </ul>
@@ -184,8 +184,8 @@
                                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Hostpot</a>
                                     <ul class="dropdown-menu dropdown-menu-dark">
                                         <li><a class="dropdown-item" href="#">Estatus</a></li>
-                                        <li><a class="dropdown-item" href="{% url "utilidades:create_hotspot_user" %}">Usuarios</a></li>
-                                        <li><a class="dropdown-item" href="{% url "utilidades:create_hotspot_user_profile" %}">Perfiles de Usuarios</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'utilidades:create_hotspot_user' %}">Usuarios</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'utilidades:create_hotspot_user_profile' %}">Perfiles de Usuarios</a></li>
                                     </ul>
                                 </li>
 
@@ -193,7 +193,7 @@
                         </ul>
                         <ul class="nav navbar-nav ml-auto">
                             <li class="nav-item active">
-                                <a class="nav-link" href="{% url "utilidades:utilidades" %}">Inicio <span class="sr-only">(current)</span></a>
+                                <a class="nav-link" href="{% url 'utilidades:utilidades' %}">Inicio <span class="sr-only">(current)</span></a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link active" href="{% url 'utilidades:detalle' %}">

@@ -29,7 +29,8 @@ urlpatterns = [
     
     #url para contactanos
     path('contactanos/', include('Contactanos.urls')),
-      #url para TPV
+    
+    #url para TPV
     path('TPV/Cajas/', include('TPV_.Cajas.urls')),
     path('TPV/Productos/', include('TPV_.Productos.urls')),
     path('TPV/Ventas/', include('TPV_.Ventas.urls')),
@@ -46,12 +47,12 @@ urlpatterns = [
     #urls de la api
     path('api/', include('Internet.api_urls')),
     
-]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]
 
-# start_background_thread()
+#+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # Configuración para servir archivos estáticos en entorno de desarrollo
-urlpatterns += staticfiles_urlpatterns()
+# urlpatterns += staticfiles_urlpatterns()
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# if settings.DEBUG:
+#     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
