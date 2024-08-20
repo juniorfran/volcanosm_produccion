@@ -20,8 +20,12 @@ RUN pip install --upgrade pip setuptools && \
 # Copiar el código fuente de la aplicación en el contenedor
 COPY . .
 
+# Ejecutar el comando collectstatic durante la construcción
+RUN python3 manage.py collectstatic --noinput
+
 # Exponer el puerto en el que la aplicación estará corriendo
 EXPOSE 8000
 
 # Comando para correr la aplicación
+
 CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
