@@ -4,14 +4,15 @@ FROM python:3.9-slim-bullseye
 # Establecer el directorio de trabajo
 WORKDIR /app
 
-# Copiar los requisitos del archivo requirements.txt
-COPY requirements.txt .
-
-# Instalar las dependencias necesarias para mysqlclient y pkg-config
+# Actualizar apt-get e instalar apt-utils
 RUN apt-get update && \
+    apt-get install -y apt-utils && \
     apt-get install -y --no-install-recommends gcc pkg-config libmariadb-dev python3-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Copiar los requisitos del archivo requirements.txt
+COPY requirements.txt .
 
 # Instalar los requisitos de Python
 RUN pip install --upgrade pip setuptools && \
@@ -27,5 +28,4 @@ RUN python3 manage.py collectstatic --noinput
 EXPOSE 8000
 
 # Comando para correr la aplicación
-
 CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
