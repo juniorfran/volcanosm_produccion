@@ -202,6 +202,7 @@
     
 
     <!-- Agrega este script en la sección de scripts -->
+{% comment %} {% if tour.solo_finde==true %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         flatpickr("#fecha_reserva", {
@@ -216,6 +217,25 @@
         });
     });
 </script>
+{% endif %} {% endcomment %}
+
+{% if tour.solo_finde %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr("#fecha_reserva", {
+            minDate: 'today',  // A partir de hoy
+            disable: [
+                function(date) {
+                    // Deshabilitar todos los días excepto sábados (6) y domingos (0)
+                    return (date.getDay() !== 6 && date.getDay() !== 0);
+                }
+            ],
+            dateFormat: 'Y-m-d'  // Formato de fecha
+        });
+    });
+</script>
+{% endif %}
 
 <script>
         $(document).ready(function() {

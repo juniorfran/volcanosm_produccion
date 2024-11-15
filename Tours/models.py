@@ -43,6 +43,7 @@ class Tour(models.Model):
     # Nuevo campo para el rango de fechas disponibles
     fecha_inicio = models.DateTimeField(default=timezone.now)
     fecha_fin = models.DateTimeField(default=timezone.now)
+    solo_finde = models.BooleanField(default=False) # Solo fin de semana nuevo campo
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
