@@ -1,0 +1,3 @@
+ip: 51.222.136.8
+usuario: debian
+clave: Marciano2121.
