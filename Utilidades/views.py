@@ -15,9 +15,17 @@ import csv
 import pandas as pd
 from django.http import HttpResponse
 
+from Configuraciones.models import wompi_config
 
-Client_id = settings.CLIENT_ID
-Client_secret = settings.CLIENT_SECRET
+try:
+    latest_config = wompi_config.objects.latest('created_at')
+    Client_id = latest_config.client_id
+    Client_secret = latest_config.client_secret
+except wompi_config.DoesNotExist:
+    latest_config = None
+    Client_id = None
+    Client_secret = None
+    # Puedes asignar valores predeterminados aquí si es necesario.
 
 @login_required
 def index_utilidades(request):

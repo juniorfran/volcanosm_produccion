@@ -65,7 +65,7 @@ def create_payment_link(reserva_id, client_id, client_secret, comercio_id, monto
         
         # Guardar información del enlace de pago en la base de datos
 # Almacenar la información del enlace de pago en la base de datos
-        enlace_pago = EnlacePago.objects.create(
+        enlace_pago = EnlacePagoTour.objects.create(
             reserva=reserva_instance,
             comercio_id=comercio_id,
             monto=monto*cantidad,
