@@ -1,6 +1,10 @@
 from django.contrib import admin
-from .models import Barra_Principal, CarruselInicio, Services_Bar, Team_bar, Contacts, Urls_info, Urls_interes, Direccionamiento
+from .models import Barra_Principal, CarruselInicio, Services_Bar, Team_bar, Contacts, Urls_info, Urls_interes, Direccionamiento, wompi_config
 from .models import General_Description
+
+@admin.register(wompi_config)
+class wompi_configAdmin(admin.ModelAdmin):
+    list_display = ('id', 'client_id', 'client_secret')
 
 @admin.register(Barra_Principal)
 class BarraPrincipalAdmin(admin.ModelAdmin):

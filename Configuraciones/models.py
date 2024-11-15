@@ -9,6 +9,16 @@ from django.utils import timezone
 
 # Create your models here.
 
+class wompi_config (models.Model):
+    cuenta = models.CharField(max_length=100, blank=True, null=True)
+    client_id = models.CharField(max_length=100, blank=True, null=True)
+    client_secret = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    #funcion str
+    def __str__(self):
+        return self.cuenta
+
 class General_Description(models.Model):
     """
     This model represents the general description of a product. It is used to store information that applies to
