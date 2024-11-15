@@ -23,6 +23,9 @@ COPY . .
 
 # Ejecutar el comando collectstatic durante la construcción
 RUN python3 manage.py collectstatic --noinput
+RUN python3 manage.py makemigrations
+RUN python3 manage.py migrate
+
 
 # Exponer el puerto en el que la aplicación estará corriendo
 EXPOSE 8000
