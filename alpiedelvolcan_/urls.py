@@ -47,9 +47,7 @@ urlpatterns = [
     #urls de la api
     path('api/', include('Internet.api_urls')),
     
-]
-
-#+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # Configuración para servir archivos estáticos en entorno de desarrollo
 # urlpatterns += staticfiles_urlpatterns()
