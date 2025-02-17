@@ -58,6 +58,7 @@
         {% else %}
           <div class="text-center">
             <img src="{{ enlace_pago.url_qr_code }}" alt="Código QR" class="img-fluid img-thumbnail" style="max-width: 350px; margin-top: 30%;">
+            <!-- Botón para abrir el modal (opcional, ya que lo abriremos automáticamente) -->
             <a id="boton_pago" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#enlacePagoModal">Proceder con el pago</a>
           </div>
         {% endif %}
@@ -68,7 +69,7 @@
             <li><strong>Teléfono:</strong> <a href="https://api.whatsapp.com/send?phone=77296225" target="_blank">+503 77296225</a></li>
             <li><strong>Correo Electrónico:</strong> <a href="mailto:volcanosanmiguel.sv@hotmail.com">volcanosanmiguel.sv@hotmail.com</a></li>
           </ul>
-          <a href="{% url 'contacto' %}" class="btn btn-primary mt-3" target="_blank">Contactanos</a>
+          <a href="{% url 'contacto' %}" class="btn btn-primary mt-3" target="_blank">Contáctanos</a>
         </div>
       {% endif %}
     </div>          
@@ -101,7 +102,10 @@
 
 <script>
   $(document).ready(function () {
-    var verificacionIntervalo;
+    // Si la reserva está pendiente, abre el modal automáticamente al cargar la página.
+    {% if reserva.estado_reserva != 'PAGADO' %}
+      $('#enlacePagoModal').modal('show');
+    {% endif %}
 
     function verificarPago() {
       $.ajax({
@@ -117,8 +121,10 @@
             $(".text-blur").css("color", "black").css("text-shadow", "none");
             $('#enlacePagoModal').modal('hide');
             $("#boton_pago").hide();
-
-            clearInterval(verificacionIntervalo);
+          } else if (data.estado_reserva === "PENDIENTE") {
+            alert("Aún no has pagado, por favor completa el pago.");
+            // Vuelve a abrir el modal si aún está pendiente.
+            $('#enlacePagoModal').modal('show');
           }
         },
         error: function () {
@@ -127,15 +133,7 @@
       });
     }
 
-    // Verifica pago una vez al cargar la página
-    verificarPago();
-
-    // Si el pago no está confirmado, sigue verificando cada 5 segundos
-    //if ("{{ reserva.estado_reserva }}" !== "PAGADO") {
-     // verificacionIntervalo = setInterval(verificarPago, 5000);
-    //}
-
-    // Cuando el usuario cierra el modal, se ejecuta la verificación
+    // Cuando se cierra el modal, se verifica el estado de la reserva.
     $('#enlacePagoModal').on('hidden.bs.modal', function () {
       verificarPago();
     });

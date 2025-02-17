@@ -20,102 +20,6 @@ from django.http import JsonResponse
 from Configuraciones.models import wompi_config
 from django.core.exceptions import ImproperlyConfigured
 
-
-def get_wompi_config():
-    try:
-        config = wompi_config.objects.latest('created_at')
-        return config
-    except wompi_config.DoesNotExist:
-        raise ImproperlyConfigured("No se encontro ninguna configuración de Wompi en la base de datos")
-
-def create_payment_link_reserva(reserva_id, client_id, client_secret, url_redir, email_client, comercio_id, monto, nombre_producto, descripcion_producto, imagen, cantidad_prod, **kwargs):
-    """
-    Crea un enlace de pago en Wompi para la reserva especificada.
-    """
-    try:
-        # Obtener la configuración de Wompi
-        wompi_config = get_wompi_config()
-        Client_id = wompi_config.client_id
-        Client_secret = wompi_config.client_secret
-
-        # Autenticarse en Wompi
-        access_token = authenticate_wompi(Client_id, Client_secret)
-        if not access_token:
-            print("Error: No se pudo autenticar en Wompi.")
-            return None
-
-        # Obtener la instancia de la reserva
-        reserva_instance = get_object_or_404(Reserva, pk=reserva_id)
-
-        # URL de redirección después del pago
-        url_redir = f"https://volcanosm.com/tours/reserva_exitosa/{reserva_id}/"
-
-        # Correo del cliente para notificación
-        email_client = reserva_instance.correo_electronico
-
-        # Construir la solicitud JSON
-        request_data = {
-            "identificadorEnlaceComercio": comercio_id,
-            "monto": monto,
-            "nombreProducto": nombre_producto,
-            "infoProducto": {
-                "descripcionProducto": descripcion_producto,
-                "urlImagenProducto": imagen
-            },
-            "configuracion": {
-                "urlRedirect": url_redir,  # URL a la que se redirige después del pago
-                "esMontoEditable": False,
-                "esCantidadEditable": False,
-                "cantidadPorDefecto": cantidad_prod,
-                "emailsNotificacion": email_client,
-            },
-            **kwargs
-        }
-
-        # Enviar la solicitud a Wompi
-        response = requests.post("https://api.wompi.sv/EnlacePago", json=request_data, headers=get_wompi_headers(access_token))
-
-        # Manejar errores en la respuesta
-        if response.status_code != 200:
-            print(f"Error al crear el enlace de pago: {response.status_code} - {response.text}")
-            return None
-
-        payment_link_data = response.json()
-
-        # Verificar si los datos esperados están en la respuesta
-        if not all(k in payment_link_data for k in ["urlQrCodeEnlace", "urlEnlace", "idEnlace"]):
-            print(f"Respuesta inesperada de Wompi: {payment_link_data}")
-            return None
-
-        # Crear y guardar el enlace de pago en la base de datos
-        enlace_pago = EnlacePagoTour.objects.create(
-            reserva=reserva_instance,
-            comercio_id=comercio_id,
-            monto=monto * cantidad_prod,
-            nombre_producto=nombre_producto,
-            url_qr_code=payment_link_data["urlQrCodeEnlace"],
-            url_enlace=payment_link_data["urlEnlace"],
-            esta_productivo=payment_link_data.get("estaProductivo", False),
-            descripcionProducto=descripcion_producto,
-            imagenProducto=imagen,
-            cantidad=cantidad_prod,
-            idEnlace=payment_link_data["idEnlace"]
-        )
-
-        return enlace_pago.url_enlace  # Retornar el enlace de pago
-
-    except requests.exceptions.RequestException as e:
-        print(f"Error en la solicitud a Wompi: {e}")
-        return None
-    
-
-def get_wompi_headers(access_token):
-    return {
-        "content-type": "application/json",
-        "authorization": f"Bearer {access_token}"
-    }
-
-        
 def tours_index(request):
     # Obtener la fecha actual
     fecha_actual = timezone.now()
@@ -199,6 +103,93 @@ def tour_detail(request, tour_id):
 
     return render(request, 'detail_tours.html', context)
 
+def get_wompi_config():
+    try:
+        config = wompi_config.objects.latest('created_at')
+        return config
+    except wompi_config.DoesNotExist:
+        raise ImproperlyConfigured("No se encontro ninguna configuración de Wompi en la base de datos")
+
+def create_payment_link_reserva(reserva_id, client_id, client_secret, comercio_id, monto, nombre_producto, descripcion_producto, imagen, cantidad_prod, **kwargs):
+    """
+    Crea un enlace de pago en Wompi para la reserva especificada.
+    """
+    try:
+        # Obtener la configuración de Wompi
+        wompi_config = get_wompi_config()
+        Client_id = wompi_config.client_id
+        Client_secret = wompi_config.client_secret
+
+        # Autenticarse en Wompi
+        access_token = authenticate_wompi(Client_id, Client_secret)
+        if not access_token:
+            print("Error: No se pudo autenticar en Wompi.")
+            return None
+
+        # Obtener la instancia de la reserva
+        reserva_instance = get_object_or_404(Reserva, pk=reserva_id)
+
+        # Construir la solicitud JSON
+        request_data = {
+            "identificadorEnlaceComercio": comercio_id,
+            "monto": monto,
+            "nombreProducto": nombre_producto,
+            "infoProducto": {
+                "descripcionProducto": descripcion_producto,
+                "urlImagenProducto": imagen
+            },
+            "configuracion": {
+                "urlRedirect": "https://volcanosm.net",  # URL a la que se redirige después del pago
+                "esMontoEditable": False,
+                "esCantidadEditable": False,
+                "cantidadPorDefecto": cantidad_prod,
+                "emailsNotificacion": "correo@ejemplo.com",
+            },
+            **kwargs
+        }
+
+        # Enviar la solicitud a Wompi
+        response = requests.post("https://api.wompi.sv/EnlacePago", json=request_data, headers=get_wompi_headers(access_token))
+
+        # Manejar errores en la respuesta
+        if response.status_code != 200:
+            print(f"Error al crear el enlace de pago: {response.status_code} - {response.text}")
+            return None
+
+        payment_link_data = response.json()
+
+        # Verificar si los datos esperados están en la respuesta
+        if not all(k in payment_link_data for k in ["urlQrCodeEnlace", "urlEnlace", "idEnlace"]):
+            print(f"Respuesta inesperada de Wompi: {payment_link_data}")
+            return None
+
+        # Crear y guardar el enlace de pago en la base de datos
+        enlace_pago = EnlacePagoTour.objects.create(
+            reserva=reserva_instance,
+            comercio_id=comercio_id,
+            monto=monto * cantidad_prod,
+            nombre_producto=nombre_producto,
+            url_qr_code=payment_link_data["urlQrCodeEnlace"],
+            url_enlace=payment_link_data["urlEnlace"],
+            esta_productivo=payment_link_data.get("estaProductivo", False),
+            descripcionProducto=descripcion_producto,
+            imagenProducto=imagen,
+            cantidad=cantidad_prod,
+            idEnlace=payment_link_data["idEnlace"]
+        )
+
+        return enlace_pago.url_enlace  # Retornar el enlace de pago
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error en la solicitud a Wompi: {e}")
+        return None
+
+def get_wompi_headers(access_token):
+    return {
+        "content-type": "application/json",
+        "authorization": f"Bearer {access_token}"
+    }
+
 from django.db import transaction
 
 def reservar_tour(request, tour_id):
@@ -232,7 +223,7 @@ def reservar_tour(request, tour_id):
         tipo_documento = request.POST.get("tipo_documento")
 
         with transaction.atomic():
-            # Crear una nueva reserva sin restricciones
+            # Crear la reserva
             reserva = Reserva.objects.create(
                 tour=tour,
                 nombre=nombre,
@@ -249,32 +240,26 @@ def reservar_tour(request, tour_id):
                 estado_reserva="PENDIENTE",
             )
 
-            # Generar el enlace de pago para la nueva reserva
-            enlace_pago_info = create_payment_link_reserva(
-                reserva.id,
-                client_id,
-                client_secret,
-                "Volcano SM Tours",
-                float(reserva.precio_adulto),
-                tour.titulo,
-                BeautifulSoup(str(tour.descripcion), "html.parser").get_text(),
-                tour.url_azure,
-                reserva.cantidad_adultos
+            # Generar el enlace de pago con Wompi
+            enlace_pago_data = create_payment_link_reserva(
+                reserva.id,                                # reserva_id
+                client_id,                                 # client_id
+                client_secret,                             # client_secret
+                "Volcano SM Tours",                        # comercio_id
+                float(reserva.precio_adulto),              # monto
+                tour.titulo,                               # nombre_producto
+                BeautifulSoup(str(tour.descripcion), "html.parser").get_text(),  # descripcion_producto
+                tour.url_azure,                            # imagen
+                cantidad_adultos,                          # cantidad_prod
+                urlRedirect=f"https://volcanosm.com/tours/reserva_exitosa/{reserva.id}/",
+                emailsNotificacion=reserva.correo_electronico
             )
 
-            if enlace_pago_info:
-                # Guardar el nuevo enlace de pago en la base de datos
-                EnlacePagoTour.objects.create(
-                    reserva=reserva,
-                    url_enlace=enlace_pago_info,
-                    esta_productivo=True
-                )
+            print(f"🔍 Respuesta completa de Wompi: {enlace_pago_data}")  # Log para depuración
 
-                # Redirigir a la página de éxito
-                return redirect('reserva_exitosa', reserva_id=reserva.id)
-            else:
-                return JsonResponse({'error': 'No se pudo generar el enlace de pago'}, status=500)
-
+        # Redirigir a la página de éxito
+        return redirect('reserva_exitosa', reserva_id=reserva.id)
+                
     # Renderizar el formulario
     context = {
         'barra_principal': barra_principal,

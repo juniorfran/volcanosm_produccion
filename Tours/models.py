@@ -338,7 +338,7 @@ class Reserva(models.Model):
 class EnlacePagoTour(models.Model):
     reserva = models.ForeignKey(Reserva, on_delete=models.CASCADE, related_name='enlace_pago_set')
     comercio_id = models.CharField(max_length=500)
-    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    monto = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     nombre_producto = models.CharField(max_length=500)
     url_qr_code = models.URLField()
     url_enlace = models.URLField()
