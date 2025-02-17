@@ -58,6 +58,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://51.222.136.8',
     'https://108.181.195.15:8000',
     'https://108.181.195.15',
+    'http://108.181.195.15:8000',
+    'http://108.181.195.15',
     'https://www.volcanosm.com/',
     'https://www.volcanosm.com',
     'https://volcanosm.com/',
