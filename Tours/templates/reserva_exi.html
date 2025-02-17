@@ -124,6 +124,14 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
+            <p>Enlace de pago: <a href="{{ enlace_pago.url_enlace }}" target="_blank">{{ enlace_pago.url_enlace }}</a></p>
+            {% if enlace_pago %}
+              <p><strong>DEBUG:</strong> Enlace de Pago ID: {{ enlace_pago.id }}</p>
+              <p><strong>DEBUG:</strong> URL de Enlace: {{ enlace_pago.url_enlace }}</p>
+              <p><strong>DEBUG:</strong> URL QR Code: {{ enlace_pago.url_qr_code }}</p>
+          {% else %}
+              <p>⚠ No se encontró un enlace de pago.</p>
+          {% endif %}
             {% if enlace_pago %}
                 <p>Enlace de pago: <a href="{{ enlace_pago.url_enlace }}" target="_blank">{{ enlace_pago.url_enlace }}</a></p>
                 <iframe src="{{ enlace_pago.url_enlace }}" style="width: 100%; height: 600px; border: none;"></iframe>

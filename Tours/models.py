@@ -191,7 +191,15 @@ class Reserva(models.Model):
         # Generar código de reserva único antes de guardar
         if not self.codigo_reserva:
             self.codigo_reserva = self.generar_codigo_reserva()
-            self.enviar_codigo_por_correo()  # Envía el código por correo al crear la reserva
+            #self.enviar_codigo_por_correo()  # Envía el código por correo al crear la reserva
+        
+        # Detectar si el estado ha cambiado a "PAGADO"
+        if self.pk:  # Verificar que la reserva ya existe en la base de datos
+            reserva_anterior = Reserva.objects.get(pk=self.pk)
+            if reserva_anterior.estado_reserva != "PAGADO" and self.estado_reserva == "PAGADO":
+                self.enviar_codigo_por_correo()  # Solo se envía si el estado cambia a "PAGADO"
+
+
         super().save(*args, **kwargs)
 
     def generar_codigo_reserva(self):
