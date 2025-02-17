@@ -23,6 +23,10 @@ SECRET_KEY = 'django-insecure-71ilsry+%0yrbexaf^j!f41b0i=t!g+8%pvd!1d8a)azph_nd-
 DEBUG = True
 DEBUG_PROPAGATE_EXCEPTIONS = True
 
+#WOMPI CONECTION
+CLIENT_ID = "86d5de4c-dd6a-42d2-8d5b-ff5aed09ae83"
+CLIENT_SECRET = "c3bb69e4-7d19-486b-b9d8-1b2b592714d5"
+
 ALLOWED_HOSTS = [
     'volcano-sm.azurewebsites.net', 
     'http://0.0.0.0:8000/', 
@@ -56,10 +60,10 @@ CSRF_TRUSTED_ORIGINS = [
     'https://volcanosm.net',
     'https://51.222.136.8:8000',
     'https://51.222.136.8',
-    'https://108.181.195.15:8000',
-    'https://108.181.195.15',
-    'http://108.181.195.15:8000',
-    'http://108.181.195.15',
+    'https://108.181.195.15:8000/',
+    'https://108.181.195.15/',
+    'http://108.181.195.15:8000/',
+    'http://108.181.195.15/',
     'https://www.volcanosm.com/',
     'https://www.volcanosm.com',
     'https://volcanosm.com/',
@@ -74,10 +78,6 @@ CSRF_TRUSTED_ORIGINS = [
     'http://0.0.0.0/',
     
     ]
-
-#WOMPI CONECTION
-CLIENT_ID = "86d5de4c-dd6a-42d2-8d5b-ff5aed09ae83"
-CLIENT_SECRET = "c3bb69e4-7d19-486b-b9d8-1b2b592714d5"
 
 #EMAIL CONFIGURATION
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
