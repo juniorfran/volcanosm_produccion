@@ -23,7 +23,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 def get_wompi_config():
     try:
-        config = wompi_config.objects.latest('created_ad')
+        config = wompi_config.objects.latest('created_at')
         return config
     except wompi_config.DoesNotExist:
         raise ImproperlyConfigured("No se encontro ninguna configuración de Wompi en la base de datos")

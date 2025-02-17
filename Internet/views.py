@@ -23,18 +23,20 @@ from Configuraciones.models import wompi_config
 
 
 from django.core.exceptions import ImproperlyConfigured
+
 def get_wompi_config():
     from Configuraciones.models import wompi_config
     try:
-        config = wompi_config.objects.latest('created_ad')
+        config = wompi_config.objects.latest('created_at')
         return config
     except wompi_config.DoesNotExist:
         raise ImproperlyConfigured("No se encontro ninguna configuración de Wompi en la base de datos")
 
 
 def crear_transaccion_3ds(acceso_id, numeroTarjeta, cvv, mesVencimiento, anioVencimiento, monto, nombre, apellido, email, ciudad, direccion, telefono, client_id, client_secret, **kwargs):
+    
     # Cargar la configuración de Wompi
-    wompi_config = settings.get_wompi_config()
+    wompi_config = get_wompi_config()
     Client_id = wompi_config.client_id
     Client_secret = wompi_config.client_secret
 
