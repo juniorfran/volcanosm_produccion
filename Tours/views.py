@@ -110,7 +110,7 @@ def get_wompi_config():
     except wompi_config.DoesNotExist:
         raise ImproperlyConfigured("No se encontro ninguna configuración de Wompi en la base de datos")
 
-def create_payment_link_reserva(reserva_id, client_id, client_secret, comercio_id, monto, nombre_producto, descripcion_producto, imagen, cantidad_prod, **kwargs):
+def create_payment_link_reserva(reserva_id, client_id, client_secret, comercio_id, monto, nombre_producto, descripcion_producto, imagen, cantidad_prod, url_redir, **kwargs):
     """
     Crea un enlace de pago en Wompi para la reserva especificada.
     """
@@ -132,7 +132,7 @@ def create_payment_link_reserva(reserva_id, client_id, client_secret, comercio_i
         reserva_instance = get_object_or_404(Reserva, pk=reserva_id)
 
         #urlRedirect es la url de reserva_exitosa/id_reserva
-        url_redir = f"https://volcanosm.com/tours/reserva_exitosa/{reserva_instance.reserva.id}/",
+        #url_redir = f"https://volcanosm.com/tours/reserva_exitosa/{reserva_instance.reserva.id}/",
 
         # Construir la solicitud JSON
         request_data = {
@@ -256,7 +256,7 @@ def reservar_tour(request, tour_id):
                 BeautifulSoup(str(tour.descripcion), "html.parser").get_text(),  # descripcion_producto
                 tour.url_azure,                            # imagen
                 cantidad_adultos,                          # cantidad_prod
-                urlRedirect=f"https://volcanosm.com/tours/reserva_exitosa/{reserva.id}/",
+                url_redir = f"https://volcanosm.com/tours/reserva_exitosa/{reserva.id}/",
                 emailsNotificacion=reserva.correo_electronico
             )
 
