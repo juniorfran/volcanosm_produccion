@@ -2,6 +2,9 @@
 import os
 from pathlib import Path
 from celery import Celery
+#from Configuraciones.models import wompi_config
+#from django.core.exceptions import ImproperlyConfigured
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +30,9 @@ ALLOWED_HOSTS = [
     'localhost',
     'volcanosm.net', 
     '51.222.136.8:8000', 
-    '51.222.136.8', 
+    '51.222.136.8',
+    '108.181.195.15:8000',
+    '108.181.195.15', 
     'http://volcanosm.com', 
     'https://volcanosm.com',
     'http://www.volcanosm.com', 
@@ -51,6 +56,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://volcanosm.net',
     'https://51.222.136.8:8000',
     'https://51.222.136.8',
+    'https://108.181.195.15:8000',
+    'https://108.181.195.15',
     'https://www.volcanosm.com/',
     'https://www.volcanosm.com',
     'https://volcanosm.com/',
@@ -294,3 +301,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
