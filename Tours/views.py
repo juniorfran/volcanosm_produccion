@@ -388,13 +388,13 @@ def actualizar_estado_reserva(request, reserva_id):
 
     print(f"Estado recibido de Wompi: {mensaje_transaccion}")
 
-    # 6️⃣ Actualizar estado basado en la respuesta de Wompi
-    if mensaje_transaccion == 'AUTORIZADO':
+    # Actualizar estado basado en la respuesta de Wompi
+    if mensaje_transaccion == 'AUTORIZADO' or mensaje_transaccion == 'Autorizado':
         Reserva.objects.filter(id=reserva.id).update(estado_reserva='PAGADO')
     else:
         Reserva.objects.filter(id=reserva.id).update(estado_reserva='PENDIENTE')
 
-    # 7️⃣ Volver a obtener el objeto actualizado
+    # Volver a obtener el objeto actualizado
     reserva.refresh_from_db()
 
     print(f"Estado actualizado en BD después de la consulta: {reserva.estado_reserva}")
