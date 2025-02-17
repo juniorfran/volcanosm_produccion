@@ -28,7 +28,7 @@ def get_wompi_config():
     except wompi_config.DoesNotExist:
         raise ImproperlyConfigured("No se encontro ninguna configuración de Wompi en la base de datos")
 
-def create_payment_link_reserva(reserva_id, client_id, client_secret, comercio_id, monto, nombre_producto, descripcion_producto, imagen, cantidad_prod, **kwargs):
+def create_payment_link_reserva(reserva_id, client_id, client_secret, url_redir, email_client, comercio_id, monto, nombre_producto, descripcion_producto, imagen, cantidad_prod, **kwargs):
     """
     Crea un enlace de pago en Wompi para la reserva especificada.
     """
@@ -47,6 +47,12 @@ def create_payment_link_reserva(reserva_id, client_id, client_secret, comercio_i
         # Obtener la instancia de la reserva
         reserva_instance = get_object_or_404(Reserva, pk=reserva_id)
 
+        # URL de redirección después del pago
+        url_redir = f"https://volcanosm.com/tours/reserva_exitosa/{reserva_id}/"
+
+        # Correo del cliente para notificación
+        email_client = reserva_instance.correo_electronico
+
         # Construir la solicitud JSON
         request_data = {
             "identificadorEnlaceComercio": comercio_id,
@@ -57,11 +63,11 @@ def create_payment_link_reserva(reserva_id, client_id, client_secret, comercio_i
                 "urlImagenProducto": imagen
             },
             "configuracion": {
-                "urlRedirect": "https://volcanosm.net",  # URL a la que se redirige después del pago
+                "urlRedirect": url_redir,  # URL a la que se redirige después del pago
                 "esMontoEditable": False,
                 "esCantidadEditable": False,
                 "cantidadPorDefecto": cantidad_prod,
-                "emailsNotificacion": "correo@ejemplo.com",
+                "emailsNotificacion": email_client,
             },
             **kwargs
         }
@@ -197,8 +203,8 @@ from django.db import transaction
 
 def reservar_tour(request, tour_id):
     """
-    Permite a un usuario reservar un tour y generar un enlace de pago en Wompi.
-    Si ya existe una reserva sin enlace de pago, se genera uno nuevo y se actualiza.
+    Permite a un usuario reservar un tour y genera un nuevo enlace de pago en Wompi.
+    No verifica reservas previas, permitiendo múltiples reservas sin restricciones.
     """
 
     wompi_config = get_wompi_config()
@@ -226,51 +232,7 @@ def reservar_tour(request, tour_id):
         tipo_documento = request.POST.get("tipo_documento")
 
         with transaction.atomic():
-            # Buscar si ya existe una reserva con los mismos datos
-            reserva = Reserva.objects.filter(
-                correo_electronico=correo_electronico,
-                tour=tour,
-                fecha_reserva=fecha_reserva
-            ).first()
-
-            # Si la reserva ya existe
-            if reserva:
-                # Buscar si tiene un enlace de pago asociado
-                enlace_pago = EnlacePagoTour.objects.filter(reserva=reserva).first()
-
-                if enlace_pago and enlace_pago.url_enlace:
-                    # Si ya tiene un enlace de pago, redirigir directamente
-                    return redirect('reserva_exitosa', reserva_id=reserva.id)
-                else:
-                    # Si no tiene enlace de pago, generar uno nuevo y actualizar
-                    enlace_pago_url = create_payment_link_reserva(
-                        reserva.id,
-                        client_id,
-                        client_secret,
-                        "Volcano SM Tours",
-                        float(reserva.precio_adulto),
-                        tour.titulo,
-                        BeautifulSoup(str(tour.descripcion), "html.parser").get_text(),
-                        tour.url_azure,
-                        reserva.cantidad_adultos
-                    )
-
-                    if enlace_pago_url:
-                        # Crear o actualizar el enlace de pago en la base de datos
-                        enlace_pago, created = EnlacePagoTour.objects.update_or_create(
-                            reserva=reserva,
-                            defaults={
-                                'url_enlace': enlace_pago_url,
-                                'esta_productivo': True
-                            }
-                        )
-
-                        # Redirigir a la página de éxito
-                        return redirect('reserva_exitosa', reserva_id=reserva.id)
-                    else:
-                        return JsonResponse({'error': 'No se pudo generar el enlace de pago'}, status=500)
-
-            # Si la reserva no existe, crear una nueva
+            # Crear una nueva reserva sin restricciones
             reserva = Reserva.objects.create(
                 tour=tour,
                 nombre=nombre,
@@ -288,7 +250,7 @@ def reservar_tour(request, tour_id):
             )
 
             # Generar el enlace de pago para la nueva reserva
-            enlace_pago_url = create_payment_link_reserva(
+            enlace_pago_info = create_payment_link_reserva(
                 reserva.id,
                 client_id,
                 client_secret,
@@ -300,11 +262,11 @@ def reservar_tour(request, tour_id):
                 reserva.cantidad_adultos
             )
 
-            if enlace_pago_url:
+            if enlace_pago_info:
                 # Guardar el nuevo enlace de pago en la base de datos
                 EnlacePagoTour.objects.create(
                     reserva=reserva,
-                    url_enlace=enlace_pago_url,
+                    url_enlace=enlace_pago_info,
                     esta_productivo=True
                 )
 
@@ -341,17 +303,6 @@ def reserva_exitosa(request, reserva_id):
     print("URL de Enlace:", enlace_pago.url_enlace if enlace_pago else "No hay enlace")
     print("ID de Enlace:", enlace_pago.idEnlace if enlace_pago else "No hay ID")
 
-    # # Verificar si existe el enlace de pago y es válido
-    # if enlace_pago:
-    #     try:
-    #         response = requests.head(enlace_pago.url_enlace, timeout=5)
-    #         if response.status_code != 200:
-    #             enlace_pago = None  # Si el enlace no es válido, establece None
-    #     except requests.RequestException:
-    #         enlace_pago = None
-    # else:
-    #     enlace_pago = None  # Si no existe, establece None
-
     # Obtener otros datos necesarios para la plantilla
     data_contact = Contacts.objects.latest()
     barra_principal = Barra_Principal.objects.latest('fecha_creacion')
@@ -371,40 +322,6 @@ def reserva_exitosa(request, reserva_id):
 
     return render(request, 'reserva_exitosa.html', context)
 
-
-# def reserva_exitosa1(request, reserva_id):
-#     reserva = get_object_or_404(Reserva, pk=reserva_id)
-
-#     # Obtener el enlace de pago asociado a la reserva
-#     enlace_pago = EnlacePagoTour.objects.filter(reserva=reserva).first()
-
-#     # Debugging: Verifica si el objeto `enlace_pago` tiene datos antes de enviarlo a la plantilla
-#     print("🔹 Enlace de Pago:", enlace_pago)
-#     if enlace_pago:
-#         print("🔹 ID Enlace:", enlace_pago.idEnlace)
-#         print("🔹 URL Enlace:", enlace_pago.url_enlace)
-#         print("🔹 URL QR Code:", enlace_pago.url_qr_code)
-#     else:
-#         print("⚠ No se encontró un enlace de pago.")
-
-#     data_contact = Contacts.objects.latest()
-#     barra_principal = Barra_Principal.objects.latest('fecha_creacion')
-#     urls_info = Urls_info.objects.all()
-#     ultima_descripcion = General_Description.objects.latest('fecha_creacion')
-#     urls_interes = Urls_interes.objects.all()
-
-#     # Pasamos los datos a la plantilla
-#     context = {
-#         'barra_principal': barra_principal,
-#         'data_contact': data_contact,
-#         'urls_info': urls_info,
-#         'ultima_descripcion': ultima_descripcion,
-#         'urls_interes': urls_interes,
-#         'reserva': reserva,
-#         'enlace_pago': enlace_pago  # Asegúrate de que esto se envía
-#     }
-
-#     return render(request, 'reserva_exi.html', context)
 
 def consultar_enlace_pago(enlace_pago_id, client_id, client_secret):
 
@@ -428,6 +345,11 @@ def consultar_enlace_pago(enlace_pago_id, client_id, client_secret):
         # Imprimir la información del enlace de pago
         print("Información del enlace de pago:")
         print(enlace_pago_info)
+
+        transaccion = enlace_pago_info.get('transaccionCompra', {})
+        mensaje_transaccion = transaccion.get('mensaje', 'AUTORIZADO')
+        print(mensaje_transaccion)
+
         return enlace_pago_info
     else:
         print("Error al obtener información del enlace de pago.")
@@ -439,68 +361,57 @@ from datetime import datetime, timedelta
 def actualizar_estado_reserva(request, reserva_id):
     """
     Actualiza el estado de la reserva basada en la transacción de pago en Wompi.
-    Recibe el ID de la reserva como parámetro en la URL.
     """
 
-    # Cargar la configuración de Wompi
+    # 1️⃣ Autenticarse en Wompi
     wompi_configuracion = get_wompi_config()
-    Client_id = wompi_configuracion.client_id
-    Client_secret = wompi_configuracion.client_secret
+    client_id = wompi_configuracion.client_id
+    client_secret = wompi_configuracion.client_secret
 
-    # Autenticarse en Wompi
-    access_token = authenticate_wompi(Client_id, Client_secret)
+    access_token = authenticate_wompi(client_id, client_secret)
     if not access_token:
         return JsonResponse({'error': 'No se pudo autenticar en Wompi'}, status=500)
 
-    # Obtener la reserva específica
+    # 2️⃣ Obtener la reserva específica
     reserva = get_object_or_404(Reserva, id=reserva_id)
 
-    # Buscar el enlace de pago asociado a la reserva
+    # 3️⃣ Buscar el enlace de pago asociado a la reserva
     enlace_pago = EnlacePagoTour.objects.filter(reserva=reserva).first()
     if not enlace_pago:
         return JsonResponse({'error': 'No se encontró un enlace de pago asociado'}, status=404)
 
-    # No actualizar si ya está pagado
+    # Si la reserva ya está pagada, no hacemos nada
     if reserva.estado_reserva == 'PAGADO':
         return JsonResponse({'estado_reserva': reserva.estado_reserva, 'mensaje': 'Reserva ya pagada'})
 
-    # Consultar el estado del pago en Wompi
-    enlace_pago_info = consultar_enlace_pago(enlace_pago.idEnlace, Client_id, Client_secret)
+    print(f"Estado actual en BD antes de consulta: {reserva.estado_reserva}")
+
+    # 4️⃣ Consultar el estado del pago en Wompi
+    enlace_pago_info = make_wompi_get_request(f"EnlacePago/{enlace_pago.idEnlace}", access_token)
     if not isinstance(enlace_pago_info, dict):
         return JsonResponse({'error': 'No se pudo obtener información del enlace de pago'}, status=400)
 
-    # Verificar si 'transaccionCompra' existe y tiene datos
-    transacciones = enlace_pago_info.get('transaccionCompra')
-    if transacciones is None:
-        return JsonResponse({'estado_reserva': reserva.estado_reserva, 'mensaje': 'No hay transacción asociada'}, status=200)
+    # 5️⃣ Extraer transacción si existe
+    transaccion = enlace_pago_info.get('transaccionCompra')
 
-    mensaje_transaccion = transacciones.get('mensaje', 'PENDIENTE')
-    fecha_transaccion = transacciones.get('fechaTransaccion')
-
-    # Actualizar estado basado en la respuesta de Wompi
-    if mensaje_transaccion == 'AUTORIZADO':
-        reserva.estado_reserva = 'PAGADO'
+    if transaccion:  # Si la transacción existe
+        mensaje_transaccion = transaccion.get('mensaje', 'PENDIENTE')
+        fecha_transaccion = transaccion.get('fechaTransaccion')
     else:
-        reserva.estado_reserva = 'PENDIENTE'
+        mensaje_transaccion = 'PENDIENTE'
+        fecha_transaccion = None
 
-    # Manejar tiempos de expiración del pago
-    if fecha_transaccion:
-        try:
-            fecha_transaccion_dt = datetime.fromisoformat(fecha_transaccion)
-        except ValueError:
-            return JsonResponse({'error': 'Formato de fecha inválido'}, status=400)
+    print(f"Estado recibido de Wompi: {mensaje_transaccion}")
 
-        tiempo_transcurrido = datetime.now(tz=fecha_transaccion_dt.tzinfo) - fecha_transaccion_dt
+    # 6️⃣ Actualizar estado basado en la respuesta de Wompi
+    if mensaje_transaccion == 'AUTORIZADO':
+        Reserva.objects.filter(id=reserva.id).update(estado_reserva='PAGADO')
+    else:
+        Reserva.objects.filter(id=reserva.id).update(estado_reserva='PENDIENTE')
 
-        # Si han pasado más de 5 minutos, marcar como PENDIENTE
-        if tiempo_transcurrido > timedelta(minutes=5):
-            reserva.estado_reserva = 'PENDIENTE'
+    # 7️⃣ Volver a obtener el objeto actualizado
+    reserva.refresh_from_db()
 
-        # Si han pasado más de 24 horas y sigue pendiente, marcar como CANCELADO
-        if reserva.estado_reserva == 'PENDIENTE' and tiempo_transcurrido > timedelta(hours=24):
-            reserva.estado_reserva = 'CANCELADO'
-
-    # Guardar la actualización en la base de datos
-    reserva.save()
+    print(f"Estado actualizado en BD después de la consulta: {reserva.estado_reserva}")
 
     return JsonResponse({'estado_reserva': reserva.estado_reserva, 'reserva_id': reserva.id})

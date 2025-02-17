@@ -4,116 +4,76 @@
 
 {% block content %}
 
-{% if reserva.estado_reserva != 'PAGADO' %}
-
-  <style>
+<style>
+  {% if reserva.estado_reserva != 'PAGADO' %}
     .text-blur {
       color: transparent;
-      text-shadow: 0 0 5px rgba(0,0,0,0.5); /* Ajusta el valor del desenfoque según prefieras */
+      text-shadow: 0 0 5px rgba(0,0,0,0.5);
     }
-  </style>
-  
-{% endif %}
+  {% endif %}
+</style>
 
-
-
-  <div class="container mt-5">
-    <div class="row">
-      <!-- Parte izquierda con detalles de la reserva -->
-      <div class="col-md-6">
-      {% if reserva.estado_reserva != 'PAGADO' %}
-          <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-            <h2 class="mb-4">¡Reserva Agendada con exito!</h2>
-            Tu reserva esta lista, realiza el pago para poder confirmar tu asistencia.
-          </div>
-      {% else %}
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-          <h2 class="mb-4">¡Reserva pagada con exito!</h2>
-          Tu reserva esta lista, hemos recibido tu pago.
-        </div>
-      {% endif %}
-
-        <div class="mb-4">
-          <p class="lead">Código de Reserva: <strong class="lead text-blur">{{ reserva.codigo_reserva }}</strong></p>
-        </div>
-
-        <h3>Detalles de la Reserva:</h3>
-        <ul class="list-group mb-4">
-          <li class="list-group-item"><strong>Nombre:</strong> {{ reserva.nombre }}</li>
-          <li class="list-group-item"><strong>DUI:</strong> {{ reserva.dui }}</li>
-          <li class="list-group-item"><strong>Correo Electrónico:</strong> {{ reserva.correo_electronico }}</li>
-          <li class="list-group-item"><strong>Dirección:</strong> {{ reserva.direccion }}</li>
-          <li class="list-group-item"><strong>Cantidad de Participantes:</strong> {{ reserva.cantidad_adultos }}</li>
-          <li class="list-group-item"><strong>Fecha de Reserva:</strong> {{ reserva.fecha_reserva }}</li>
-          <li class="list-group-item">
-            <strong>Total a Pagar:</strong>
-            <span class="text-primary h4">
-                ${{ reserva.total_pagar|floatformat:2|intcomma }}
-            </span>
-          </li>
-          <!-- Agrega más detalles según sea necesario -->
-        </ul>
-
-        <p class="lead">Gracias por elegir nuestro tour. ¡Esperamos que tengas una experiencia maravillosa!</p>
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-6">
+      <div id="estado_reserva_alert" class="alert {% if reserva.estado_reserva != 'PAGADO' %}alert-danger{% else %}alert-success{% endif %}" role="alert">
         {% if reserva.estado_reserva != 'PAGADO' %}
-          <p class="lead">Tienes 24 horas para realizar tu pago.</p>
+          <h2>¡Reserva Agendada con éxito!</h2>
+          <p>Realiza el pago para confirmar tu asistencia.</p>
+        {% else %}
+          <h2>¡Reserva pagada con éxito!</h2>
+          <p>Tu reserva está lista, hemos recibido tu pago.</p>
         {% endif %}
-        
       </div>
 
-      <!-- Parte derecha con el código QR y botón de pago -->
+      <div class="mb-4">
+        <p class="lead">Código de Reserva: <strong class="lead text-blur">{{ reserva.codigo_reserva }}</strong></p>
+      </div>
+
+      <h3>Detalles de la Reserva:</h3>
+      <ul class="list-group mb-4">
+        <li class="list-group-item"><strong>Nombre:</strong> {{ reserva.nombre }}</li>
+        <li class="list-group-item"><strong>DUI:</strong> {{ reserva.dui }}</li>
+        <li class="list-group-item"><strong>Correo Electrónico:</strong> {{ reserva.correo_electronico }}</li>
+        <li class="list-group-item"><strong>Dirección:</strong> {{ reserva.direccion }}</li>
+        <li class="list-group-item"><strong>Cantidad de Participantes:</strong> {{ reserva.cantidad_adultos }}</li>
+        <li class="list-group-item"><strong>Fecha de Reserva:</strong> {{ reserva.fecha_reserva }}</li>
+        <li class="list-group-item"><strong>Total a Pagar:</strong>
+          <span class="text-primary h4">${{ reserva.total_pagar|floatformat:2|intcomma }}</span>
+        </li>
+      </ul>
+
+      <p class="lead">Gracias por elegir nuestro tour. ¡Esperamos que tengas una experiencia maravillosa!</p>
+      {% if reserva.estado_reserva != 'PAGADO' %}
+        <p class="lead">Tienes 24 horas para realizar tu pago.</p>
+      {% endif %}
+    </div>
+
     <div class="col-md-6 mb-4 mt-4">
-
-      {% if enlace_pago.idEnlace  %}
-
+      {% if enlace_pago.idEnlace %}
         {% if reserva.estado_reserva == 'PAGADO' %}
-        
-          <p>Hemos recibido tu pago, recibiras por email la informacion de la reserva y un codigo QR como comprobante de la misma.</p>
-
-          <br>
+          <p>Hemos recibido tu pago, recibirás por email la información de la reserva y un código QR como comprobante de la misma.</p>
           <hr>
-          <p>esperamos que disfrutes tu estadia en VOLCANO SM.</p>
-          <p>si requieres servicios adicionales no dudes en consultar con tu guis.</p>
-
-          <br>
-          <hr>
-          <p>si requieres acceso a internet puedes contratar en <a class="btn btn-primary" target="_blank" href="{% url "servicio_inter" %}" > VOLCANO-SM WIFI</a>.</p>
-
-          {% else %}
-
+          <p>Esperamos que disfrutes tu estadía en VOLCANO SM.</p>
+        {% else %}
           <div class="text-center">
             <img src="{{ enlace_pago.url_qr_code }}" alt="Código QR" class="img-fluid img-thumbnail" style="max-width: 350px; margin-top: 30%;">
-            <a class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#enlacePagoModal" >Proceder con el pago</a>
+            <a id="boton_pago" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#enlacePagoModal">Proceder con el pago</a>
           </div>
-  
-
         {% endif %}
-
-        
-        {% else %}
-
+      {% else %}
         <div class="text-center">
-          <p>Actualmente estamos realizando mantenimiento en nuestros métodos de pago para los tours. Por favor, realiza tus pagos en efectivo en nuestra caseta o mediante transferencia bancaria. Para más información:</p>
+          <p>Actualmente estamos realizando mantenimiento en nuestros métodos de pago. Realiza tus pagos en efectivo o por transferencia.</p>
           <ul class="list-unstyled">
             <li><strong>Teléfono:</strong> <a href="https://api.whatsapp.com/send?phone=77296225" target="_blank">+503 77296225</a></li>
             <li><strong>Correo Electrónico:</strong> <a href="mailto:volcanosanmiguel.sv@hotmail.com">volcanosanmiguel.sv@hotmail.com</a></li>
           </ul>
           <a href="{% url 'contacto' %}" class="btn btn-primary mt-3" target="_blank">Contactanos</a>
-          <p>Enlace de pago: {{ enlace_pago.url_enlace }} <a href="{{ enlace_pago.url_enlace }}" target="_blank">{{ enlace_pago.url_enlace }}</a></p>
         </div>
-      
       {% endif %}
     </div>          
-    </div>
-    
   </div>
-
+</div>
 
 <!-- Modal para mostrar el contenido del enlace de pago -->
 <div class="modal fade" id="enlacePagoModal" tabindex="-1" aria-labelledby="enlacePagoModalLabel" aria-hidden="true">
@@ -131,9 +91,6 @@
                 <p class="text-danger">⚠ No se encontró un enlace de pago. Inténtelo nuevamente.</p>
             {% endif %}
           </div>
-          <div class="modal-footer">
-              
-          </div>
       </div>
   </div>
 </div>
@@ -142,37 +99,47 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
-
-
 <script>
   $(document).ready(function () {
-    {% if reserva.estado_reserva != 'PAGADO' %}
-      $('#enlacePagoModal').modal('show');
-    {% endif %}
-  
-    // Al cerrar el modal, verifica si el pago ya se realizó
-    $('#enlacePagoModal').on('hidden.bs.modal', function (e) {
+    var verificacionIntervalo;
+
+    function verificarPago() {
       $.ajax({
-        url: "{% url 'actualizar_estado_reserva' reserva.id %}", // Actualiza la URL con el ID de la reserva
+        url: "{% url 'actualizar_estado_reserva' reserva.id %}",
         type: "GET",
         success: function (data) {
-          if (data.estado_reserva != 'PAGADO') {
-            // Si no se ha pagado, muestra el mensaje de alerta y reabre el modal
-            alert(
-              "Aún no se ha pagado la reserva. Por favor, realice el pago para continuar."
-            );
-            $('#enlacePagoModal').modal('show');
+          if (data.estado_reserva === "PAGADO") {
+            $("#estado_reserva_alert")
+              .removeClass("alert-danger")
+              .addClass("alert-success")
+              .html('<h2>¡Reserva pagada con éxito!</h2><p>Tu reserva está lista, hemos recibido tu pago.</p>');
+            
+            $(".text-blur").css("color", "black").css("text-shadow", "none");
+            $('#enlacePagoModal').modal('hide');
+            $("#boton_pago").hide();
+
+            clearInterval(verificacionIntervalo);
           }
         },
         error: function () {
-          console.error("No se pudo verificar el estado de la reserva.");
+          console.error("Error al verificar el estado del pago.");
         },
       });
+    }
+
+    // Verifica pago una vez al cargar la página
+    verificarPago();
+
+    // Si el pago no está confirmado, sigue verificando cada 5 segundos
+    //if ("{{ reserva.estado_reserva }}" !== "PAGADO") {
+     // verificacionIntervalo = setInterval(verificarPago, 5000);
+    //}
+
+    // Cuando el usuario cierra el modal, se ejecuta la verificación
+    $('#enlacePagoModal').on('hidden.bs.modal', function () {
+      verificarPago();
     });
   });
-  
 </script>
-
-
 
 {% endblock %}

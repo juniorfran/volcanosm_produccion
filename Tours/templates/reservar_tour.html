@@ -132,16 +132,34 @@
             // Obtener el elemento select
             const selectPais = document.getElementById('pais_residencia');
 
-            // Iterar sobre los datos y agregar opciones al select
-            data.forEach(pais => {
-                const option = document.createElement('option');
-                option.value = pais.name.common;
-                option.text = pais.name.common;
-                selectPais.add(option);
+            // Extraer nombres de países y ordenarlos alfabéticamente
+            const paisesOrdenados = data
+                .map(pais => pais.name.common) // Obtener solo los nombres
+                .sort(); // Ordenarlos alfabéticamente
+
+            // Limpiar el select antes de agregar opciones
+            selectPais.innerHTML = '';
+
+            // Agregar opción predeterminada "El Salvador" primero
+            const defaultOption = document.createElement('option');
+            defaultOption.value = 'El Salvador';
+            defaultOption.text = 'El Salvador';
+            defaultOption.selected = true; // Lo marca como seleccionado
+            selectPais.add(defaultOption);
+
+            // Agregar los demás países, evitando duplicar "El Salvador"
+            paisesOrdenados.forEach(pais => {
+                if (pais !== 'El Salvador') {
+                    const option = document.createElement('option');
+                    option.value = pais;
+                    option.text = pais;
+                    selectPais.add(option);
+                }
             });
         })
         .catch(error => console.error('Error al obtener la lista de países:', error));
 </script>
+
 
 {% if tour.solo_finde %}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
