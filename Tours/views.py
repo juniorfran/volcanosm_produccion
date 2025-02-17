@@ -18,21 +18,26 @@ from django.utils import timezone
 from django.db.models import Q
 from django.http import JsonResponse
 from Configuraciones.models import wompi_config
+from django.core.exceptions import ImproperlyConfigured
 
-try:
-    latest_config = wompi_config.objects.latest('created_at')
-    Client_id = latest_config.client_id
-    Client_secret = latest_config.client_secret
-except wompi_config.DoesNotExist:
-    latest_config = None
-    Client_id = None
-    Client_secret = None
-    # Puedes asignar valores predeterminados aquí si es necesario.
 
-# Autenticarse y obtener el token
-access_token = authenticate_wompi(Client_id, Client_secret)
+def get_wompi_config():
+    try:
+        config = wompi_config.objects.latest('created_ad')
+        return config
+    except wompi_config.DoesNotExist:
+        raise ImproperlyConfigured("No se encontro ninguna configuración de Wompi en la base de datos")
 
 def create_payment_link_reserva(reserva_id, client_id, client_secret, comercio_id, monto, nombre_producto, descripcion_producto, imagen, cantidad_prod, **kwargs):
+
+    # Cargar la configuración de Wompi
+    wompi_config = get_wompi_config()
+    Client_id = wompi_config.client_id
+    Client_secret = wompi_config.client_secret
+
+    # Autenticarse y obtener el token
+    access_token = authenticate_wompi(Client_id, Client_secret)
+
     # Autenticar con Wompi
     #access_token = authenticate_wompi(client_id, client_secret)
     reserva_instance = get_object_or_404(Reserva, pk=reserva_id)
@@ -180,6 +185,15 @@ def tour_detail(request, tour_id):
     return render(request, 'detail_tours.html', context)
 
 def reservar_tour(request, tour_id):
+
+     # Cargar la configuración de Wompi
+    wompi_config = get_wompi_config()
+    Client_id = wompi_config.client_id
+    Client_secret = wompi_config.client_secret
+
+    # Autenticarse y obtener el token
+    access_token = authenticate_wompi(Client_id, Client_secret)
+    
     client_id = Client_id
     client_secret = Client_secret
         
@@ -286,30 +300,44 @@ def reservar_tour(request, tour_id):
 def reserva_exitosa(request, reserva_id):
     reserva = Reserva.objects.get(pk=reserva_id)
     enlace_pago = reserva.enlace_pago_set.get()
-        #obtener todos los datos de contacto
+
+    # Verifica si el enlace es válido
+    try:
+        response = requests.head(enlace_pago.url_enlace, timeout=5)
+        if response.status_code != 200:
+            enlace_pago = None  # Si el enlace no es válido, establece un valor nulo
+    except requests.RequestException:
+        enlace_pago = None
+
+    # Obtener otros datos necesarios para el contexto
     data_contact = Contacts.objects.latest()
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion') #obtener la barra principal
-    data_contact = Contacts.objects.latest()#obtener todos los datos de contacto
-    urls_info = Urls_info.objects.all() #obtener todas las url de informacion
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion') # Obtén la última descripción general
-    urls_interes = Urls_interes.objects.all() #urls de interes
-    
-    
+    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
+    urls_info = Urls_info.objects.all()
+    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    urls_interes = Urls_interes.objects.all()
+
     context = {
-        'barra_principal':barra_principal,
-        'data_contact':data_contact,
-        'urls_info':urls_info,
+        'barra_principal': barra_principal,
+        'data_contact': data_contact,
+        'urls_info': urls_info,
         'ultima_descripcion': ultima_descripcion,
-        'urls_interes':urls_interes,
+        'urls_interes': urls_interes,
         'reserva': reserva,
-        'enlace_pago': enlace_pago,
+        'enlace_pago': enlace_pago,  # Enlace validado
     }
+    print(context)
 
     return render(request, 'reserva_exitosa.html', context)
 
 
 def consultar_enlace_pago(enlace_pago_id, client_id, client_secret):
-    # Autenticar con Wompi y obtener el token
+
+    # Cargar la configuración de Wompi
+    wompi_config = get_wompi_config()
+    client_id = wompi_config.client_id
+    client_secret = wompi_config.client_secret
+
+    # Autenticarse y obtener el token
     access_token = authenticate_wompi(client_id, client_secret)
 
     if not access_token:
@@ -330,67 +358,52 @@ def consultar_enlace_pago(enlace_pago_id, client_id, client_secret):
         return None
 
 
+from datetime import datetime, timedelta
+
 def actualizar_estado_reserva(request):
-    '''Actualizar el estado de la reserva según las condiciones dadas.'''
-    
+
+    # Cargar la configuración de Wompi
+    wompi_config = get_wompi_config()
+    Client_id = wompi_config.client_id
+    Client_secret = wompi_config.client_secret
+
+    # Autenticarse y obtener el token
+    access_token = authenticate_wompi(Client_id, Client_secret)
+
     try:
-        # Obtener la última reserva registrada
         ultima_reserva = Reserva.objects.latest('id')
-
-        # Buscar enlace relacionado a la reserva
-        enlace_pago = EnlacePagoTour.objects.filter(reserva=ultima_reserva).first()
-        
-        if ultima_reserva.estado_reserva != 'PAGADO':
-            if enlace_pago:
-                # Consultar la información del enlace de pago
-                enlace_pago_info = consultar_enlace_pago(enlace_pago.idEnlace, Client_id, Client_secret)
-                
-                # Verificar si se encontró información del enlace de pago y si tiene transacciones
-                if enlace_pago_info:
-                    transacciones = enlace_pago_info.get('transaccionCompra')
-                    if transacciones:
-                        mensaje_transaccion = transacciones.get('mensaje')
-                        fecha_transaccion = transacciones.get('fechaTransaccion')
-                        
-                        # Si el mensaje de la transacción es AUTORIZADO, el estado es PAGADO
-                        if mensaje_transaccion == 'AUTORIZADO':
-                            ultima_reserva.estado_reserva = 'PAGADO'
-
-                        else:
-                            # Si no es AUTORIZADO, pero hay una transacción, el estado es PENDIENTE
-                            ultima_reserva.estado_reserva = 'PENDIENTE'
-                            
-                        fecha_ultima_reserva = str(ultima_reserva.fecha_reserva)
-
-                        # Convertir la fecha de la transacción a un objeto datetime
-                        fecha_transaccion_dt = datetime.fromisoformat(fecha_transaccion)
-                        fecha_ultima_reserva_dt = datetime.fromisoformat(fecha_ultima_reserva)
-                        
-                        # Verificar y actualizar el estado según el tiempo transcurrido
-                        if ultima_reserva.estado_reserva == "RESERVADO":
-                            fecha_reserva = ultima_reserva.fecha_reserva
-                            if (datetime.now(tz=fecha_transaccion_dt.tzinfo) - fecha_transaccion_dt) > timedelta(minutes=5):
-                                ultima_reserva.estado_reserva = 'PENDIENTE'
-                        
-                        # Cambiar a estado "CANCELADO" si la reserva ha estado en estado "RESERVADO" durante más de 24 horas
-                        if ultima_reserva.estado_reserva == 'PENDIENTE':
-                            fecha_reserva = ultima_reserva.fecha_reserva
-                            if (datetime.now(tz=fecha_transaccion_dt.tzinfo) - fecha_transaccion_dt) > timedelta(minutes=25):
-                                ultima_reserva.estado_reserva = 'CANCELADO'
-                    else:
-                        # Si no hay transacciones, establecer el estado como RESERVADO
-                        ultima_reserva.estado_reserva = 'RESERVADO'
-                else:
-                    print("La reserva no fue pagada, no se encontró información de la transacción")
-            else:
-                print("No se encontró ningún enlace de pago asociado a la reserva")
-        else:
-            print("Reserva actualizada, el estado es: ", ultima_reserva.estado_reserva)
-
     except Reserva.DoesNotExist:
-        print('No hay ninguna reserva registrada')
+        return JsonResponse({'error': 'No se encontraron reservas'}, status=404)
 
+    enlace_pago = EnlacePagoTour.objects.filter(reserva=ultima_reserva).first()
+    if ultima_reserva.estado_reserva != 'PAGADO':
+        if enlace_pago:
+            enlace_pago_info = consultar_enlace_pago(enlace_pago.idEnlace, Client_id, Client_secret)
+            if not isinstance(enlace_pago_info, dict):
+                return JsonResponse({'error': 'Enlace de pago no válido'}, status=400)
+            
+            transacciones = enlace_pago_info.get('transaccionCompra', {})
+            mensaje_transaccion = transacciones.get('mensaje')
+            fecha_transaccion = transacciones.get('fechaTransaccion')
+
+            if mensaje_transaccion == 'AUTORIZADO':
+                ultima_reserva.estado_reserva = 'PAGADO'
+            else:
+                ultima_reserva.estado_reserva = 'PENDIENTE'
+
+            if fecha_transaccion:
+                try:
+                    fecha_transaccion_dt = datetime.fromisoformat(fecha_transaccion)
+                except ValueError:
+                    return JsonResponse({'error': 'Formato de fecha inválido'}, status=400)
+
+                if (datetime.now(tz=fecha_transaccion_dt.tzinfo) - fecha_transaccion_dt) > timedelta(minutes=5):
+                    ultima_reserva.estado_reserva = 'PENDIENTE'
+
+                if ultima_reserva.estado_reserva == 'PENDIENTE' and \
+                   (datetime.now(tz=fecha_transaccion_dt.tzinfo) - fecha_transaccion_dt) > timedelta(hours=24):
+                    ultima_reserva.estado_reserva = 'CANCELADO'
+        else:
+            return JsonResponse({'error': 'No se encontró un enlace de pago'}, status=404)
     ultima_reserva.save()
-
-    # Devuelve una respuesta JSON
     return JsonResponse({'estado_reserva': ultima_reserva.estado_reserva})

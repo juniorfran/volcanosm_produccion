@@ -10,14 +10,18 @@ from django.utils import timezone
 # Create your models here.
 
 class wompi_config (models.Model):
-    cuenta = models.CharField(max_length=100, blank=True, null=True)
-    client_id = models.CharField(max_length=100, blank=True, null=True)
-    client_secret = models.CharField(max_length=100, blank=True, null=True)
+    cuenta = models.CharField(max_length=800, blank=True, null=True)
+    client_id = models.TextField(max_length=800, blank=True, null=True)
+    client_secret = models.TextField(max_length=800, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     #funcion str
     def __str__(self):
         return self.cuenta
+    
+    class Meta:
+        verbose_name = "Configuración Wompi"
+        verbose_name_plural = "Configuraciones Wompi"
 
 class General_Description(models.Model):
     """

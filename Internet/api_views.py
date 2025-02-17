@@ -30,6 +30,16 @@ from .serializers import (
 )
 
 
+from django.core.exceptions import ImproperlyConfigured
+def get_wompi_config():
+    from Configuraciones.models import wompi_config
+    try:
+        config = wompi_config.objects.latest('created_ad')
+        return config
+    except wompi_config.DoesNotExist:
+        raise ImproperlyConfigured("No se encontro ninguna configuración de Wompi en la base de datos")
+    
+
 class TiposListCreate(generics.ListCreateAPIView):
     queryset = Tipos.objects.all()
     serializer_class = TiposSerializer
@@ -103,8 +113,6 @@ class MikrotikConfigRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView)
     serializer_class = MikrotikConfigSerializer
     
 
-Client_id = settings.CLIENT_ID
-Client_secret = settings.CLIENT_SECRET
 
 @api_view(['POST'])
 def get_wompi_headers(access_token):
@@ -197,6 +205,13 @@ def crear_transaccion_3ds(acceso_id, numeroTarjeta, cvv, mesVencimiento, anioVen
         return None
     
 def consultar_transaccion_3ds(id_transaccion):
+
+    # Cargar la configuración de Wompi
+    wompi_config = settings.get_wompi_config()
+    Client_id = wompi_config.client_id
+    Client_secret = wompi_config.client_secret
+
+    # Autenticarse y obtener el token
     access_token = authenticate_wompi(Client_id, Client_secret)
     
     if not access_token:
@@ -217,9 +232,19 @@ def consultar_transaccion_3ds(id_transaccion):
 
 
 class Transaccion3DSCompraAccesoView(APIView):
+
     queryset = Transaccion3DS.objects.all()
     permission_classes = [AllowAny]
     def post(self, request, tipo_acceso_id):
+
+        # Cargar la configuración de Wompi
+        wompi_config = settings.get_wompi_config()
+        Client_id = wompi_config.client_id
+        Client_secret = wompi_config.client_secret
+
+        # Autenticarse y obtener el token
+        access_token = authenticate_wompi(Client_id, Client_secret)
+
         tipo_acceso = get_object_or_404(Tipos, id=tipo_acceso_id)
         acceso_disponible = Accesos.objects.filter(acceso_tipo=tipo_acceso, estado=True).first()
         

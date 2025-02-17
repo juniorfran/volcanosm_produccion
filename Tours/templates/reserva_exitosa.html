@@ -142,24 +142,32 @@
 
 
 <script>
-  $(document).ready(function() {
+  $(document).ready(function () {
     {% if reserva.estado_reserva != 'PAGADO' %}
       $('#enlacePagoModal').modal('show');
     {% endif %}
-    
-
-    // Add event listener for hidden.bs.modal event
-    $('#enlacePagoModal').on('hidden.bs.modal', function(e) {
-      // Make an AJAX GET request to the actualizar_estado_reserva URL
-      $.get("{% url 'actualizar_estado_reserva' %}", function(data, status) {
-        // Check if the reservation is not paid and display an alert
-        if (data.estado_reserva != 'PAGADO') {
-          alert('Aún no se ha pagado la reserva. Por favor, realice el pago para continuar.');
-          $('#enlacePagoModal').modal('show');
-        }
+  
+    // Al cerrar el modal, verifica si el pago ya se realizó
+    $('#enlacePagoModal').on('hidden.bs.modal', function (e) {
+      $.ajax({
+        url: "{% url 'actualizar_estado_reserva' reserva.id %}", // Actualiza la URL con el ID de la reserva
+        type: "GET",
+        success: function (data) {
+          if (data.estado_reserva != 'PAGADO') {
+            // Si no se ha pagado, muestra el mensaje de alerta y reabre el modal
+            alert(
+              "Aún no se ha pagado la reserva. Por favor, realice el pago para continuar."
+            );
+            $('#enlacePagoModal').modal('show');
+          }
+        },
+        error: function () {
+          console.error("No se pudo verificar el estado de la reserva.");
+        },
       });
     });
   });
+  
 </script>
 
 

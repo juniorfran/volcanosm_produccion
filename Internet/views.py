@@ -21,18 +21,25 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from Configuraciones.models import wompi_config
 
-try:
-    latest_config = wompi_config.objects.latest('created_at')
-    Client_id = latest_config.client_id
-    Client_secret = latest_config.client_secret
-except wompi_config.DoesNotExist:
-    latest_config = None
-    Client_id = None
-    Client_secret = None
-    # Puedes asignar valores predeterminados aquí si es necesario.
+
+from django.core.exceptions import ImproperlyConfigured
+def get_wompi_config():
+    from Configuraciones.models import wompi_config
+    try:
+        config = wompi_config.objects.latest('created_ad')
+        return config
+    except wompi_config.DoesNotExist:
+        raise ImproperlyConfigured("No se encontro ninguna configuración de Wompi en la base de datos")
+
 
 def crear_transaccion_3ds(acceso_id, numeroTarjeta, cvv, mesVencimiento, anioVencimiento, monto, nombre, apellido, email, ciudad, direccion, telefono, client_id, client_secret, **kwargs):
-    access_token = authenticate_wompi(client_id, client_secret)
+    # Cargar la configuración de Wompi
+    wompi_config = settings.get_wompi_config()
+    Client_id = wompi_config.client_id
+    Client_secret = wompi_config.client_secret
+
+    # Autenticarse y obtener el token
+    access_token = authenticate_wompi(Client_id, Client_secret)
     acceso_instance = get_object_or_404(Accesos, pk=acceso_id)
     
     if not access_token:
@@ -245,6 +252,15 @@ def login_mikrotik(router_ip, username, password):
 
 
 def transaccion3ds_compra_acceso(request, tipo_acceso_id):
+
+    # Cargar la configuración de Wompi
+    wompi_config = settings.get_wompi_config()
+    Client_id = wompi_config.client_id
+    Client_secret = wompi_config.client_secret
+
+    # Autenticarse y obtener el token
+    access_token = authenticate_wompi(Client_id, Client_secret)
+
     barra_principal = Barra_Principal.objects.latest('fecha_creacion')
     data_contact = Contacts.objects.latest()
     urls_info = Urls_info.objects.all()
@@ -419,6 +435,11 @@ def transaccion3ds_fallida(request):
 
 
 def consultar_transaccion_3ds(id_transaccion):
+    # Cargar la configuración de Wompi
+    wompi_config = settings.get_wompi_config()
+    Client_id = wompi_config.client_id
+    Client_secret = wompi_config.client_secret
+
     # Autenticar con Wompi
     access_token = authenticate_wompi(Client_id, Client_secret)
     
@@ -452,6 +473,15 @@ def verificar_pago(request, transaccion_id):
 
 
 def comprar_acceso(request, tipo_acceso_id):
+
+    # Cargar la configuración de Wompi
+    wompi_config = settings.get_wompi_config()
+    Client_id = wompi_config.client_id
+    Client_secret = wompi_config.client_secret
+
+    # Autenticarse y obtener el token
+    access_token = authenticate_wompi(Client_id, Client_secret)
+
     barra_principal = Barra_Principal.objects.latest('fecha_creacion')
     data_contact = Contacts.objects.latest()
     urls_info = Urls_info.objects.all()
@@ -660,6 +690,14 @@ def consultar_enlace_pago(id_enlace, client_id, client_secret):
         return None
     
 def verificar_transaccion_exitosa(request):
+
+    # Cargar la configuración de Wompi
+    wompi_config = settings.get_wompi_config()
+    Client_id = wompi_config.client_id
+    Client_secret = wompi_config.client_secret
+
+    # Autenticarse y obtener el token
+    access_token = authenticate_wompi(Client_id, Client_secret)
     
     if request.method == 'POST':
         # Obtener el idEnlace del cuerpo de la solicitud POST     
