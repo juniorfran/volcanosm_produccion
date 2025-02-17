@@ -125,9 +125,14 @@ def create_payment_link_reserva(reserva_id, client_id, client_secret, comercio_i
         if not access_token:
             print("Error: No se pudo autenticar en Wompi.")
             return None
+        
+
 
         # Obtener la instancia de la reserva
         reserva_instance = get_object_or_404(Reserva, pk=reserva_id)
+
+        #urlRedirect es la url de reserva_exitosa/id_reserva
+        url_redir = f"https://volcanosm.com/tours/reserva_exitosa/{reserva_instance.reserva.id}/",
 
         # Construir la solicitud JSON
         request_data = {
@@ -139,11 +144,11 @@ def create_payment_link_reserva(reserva_id, client_id, client_secret, comercio_i
                 "urlImagenProducto": imagen
             },
             "configuracion": {
-                "urlRedirect": "https://volcanosm.net",  # URL a la que se redirige después del pago
+                "urlRedirect": url_redir,  # URL a la que se redirige después del pago
                 "esMontoEditable": False,
                 "esCantidadEditable": False,
                 "cantidadPorDefecto": cantidad_prod,
-                "emailsNotificacion": "correo@ejemplo.com",
+                "emailsNotificacion": reserva_instance.correo_electronico,
             },
             **kwargs
         }
@@ -389,8 +394,10 @@ def actualizar_estado_reserva(request, reserva_id):
     print(f"Estado recibido de Wompi: {mensaje_transaccion}")
 
     # Actualizar estado basado en la respuesta de Wompi
-    if mensaje_transaccion == 'AUTORIZADO' or mensaje_transaccion == 'Autorizado':
+    if mensaje_transaccion.upper() == 'AUTORIZADO':
         Reserva.objects.filter(id=reserva.id).update(estado_reserva='PAGADO')
+        #enviar el detalle de la reserva por correo
+        reserva.enviar_codigo_por_correo()
     else:
         Reserva.objects.filter(id=reserva.id).update(estado_reserva='PENDIENTE')
 

@@ -208,7 +208,7 @@ class Reserva(models.Model):
         # Genera un número correlativo desde 001
         correlativo = str(random.randint(1, 9999)).zfill(4)
         # Combina los elementos para formar el código de reserva
-        codigo = f"re-{fecha_actual}f{self.dui}{correlativo}"
+        codigo = f"re-{fecha_actual}f{correlativo}"
         return codigo
     
     def guardar_qr_code_image(self, qr_io):
