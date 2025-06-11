@@ -130,6 +130,9 @@ INSTALLED_APPS = [
 
 # Llaves de Google
 RECAPTCHA_SECRET_KEY = "6LfQS10rAAAAAEaaHqrRXEbFWP69quWZRbdeysJ7"
+RECAPTCHA_SITE_KEY   = "TU_SITE_KEY"     # pública
+RECAPTCHA_SECRET_KEY = "TU_SECRET_KEY"   # privada
+RECAPTCHA_SCORE_THRESHOLD = 0.5          # cambia si necesitas ser más estricto
 
 CORS_ALLOW_ALL_ORIGINS = True
 

@@ -42,13 +42,14 @@
                                 required="required" name="message"></textarea>
                             <p class="help-block text-danger"></p>
                         </div>
-                        <!-- … textarea … -->
-                        <div class="control-group">
-                            <!-- Caja “No soy un robot” -->
-                            <div class="g-recaptcha" data-sitekey="6LfQS10rAAAAAGipDOGL2ee16Y355iZ6q4wt44rS"></div>
-                        </div>
+                        <input type="hidden" name="recaptcha_token" id="recaptcha_token">
+                        <input type="hidden" name="recaptcha_action" value="contact">
+
+                        <!-- Botón normal -->
                         <div class="text-center">
-                            <button class="btn btn-primary py-3 px-4" type="submit">Enviar Mensaje</button>
+                            <button class="btn btn-primary py-3 px-4" type="submit">
+                                Enviar Mensaje
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -60,10 +61,42 @@
 
 
 
-<script src="https://www.google.com/recaptcha/api.js?hl=es" async defer></script>
+
+ <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}"></script>
+
+    <script>
+      /* ② Genera un token cada vez que se vaya a enviar el formulario.
+            Si tu página tarda en enviarse (>2 min), regenera el token en submit. */
+      function genRecaptchaToken() {
+          grecaptcha.ready(function () {
+              grecaptcha.execute('{{ recaptcha_site_key }}', {action: 'contact'}).then(function (token) {
+                  document.getElementById('recaptcha_token').value = token;
+              });
+          });
+      }
+
+      // Genera al cargar y cada 110 s para prevenir expiración
+      genRecaptchaToken();
+      setInterval(genRecaptchaToken, 110 * 1000);
+    </script>
 {% endblock content %}
 
 {% block extra_js %}
-<script src="https://www.google.com/recaptcha/api.js?hl=es" async defer></script>
+ <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}"></script>
 
+    <script>
+      /* ② Genera un token cada vez que se vaya a enviar el formulario.
+            Si tu página tarda en enviarse (>2 min), regenera el token en submit. */
+      function genRecaptchaToken() {
+          grecaptcha.ready(function () {
+              grecaptcha.execute('{{ recaptcha_site_key }}', {action: 'contact'}).then(function (token) {
+                  document.getElementById('recaptcha_token').value = token;
+              });
+          });
+      }
+
+      // Genera al cargar y cada 110 s para prevenir expiración
+      genRecaptchaToken();
+      setInterval(genRecaptchaToken, 110 * 1000);
+    </script>
 {% endblock extra_js %}
