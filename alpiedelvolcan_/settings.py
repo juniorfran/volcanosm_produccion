@@ -129,7 +129,6 @@ INSTALLED_APPS = [
 ]
 
 # Llaves de Google
-RECAPTCHA_SECRET_KEY = "6LfQS10rAAAAAEaaHqrRXEbFWP69quWZRbdeysJ7"
 RECAPTCHA_SITE_KEY   = "6LfQS10rAAAAAGipDOGL2ee16Y355iZ6q4wt44rS"     # pública
 RECAPTCHA_SECRET_KEY = "6LfQS10rAAAAAEaaHqrRXEbFWP69quWZRbdeysJ7"   # privada
 RECAPTCHA_SCORE_THRESHOLD = 0.5          # cambia si necesitas ser más estricto

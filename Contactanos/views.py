@@ -1,9 +1,28 @@
 # En tu archivo views.py
 from django.shortcuts import render, redirect
+import requests
 
 from Configuraciones.models import Barra_Principal, Contacts, Direccionamiento, General_Description, Urls_info, Urls_interes
 from Tours.models import Tour
+from alpiedelvolcan_ import settings
 from .models import Mensaje_Contacto
+
+def verificar_recaptcha(token, accion, ip):
+    resp = requests.post(
+        "https://www.google.com/recaptcha/api/siteverify",
+        data={
+            "secret": settings.RECAPTCHA_SECRET_KEY,
+            "response": token,
+            "remoteip": ip,
+        },
+        timeout=5,
+    ).json()
+    return (
+        resp.get("success")
+        and resp.get("action") == accion     # "contact"
+        and resp.get("score", 0) >= 0.5      # umbral
+    )
+
 
 def contacto(request):
     tours = Tour.objects.all().order_by('-tipo_tour')

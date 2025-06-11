@@ -1,95 +1,82 @@
 {% extends "base.html" %}
-
 {% load static %}
 
 {% block content %}
-
 {% include "direccionamiento.html" %}
 
-
-<!-- Contact Start -->
 <div class="container-fluid py-5">
-    <div class="container py-5">
-        <div class="text-center mb-3 pb-3">
-            <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">Contactanos</h6>
-            <h2>Si tienes alguna duda puedes contactarnos</h2>
-        </div>
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="contact-form bg-white" style="padding: 30px;">
-                    <div id="success"></div>
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="form-row">
-                            <div class="control-group col-sm-6">
-                                <input type="text" class="form-control p-4" id="name" placeholder="Tu Nombre Completo"
-                                    required="required" name="name" />
-                                <p class="help-block text-danger"></p>
-                            </div>
-                            <div class="control-group col-sm-6">
-                                <input type="email" class="form-control p-4" id="email" placeholder="Tu Email"
-                                    required="required" name="email" />
-                                <p class="help-block text-danger"></p>
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <input type="text" class="form-control p-4" id="subject" placeholder="Asunto"
-                                required="required" name="subject" />
-                            <p class="help-block text-danger"></p>
-                        </div>
-                        <div class="control-group">
-                            <textarea class="form-control py-3 px-4" rows="5" id="message" placeholder="Como podemos ayudarte"
-                                required="required" name="message"></textarea>
-                            <p class="help-block text-danger"></p>
-                        </div>
-
-                        <!-- Botón normal -->
-                        <div class="text-center">
-                            <button class="btn btn-primary py-3 px-4"  data-action='submit' data-sitekey="6LfQS10rAAAAAGipDOGL2ee16Y355iZ6q4wt44rS" 
-                                data-callback='onSubmit' type="submit">
-                                Enviar Mensaje
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+  <div class="container py-5">
+    <div class="text-center mb-3 pb-3">
+      <h6 class="text-primary text-uppercase" style="letter-spacing:5px;">Contáctanos</h6>
+      <h2>Si tienes alguna duda puedes contactarnos</h2>
     </div>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="contact-form bg-white" style="padding:30px;">
+          <form id="contact-form" method="post">
+            {% csrf_token %}
+
+            <!-- TUS CAMPOS -->
+            <div class="form-row">
+              <div class="control-group col-sm-6">
+                <input class="form-control p-4"
+                       type="text" name="name" placeholder="Tu Nombre Completo" required>
+              </div>
+              <div class="control-group col-sm-6">
+                <input class="form-control p-4"
+                       type="email" name="email" placeholder="Tu Email" required>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <input class="form-control p-4"
+                     type="text" name="subject" placeholder="Asunto" required>
+            </div>
+
+            <div class="control-group">
+              <textarea class="form-control py-3 px-4"
+                        name="message" rows="5" placeholder="¿Cómo podemos ayudarte?" required></textarea>
+            </div>
+
+            <!-- ① token invisible -->
+            <input type="hidden" name="recaptcha_token" id="recaptcha_token">
+            <input type="hidden" name="recaptcha_action" value="contact">
+
+            <!-- ② Botón normal -->
+            <div class="text-center">
+              <button class="btn btn-primary py-3 px-4" type="submit">
+                Enviar Mensaje
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-<!-- Contact End -->
-
-
-
-
- <script src="https://www.google.com/recaptcha/api.js?render=reCAPTCHA_site_key"></script>
-
-
-    <script>
-      function onClick(e) {
-        e.preventDefault();
-        grecaptcha.ready(function() {
-          grecaptcha.execute('6LfQS10rAAAAAGipDOGL2ee16Y355iZ6q4wt44rS', {action: 'submit'}).then(function(token) {
-              // Add your logic to submit to your backend server here.
-          });
-        });
-      }
-  </script>
-
 {% endblock content %}
 
 {% block extra_js %}
- <script src="https://www.google.com/recaptcha/api.js?render=reCAPTCHA_site_key"></script>
+  <!-- ③ Carga la librería con TU site-key -->
+  <script src="https://www.google.com/recaptcha/api.js?render=6LfQS10rAAAAAGipDOGL2ee16Y355iZ6q4wt44rS"></script>
 
-
-    <script>
-      function onClick(e) {
-        e.preventDefault();
-        grecaptcha.ready(function() {
-          grecaptcha.execute('6LfQS10rAAAAAGipDOGL2ee16Y355iZ6q4wt44rS', {action: 'submit'}).then(function(token) {
-              // Add your logic to submit to your backend server here.
-          });
+  <script>
+    // Genera token y lo pone en el hidden antes de enviar
+    function setRecaptchaAndSubmit(event){
+      event.preventDefault();          // Detiene envío
+      grecaptcha.ready(function(){
+        grecaptcha.execute('6LfQS10rAAAAAGipDOGL2ee16Y355iZ6q4wt44rS', {
+          action: 'contact'
+        }).then(function(token){
+          document.getElementById('recaptcha_token').value = token;
+          event.target.submit();       // Envía con token
         });
-      }
-  </script>
+      });
+    }
 
+    // Escucha el submit del formulario
+    document.getElementById('contact-form')
+            .addEventListener('submit', setRecaptchaAndSubmit);
+  </script>
 {% endblock extra_js %}
