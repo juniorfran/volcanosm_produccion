@@ -42,6 +42,11 @@
                                 required="required" name="message"></textarea>
                             <p class="help-block text-danger"></p>
                         </div>
+                        <!-- … textarea … -->
+                        <div class="control-group">
+                            <!-- Caja “No soy un robot” -->
+                            <div class="g-recaptcha" data-sitekey="6LfQS10rAAAAAGipDOGL2ee16Y355iZ6q4wt44rS"></div>
+                        </div>
                         <div class="text-center">
                             <button class="btn btn-primary py-3 px-4" type="submit">Enviar Mensaje</button>
                         </div>
@@ -55,9 +60,10 @@
 
 
 
-
+<script src="https://www.google.com/recaptcha/api.js?hl=es" async defer></script>
 {% endblock content %}
 
 {% block extra_js %}
+<script src="https://www.google.com/recaptcha/api.js?hl=es" async defer></script>
 
 {% endblock extra_js %}

@@ -125,7 +125,11 @@ INSTALLED_APPS = [
     'Internet',
     'rest_framework',
     'corsheaders',
+    #'captcha',
 ]
+
+# Llaves de Google
+RECAPTCHA_SECRET_KEY = "6LfQS10rAAAAAEaaHqrRXEbFWP69quWZRbdeysJ7"
 
 CORS_ALLOW_ALL_ORIGINS = True
 

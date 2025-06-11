@@ -15,7 +15,8 @@ RUN apt-get update && \
 COPY requirements.txt .
 
 # Instalar los requisitos de Python
-RUN pip install --upgrade pip setuptools && \
+RUN pip install django-recaptcha && \
+    pip install --upgrade pip setuptools && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copiar el código fuente de la aplicación en el contenedor
