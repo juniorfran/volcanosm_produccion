@@ -1,12 +1,13 @@
 version: '3'
-# implementacion con compose
 services:
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
+      - /var/lib/volcanosm/static:/app/staticfiles   # si usará collectstatic
+      - /var/lib/volcanosm/media:/app/media          # si maneja uploads
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"   # <-- solo accesible desde el host para Nginx
     environment:
       - DEBUG=0
