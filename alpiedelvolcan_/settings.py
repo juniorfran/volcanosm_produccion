@@ -27,28 +27,31 @@ DEBUG_PROPAGATE_EXCEPTIONS = True
 CLIENT_ID = "86d5de4c-dd6a-42d2-8d5b-ff5aed09ae83"
 CLIENT_SECRET = "c3bb69e4-7d19-486b-b9d8-1b2b592714d5"
 
-ALLOWED_HOSTS = [
-    'volcano-sm.azurewebsites.net', 
-    'http://0.0.0.0:8000/', 
-    '127.0.0.1',
-    'localhost',
-    'volcanosm.net', 
-    '51.222.136.8:8000', 
-    '51.222.136.8',
-    '93.127.132.158:8000', 
-    '93.127.132.158',
-    '108.181.195.15:8000',
-    '108.181.195.15', 
-    'http://volcanosm.com', 
-    'https://volcanosm.com',
-    'http://www.volcanosm.com', 
-    'https://www.volcanosm.com',
-    'www.volcanosm.com', 
-    'volcanosm.com',
-    'http://0.0.0.0/',
-    'http://0.0.0.0:8000/',
-    'http://172.17.0.2/'
-]
+# ALLOWED_HOSTS = [
+#     'volcano-sm.azurewebsites.net', 
+#     'http://0.0.0.0:8000/', 
+#     '127.0.0.1',
+#     'localhost',
+#     'volcanosm.net', 
+#     '51.222.136.8:8000', 
+#     '51.222.136.8',
+#     '93.127.132.158:8000', 
+#     '93.127.132.158',
+#     '108.181.195.15:8000',
+#     '108.181.195.15', 
+#     'http://volcanosm.com', 
+#     'https://volcanosm.com',
+#     'http://www.volcanosm.com', 
+#     'https://www.volcanosm.com',
+#     'www.volcanosm.com', 
+#     'volcanosm.com',
+#     'http://0.0.0.0/',
+#     'http://0.0.0.0:8000/',
+#     'http://172.17.0.2/'
+# ]
+
+ALLOWED_HOSTS = ["volcanosm.com", "www.volcanosm.com", "93.127.132.158", "localhost", "127.0.0.1"]
+
 #CORS_ALLOWED_ORIGINS = ['https://alpiedelvolcan.azurewebsites.net/']
 
 # Security & HTTPS settings
