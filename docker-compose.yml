@@ -1,12 +1,13 @@
 version: '3'
-# implementacion con compose
 services:
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
+      - /var/lib/volcanosm/static:/app/staticfiles   # ← STATIC_ROOT
+      - /var/lib/volcanosm/media:/app/media          # ← MEDIA_ROOT
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
       - DEBUG=0
