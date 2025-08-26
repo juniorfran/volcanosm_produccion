@@ -20,44 +20,162 @@ from django.http import JsonResponse
 from Configuraciones.models import wompi_config
 from django.core.exceptions import ImproperlyConfigured
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Max
+from django.core.exceptions import FieldError
+
+
+
 def tours_index(request):
-    # Obtener la fecha actual
-    fecha_actual = timezone.now()
+    now = timezone.now()
 
-    # Obtener todos los tours desde la base de datos
-    tours = Tour.objects.all()
+    # Base queryset
+    tours_qs = Tour.objects.all()
 
-    # Verificar la disponibilidad de cada tour
-    for tour in tours:
-        if tour.fecha_inicio <= fecha_actual <= tour.fecha_fin:
-            tour.disponible = True
+    # ---- Filtros GET ----
+    q = (request.GET.get('q') or '').strip()
+    tipo = (request.GET.get('tipo') or '').strip()           # si es FK vendrá un id en str
+    duracion_range = (request.GET.get('duracion') or '').strip()
+    solo_finde = request.GET.get('solo_finde')
+    orden = (request.GET.get('orden') or '').strip()
+    precio_param = request.GET.get('precio')
+
+    # Buscador (intenta FK.nombre y cae a campos de texto)
+    if q:
+        try:
+            tours_qs = tours_qs.filter(
+                Q(titulo__icontains=q) |
+                Q(descripcion__icontains=q) |
+                Q(tipo_tour__nombre__icontains=q) |   # si es FK con campo nombre
+                Q(tipo_tour__icontains=q)             # si fuera CharField
+            )
+        except FieldError:
+            tours_qs = tours_qs.filter(
+                Q(titulo__icontains=q) |
+                Q(descripcion__icontains=q)
+            )
+
+    # Filtro por tipo (si es FK, usa _id; si fuera Char, igual funciona porque value es el mismo)
+    if tipo:
+        try:
+            tipo_id = int(tipo)
+            tours_qs = tours_qs.filter(tipo_tour_id=tipo_id)
+        except ValueError:
+            # Si llegó texto (para CharField):
+            tours_qs = tours_qs.filter(tipo_tour=tipo)
+
+    # Filtro rango duración
+    if duracion_range:
+        try:
+            lo, hi = map(int, duracion_range.split('-'))
+            tours_qs = tours_qs.filter(duracion__gte=lo, duracion__lte=hi)
+        except Exception:
+            pass
+
+    # Solo fines de semana
+    if solo_finde:
+        tours_qs = tours_qs.filter(solo_finde=True)
+
+    # ---- Precio máx dinámico (antes de aplicar filtro por precio) ----
+    agg = tours_qs.aggregate(precio_max=Max('precio_adulto'))
+    precio_max = int(agg['precio_max']) if agg['precio_max'] is not None else 300
+
+    try:
+        precio_val = int(float(precio_param)) if precio_param is not None else precio_max
+    except (TypeError, ValueError):
+        precio_val = precio_max
+
+    precio_val = max(0, min(precio_val, precio_max))
+    tours_qs = tours_qs.filter(precio_adulto__lte=precio_val)
+
+    # ---- Orden ----
+    order_map = {
+        'precio': 'precio_adulto',
+        '-precio': '-precio_adulto',
+        'duracion': 'duracion',
+        '-duracion': '-duracion',
+    }
+    if orden in order_map:
+        tours_qs = tours_qs.order_by(order_map[orden])
+
+    # Marca disponibilidad sin tocar BD
+    tours = list(tours_qs)
+    for t in tours:
+        if getattr(t, 'fecha_inicio', None) and getattr(t, 'fecha_fin', None):
+            t.disponible = (t.fecha_inicio <= now <= t.fecha_fin)
         else:
-            tour.disponible = False
-            
+            t.disponible = False
+
+    # ---- Opciones de "tipo" para el <select> (soporta FK o CharField) ----
+    try:
+        # Si es FK con campo "nombre"
+        tipos_pairs = (
+            Tour.objects.filter(tipo_tour__isnull=False)
+                        .values_list('tipo_tour__id', 'tipo_tour__nombre')
+                        .distinct()
+        )
+        tipos = list(tipos_pairs)
+    except FieldError:
+        # Si es CharField
+        tipos_vals = (
+            Tour.objects.exclude(tipo_tour__isnull=True)
+                        .exclude(tipo_tour='')       # aquí sí es seguro: es CharField
+                        .values_list('tipo_tour', flat=True)
+                        .distinct()
+        )
+        tipos = [(v, v) for v in tipos_vals]
+
+    # Paginación
+    paginator = Paginator(tours, 9)
+    page = request.GET.get('page')
+    try:
+        page_obj = paginator.page(page)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
+    # Datos globales
     titulo = "Nuestros Tours"
     direccion_actual = "tours"
-
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion') # Obtener la barra principal
-    data_contact = Contacts.objects.latest() # Obtener todos los datos de contacto
-    urls_info = Urls_info.objects.all() # Obtener todas las URL de información
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion') # Obtener la última descripción general
-    urls_interes = Urls_interes.objects.all() # URLs de interés
+    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
+    data_contact = Contacts.objects.latest()
+    urls_info = Urls_info.objects.all()
+    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    urls_interes = Urls_interes.objects.all()
     conf_direccionamiento = Direccionamiento.objects.latest('fecha_creacion')
     servicio = Servicios.objects.first()
-    
 
-    # Renderizar la plantilla 'show_tours.html' con la lista de tours y otros datos
+    # Imagen header opcional
+    header_bg = None
+    if hasattr(conf_direccionamiento, 'imagen_principal') and getattr(conf_direccionamiento, 'imagen_principal'):
+        img = getattr(conf_direccionamiento, 'imagen_principal')
+        header_bg = getattr(img, 'url', None)
+    elif hasattr(conf_direccionamiento, 'url_azure'):
+        header_bg = conf_direccionamiento.url_azure
+
     context = {
         'servicio': servicio,
-        'titulo':titulo,
-        'direccion_actual':direccion_actual,
-        'tours': tours,
+        'titulo': titulo,
+        'direccion_actual': direccion_actual,
+
+        'tours': page_obj.object_list,
+        'is_paginated': page_obj.paginator.num_pages > 1,
+        'page_obj': page_obj,
+        'paginator': paginator,
+
         'barra_principal': barra_principal,
         'data_contact': data_contact,
         'urls_info': urls_info,
         'ultima_descripcion': ultima_descripcion,
         'urls_interes': urls_interes,
-        'direccionamiento':conf_direccionamiento,
+        'direccionamiento': conf_direccionamiento,
+
+        # UI / Filtros
+        'tipos': tipos,
+        'precio_max': precio_max,
+        'precio_val': precio_val,
+        'header_bg': header_bg,
     }
     return render(request, 'show_tours.html', context)
 

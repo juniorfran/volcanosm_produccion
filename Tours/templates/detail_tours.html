@@ -2,191 +2,280 @@
 
 {% block content %}
 
-<!-- Header Start -->
 {% include "direccionamiento.html" %}
-<!-- Header End -->
-<br>
-<hr>
-<h1>{{ tour.titulo }}</h1>
-<hr>
-<!-- Tour Detail Start -->
-<div class="container mt-5">
-    <div class="row">
-        <!-- Imagen principal y miniaturas -->
-        <div class="col-md-6">
-            <!-- Miniaturas de otras imágenes -->
-            <div class="mt-4">
-                <div class="row">
-                    {% if imagenes %}
-                        {% for imagen in imagenes %}
-                            <div class="col-2 mb-2">
-                                <img src="{{ imagen }}" alt="Miniatura" class="img-thumbnail imagen-miniatura" data-imagen="{{ imagen }}" style="max-width: 100%;">
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <p>No hay miniaturas disponibles.</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Imagen principal -->
-            <div class="mt-4">
-                <img src="{{ tour.obtener_imagen_principal }}" alt="Imagen del Tour" class="img-fluid" id="imagen-principal" style="max-width: 500px;">
-            </div>
-        </div>
-        <!-- Información del Tour -->
-        <div class="col-md-6">
-            <div class="mt-4">
-                
-                <p>{{ tour.incluye_tour | safe }}</p>
-                <p>Precio Adultos: ${{ tour.precio_adulto }}</p>
-                <p>Precio niños: ${{ tour.precio_nino }}</p>
-                <p>Duracion del Tour: {{ tour.duracion }} horas.</p>
-                <p>Tipo: {{ tour.tipo_tour }}</p>
-                <a href="{% url 'reservar_tour' tour_id=tour.id %}" class="btn btn-primary">Reservar</a>
-            </div>
-        </div>
-        
-        <div class="mt-4">
-            <hr>
-            <p>{{ tour.descripcion | safe}}</p>
-            <br>
-            <p>{{ tour.descripcion1 | safe }}</p>
-            <br>
-            <p>{{ tour.descripcion2 | safe }}</p>
-        </div>
-    </div>
-    <hr>
-</div>
-
-<!-- Apartado de Reseñas -->
 
 <style>
-    #full-stars-example-two .rating-group {
-      display: inline-flex;
-    }
-  
-    #full-stars-example-two .rating__icon {
-      pointer-events: none;
-    }
-  
-    #full-stars-example-two .rating__input {
-      position: absolute !important;
-      left: -9999px !important;
-    }
-  
-    #full-stars-example-two .rating__label {
-      cursor: pointer;
-      padding: 0 0.1em;
-      font-size: 2rem;
-    }
-  
-    #full-stars-example-two .rating__icon--star {
-      color: orange;
-    }
-  
-    #full-stars-example-two .rating__input:checked ~ .rating__label .rating__icon--star {
-      color: #ddd;
-    }
-  
-    #full-stars-example-two .rating-group:hover .rating__label .rating__icon--star {
-      color: orange;
-    }
-  
-    #full-stars-example-two .rating__input:hover ~ .rating__label .rating__icon--star {
-      color: #ddd;
-    }
+  /* Relación de aspecto para imagen principal */
+  .ratio-box{position:relative;width:100%;overflow:hidden;background:#f8f9fa;}
+  .ratio-16x9{padding-top:56.25%;}
+  .ratio-img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;object-position:center;}
 
+  /* Miniaturas uniformes */
+  .thumb{width:78px;height:78px;object-fit:cover;object-position:center;cursor:pointer;}
+  .thumb.active{box-shadow:0 0 0 2px #007bff inset;}
 
-    /* Agrega estilos para las reseñas */
-.reseña-container {
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    padding: 10px;
-}
+  /* Sticky CTA */
+  @media (min-width: 992px){
+    .sticky-cta{position:sticky;top:80px;}
+  }
 
-.reseña-estrellas {
-    color: #f0a80a; /* Cambia el color según tus preferencias */
-    margin-right: 5px;
-}
+  /* Modal zoom */
+  #modalZoom .modal-content{background:#000;border:0;}
+  #zoom-img{width:100%;height:80vh;object-fit:contain;object-position:center;background:#000;}
 
-/* Puedes ajustar estos estilos según tus preferencias */
-.reseña-comentario {
-    font-size: 16px;
-    line-height: 1.4;
-}
+  .media .avatar{
+    width:40px;height:40px;border-radius:50%;
+    background:#6c757d;color:#fff;display:flex;align-items:center;justify-content:center;
+  }
+</style>
 
-  </style>
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between flex-wrap">
+    <h1 class="h3 mb-2 mb-sm-0">{{ tour.titulo }}</h1>
 
+    {% if tour.promedio_estrellas and tour.cantidad_resenas %}
+      <div class="text-right small">
+        <span class="text-warning">
+          {% for i in "12345" %}
+            {% if forloop.counter <= tour.promedio_estrellas|floatformat:0 %}
+              <i class="fas fa-star"></i>
+            {% else %}
+              <i class="far fa-star"></i>
+            {% endif %}
+          {% endfor %}
+        </span>
+        <span class="text-muted">({{ tour.cantidad_resenas }} reseñas)</span>
+      </div>
+    {% endif %}
+  </div>
 
-<!-- Apartado de Reseñas -->
-<div class="mt-4">
-    <h2>Deja tu Reseña</h2>
-    <form method="post" action="{% url 'tour_detail' tour_id=tour.id %}">
+  <hr>
+
+  <div class="row">
+    <!-- Galería -->
+    <div class="col-lg-7">
+      <!-- Imagen principal en marco 16:9 -->
+      <div class="card border-0 shadow-sm mb-3">
+        <a href="#" id="zoom-trigger" aria-label="Ver imagen ampliada">
+          <div class="ratio-box ratio-16x9">
+            <img id="imagen-principal" src="{{ tour.obtener_imagen_principal }}" alt="Imagen del tour" class="ratio-img">
+          </div>
+        </a>
+      </div>
+
+      <!-- Miniaturas -->
+      <div class="d-flex flex-wrap">
+        {% if imagenes %}
+          {% for imagen in imagenes %}
+            <div class="p-1">
+              <img src="{{ imagen }}" alt="Miniatura {{ forloop.counter }}"
+                   class="img-thumbnail thumb imagen-miniatura{% if forloop.first %} active{% endif %}"
+                   data-imagen="{{ imagen }}">
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted">No hay miniaturas disponibles.</p>
+        {% endif %}
+      </div>
+
+      <!-- Descripción -->
+      <div class="mt-4">
+        {% if tour.descripcion %}<div class="mb-3">{{ tour.descripcion|safe }}</div>{% endif %}
+        {% if tour.descripcion1 %}<div class="mb-3">{{ tour.descripcion1|safe }}</div>{% endif %}
+        {% if tour.descripcion2 %}<div class="mb-3">{{ tour.descripcion2|safe }}</div>{% endif %}
+      </div>
+    </div>
+
+    <!-- Columna derecha: info / CTA -->
+    <div class="col-lg-5">
+      <div class="sticky-cta">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <div class="mb-2">
+              <span class="badge badge-info mr-1">{{ tour.tipo_tour }}</span>
+              <span class="badge badge-secondary">Duración: {{ tour.duracion }} h</span>
+              {% if tour.solo_finde %}<span class="badge badge-warning ml-1">Sábados y Domingos</span>{% endif %}
+            </div>
+
+            {% if tour.incluye_tour %}
+              <h5 class="mt-3">Incluye</h5>
+              <div class="text-muted small">{{ tour.incluye_tour|safe }}</div>
+            {% endif %}
+
+            <hr>
+
+            <div class="d-flex align-items-baseline">
+              <div class="mr-4">
+                <div class="text-muted small">Adultos</div>
+                <div class="h4 mb-0">${{ tour.precio_adulto }}</div>
+              </div>
+              <div>
+                <div class="text-muted small">Niños</div>
+                <div class="h5 mb-0">${{ tour.precio_nino }}</div>
+              </div>
+            </div>
+
+            <a href="{% url 'reservar_tour' tour_id=tour.id %}" class="btn btn-success btn-lg btn-block mt-4">
+              Reservar ahora
+            </a>
+
+            <div class="d-flex justify-content-between mt-3 text-muted small">
+              <span><i class="far fa-clock"></i> Cancelación flexible*</span>
+              <span><i class="far fa-credit-card"></i> Pago seguro</span>
+            </div>
+          </div>
+        </div>
+
+        {% if tour.puntos_importantes %}
+          <div class="card border-0 shadow-sm mt-3">
+            <div class="card-body">
+              <h6 class="mb-2">Importante</h6>
+              <div class="small text-muted">{{ tour.puntos_importantes|safe }}</div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <hr class="my-4">
+
+  <!-- Reseñas -->
+  <div class="row">
+    <div class="col-lg-7">
+      <h4 class="mb-3">Escribe una reseña</h4>
+      <form method="post" action="{% url 'tour_detail' tour_id=tour.id %}" class="needs-validation" novalidate>
         {% csrf_token %}
 
-        <!-- Agregar el campo de estrellas con el estilo CSS aplicado -->
-        <div id="full-stars-example-two" class="rating-group">
-            <input class="rating__input rating__input--none" checked name="estrellas" id="rating-none" value="0" type="radio">
-                    <!-- Agregar el campo de estrellas con el estilo CSS aplicado -->
-        <div id="full-stars-example-two" class="rating-group">
-              <input class="rating__input rating__input--none" checked name="rating" id="rating-none" value="0" type="radio">
-              <label aria-label="No rating" class="rating__label" for="rating-none"><i class="rating__icon rating__icon--none fa fa-ban"></i></label>
-              <label aria-label="1 star" class="rating__label" for="rating-1"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
-              <input class="rating__input" name="rating" id="rating-1" value="1" type="radio">
-              <label aria-label="2 stars" class="rating__label" for="rating-2"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
-              <input class="rating__input" name="rating" id="rating-2" value="2" type="radio">
-              <label aria-label="3 stars" class="rating__label" for="rating-3"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
-              <input class="rating__input" name="rating" id="rating-3" value="3" type="radio" checked>
-              <label aria-label="4 stars" class="rating__label" for="rating-4"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
-              <input class="rating__input" name="rating" id="rating-4" value="4" type="radio">
-              <label aria-label="5 stars" class="rating__label" for="rating-5"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
-              <input class="rating__input" name="rating" id="rating-5" value="5" type="radio">
-        </div>
+        <div class="form-group">
+          <label class="d-block">Tu calificación</label>
+          <div class="custom-control-inline">
+            {% for i in "12345" %}
+              <div class="custom-control custom-radio mr-3">
+                <input type="radio" id="rating-{{ forloop.counter }}" name="rating" value="{{ forloop.counter }}"
+                       class="custom-control-input" {% if forloop.counter == 5 %}checked{% endif %}>
+                <label class="custom-control-label" for="rating-{{ forloop.counter }}">
+                  {% for j in "12345" %}
+                    {% if forloop.parentloop.counter >= forloop.counter %}
+                      <i class="fas fa-star text-warning"></i>
+                    {% else %}
+                      <i class="far fa-star text-warning"></i>
+                    {% endif %}
+                  {% endfor %}
+                </label>
+              </div>
+            {% endfor %}
+          </div>
         </div>
 
-        <!-- Agregar otros campos del formulario según sea necesario -->
-        <textarea name="comentario" class="form-control" placeholder="Deja tu comentario"></textarea>
-        <br>
+        <div class="form-group">
+          <label for="comentario">Comentario</label>
+          <textarea id="comentario" name="comentario" rows="3" class="form-control" placeholder="¿Qué te pareció?" required></textarea>
+          <div class="invalid-feedback">Cuéntanos tu experiencia.</div>
+        </div>
 
-        <button type="submit" class="btn btn-primary">Enviar Reseña</button>
-    </form>
+        <button type="submit" class="btn btn-primary">Enviar reseña</button>
+      </form>
+
+      <hr class="my-4">
+
+      <h4 class="mb-3">Reseñas</h4>
+      {% if resenas %}
+        {% for resena in resenas %}
+          <div class="media mb-3 p-3 rounded border">
+            <div class="mr-3 avatar">
+              <span class="small">{{ resena.autor_iniciales|default:"U" }}</span>
+            </div>
+            <div class="media-body">
+              <div class="d-flex justify-content-between">
+                <div class="text-warning">
+                  {% for i in "12345" %}
+                    {% if forloop.counter <= resena.estrellas %}
+                      <i class="fas fa-star"></i>
+                    {% else %}
+                      <i class="far fa-star"></i>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                <small class="text-muted">{{ resena.creado_en|date:"d/m/Y" }}</small>
+              </div>
+              <div class="mt-1">{{ resena.comentario }}</div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted">Aún no hay reseñas.</p>
+      {% endif %}
+    </div>
+  </div>
 </div>
 
-
-
-<!-- Lista de Reseñas con Estrellas -->
-<div class="container mt-4">
-    <h2>Reseñas</h2>
-    {% for resena in resenas %}
-        <div class="reseña-container row">
-            <div class="col-md-2">
-                <span class="reseña-estrellas">
-                    {% for _ in resena.get_estrellas_range %}
-                        <i class="fas fa-star"></i>
-                    {% endfor %}
-                </span>
-                {{ resena.estrellas }} Estrellas
-            </div>
-            <div class="col-md-10 reseña-comentario">
-                {{ resena.comentario }}
-            </div>
-        </div>
-    {% endfor %}
+<!-- Modal de Zoom -->
+<div class="modal fade" id="modalZoom" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-body p-0">
+        <img id="zoom-img" src="" alt="Imagen ampliada" class="img-fluid w-100">
+      </div>
+      <button type="button" class="close position-absolute text-white" data-dismiss="modal"
+              aria-label="Close" style="right:.75rem;top:.25rem;">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  </div>
 </div>
 
 {% endblock content %}
 
-
 {% block extra_js %}
-<!-- Script jQuery -->
 <script>
-    $(document).ready(function() {
-        // Al hacer clic en una miniatura, actualiza la imagen principal
-        $(".imagen-miniatura").click(function() {
-            var nuevaImagen = $(this).data("imagen");
-            $("#imagen-principal").attr("src", nuevaImagen);
-        });
+  // Galería: miniaturas -> principal, estado activo y ajuste object-fit
+  (function(){
+    var main = document.getElementById('imagen-principal');
+    var thumbs = document.querySelectorAll('.imagen-miniatura');
+
+    function adjustFit(img){
+      if (!img || !img.naturalWidth) return;
+      var ratio = img.naturalHeight / img.naturalWidth;
+      img.style.objectFit = (ratio > 1.6) ? 'contain' : 'cover';
+      img.style.background = (ratio > 1.6) ? '#f8f9fa' : 'transparent';
+    }
+    if (main.complete) adjustFit(main);
+    else main.addEventListener('load', function(){ adjustFit(main); });
+
+    thumbs.forEach(function(t, idx){
+      t.addEventListener('click', function(){
+        thumbs.forEach(x => x.classList.remove('active'));
+        this.classList.add('active');
+        var src = this.getAttribute('data-imagen') || this.src;
+        main.src = src;
+        main.onload = function(){ adjustFit(main); };
+        // sincroniza imagen del modal si ya estaba abierto
+        var z = document.getElementById('zoom-img'); if (z) z.src = src;
+      });
+      if (idx === 0) t.classList.add('active');
     });
+
+    // Zoom modal
+    var trigger = document.getElementById('zoom-trigger');
+    if (trigger){
+      trigger.addEventListener('click', function(e){
+        e.preventDefault();
+        document.getElementById('zoom-img').src = main.src;
+        $('#modalZoom').modal('show');
+      });
+    }
+  })();
+
+  // Validación Bootstrap 4 para formularios (reseñas)
+  (function(){
+    var forms = document.getElementsByClassName('needs-validation');
+    Array.prototype.forEach.call(forms, function(form){
+      form.addEventListener('submit', function (event) {
+        if (form.checkValidity() === false) { event.preventDefault(); event.stopPropagation(); }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  })();
 </script>
 {% endblock extra_js %}

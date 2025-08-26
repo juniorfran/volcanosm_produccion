@@ -1,73 +1,174 @@
 {% extends "base.html" %}
-
 {% load static %}
 
 {% block content %}
 
 {% include "direccionamiento.html" with servicio=servicio %}
 
+<style>
+  /* Mantener proporción en imágenes (evita que rompan el layout) */
+  .ratio-box{position:relative;width:100%;padding-top:66.66%;overflow:hidden;border-radius:.5rem;}
+  .ratio-img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;object-position:center;transition:transform .35s;}
+  .card:hover .ratio-img{transform:scale(1.03)}
 
-<!-- Service Start -->
+  .service-card{border:0;box-shadow:0 .5rem 1rem rgba(0,0,0,.08);transition:box-shadow .25s;}
+  .service-card:hover{box-shadow:0 .75rem 1.5rem rgba(0,0,0,.12);}
+  .service-card .card-body{display:flex;flex-direction:column}
+
+  /* Descripción con clamp y “leer más” */
+  .clamp-3{
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;
+    overflow:hidden; min-height:3.6em;
+  }
+  .read-more{cursor:pointer;font-weight:600}
+  .badge-soft{background:rgba(0,123,255,.08);color:#0a58ca;border:1px solid rgba(0,123,255,.15);}
+
+  /* CTA inline */
+  .cta-row{margin-top:auto}
+</style>
+
+<!-- Services -->
 <div class="container-fluid py-5">
-    <div class="container pt-5 pb-3">
-        <div class="text-center mb-3 pb-3">
-            <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">Services</h6>
-            <h1>Nuestros Servicios</h1>
-        </div>
-        <div class="row">
-            {% for servicio in servicios %}
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="service-item bg-white text-center mb-2 py-5 px-4">
-                    <a href="{{ servicio.url_servicio }}">
-                        <img src="{{ servicio.url_azure }}" alt="{{ servicio.nombre }}" class="img-fluid mb-4">
-                    </a>
-                    <h5 class="mb-2">{{ servicio.nombre }}</h5>
-                    <p class="m-0">{{ servicio.descripcion | safe}}</p>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+  <div class="container pt-5 pb-3">
+    <div class="text-center mb-4">
+      <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">Nuestra Promesa</h6>
+      <h1 class="mb-2">Experiencias que te conectan con la naturaleza</h1>
+      <p class="text-muted mb-0">Servicios diseñados para que disfrutes, sin complicaciones.</p>
     </div>
-</div>
-<!-- Service End -->
 
-
-<!-- Testimonial Start -->
-<div class="container-fluid py-5">
-    <div class="container pt-5 pb-3">
-        <div class="text-center mb-3 pb-3">
-            <h1>Descubre un Tour</h1>
-        </div>
-        <div class="row">
-            {% for tour in tours %}
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="service-item bg-white text-center mb-2 py-5 px-4">
-                    <h5 class="text-truncate">{{ tour.titulo }}</h5>
-                    <p>Duración: {{ tour.duracion }} Horas</p>
-                    <p>Precio Adultos: ${{ tour.precio_adulto }}</p>
-                    <p>Precio Niños: ${{ tour.precio_nino }}</p>
-                    <div class="expandable-description">
-                        <a class="btn btn-primary" data-toggle="collapse" href="#collapseDescription{{ forloop.counter }}" role="button" aria-expanded="false" aria-controls="collapseDescription{{ forloop.counter }}">
-                            Ver descripción
-                        </a>
-                        <div class="collapse" id="collapseDescription{{ forloop.counter }}">
-                            <div class="card card-body">
-                                {{ tour.descripcion | safe }}
-                            </div>
-                        </div>
-                    </div>
+    <div class="row">
+      {% for servicio in servicios %}
+        <div class="col-lg-4 col-md-6 mb-4 d-flex">
+          <div class="card service-card w-100">
+            <a href="{{ servicio.url_servicio }}" class="text-decoration-none">
+              <div class="ratio-box">
+                <img src="{{ servicio.url_azure }}" alt="{{ servicio.nombre }}" class="ratio-img" loading="lazy">
+              </div>
+            </a>
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-2">
+                <h5 class="mb-0 mr-2">{{ servicio.nombre }}</h5>
+                {% if servicio.tag %}<span class="badge badge-soft">{{ servicio.tag }}</span>{% endif %}
+              </div>
+              {% if servicio.descripcion %}
+                <div class="text-muted clamp-3" data-full="{{ servicio.descripcion|striptags }}">
+                  {{ servicio.descripcion|striptags }}
                 </div>
+                <div class="mt-2">
+                  <span class="read-more text-primary small">Ver más</span>
+                </div>
+              {% endif %}
+
+              <div class="cta-row d-flex justify-content-between align-items-center mt-3">
+                <a href="{{ servicio.url_servicio }}" class="btn btn-outline-primary">Ver servicio</a>
+                {% if servicio.cta_secundaria_url %}
+                  <a href="{{ servicio.cta_secundaria_url }}" class="btn btn-link">Saber más</a>
+                {% endif %}
+              </div>
             </div>
-            {% endfor %}
+          </div>
         </div>
+      {% empty %}
+        <div class="col-12 text-center py-5">
+          <h5 class="mb-2">Aún no hay servicios disponibles.</h5>
+          <p class="text-muted">Pronto añadiremos nuevas experiencias.</p>
+        </div>
+      {% endfor %}
     </div>
+  </div>
 </div>
-<!-- Testimonial End -->
+
+<!-- Discover Tours -->
+<div class="container-fluid py-5 bg-light">
+  <div class="container pt-5 pb-3">
+    <div class="text-center mb-4">
+      <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">Descubre un Tour</h6>
+      <h1 class="mb-2">Vive la magia del volcán con nuestros tours</h1>
+      <p class="text-muted mb-0">Elige el recorrido ideal por duración y precio, y reserva en minutos.</p>
+    </div>
+
+    <div class="row">
+      {% for tour in tours %}
+        <div class="col-lg-4 col-md-6 mb-4 d-flex">
+          <div class="card service-card w-100">
+            <div class="ratio-box">
+              <img src="{{ tour.url_azure }}" alt="{{ tour.titulo }}" class="ratio-img" loading="lazy">
+            </div>
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-1">
+                <h5 class="mb-0 mr-2 text-truncate" title="{{ tour.titulo }}">{{ tour.titulo }}</h5>
+                {% if tour.solo_finde %}<span class="badge badge-warning">Sáb–Dom</span>{% endif %}
+              </div>
+
+              <p class="text-muted small mb-2">
+                <i class="far fa-clock"></i> {{ tour.duracion }} h
+              </p>
+
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <div>
+                  <div class="text-muted small mb-0">Adultos</div>
+                  <div class="h5 mb-0">${{ tour.precio_adulto }}</div>
+                </div>
+                <div>
+                  <div class="text-muted small mb-0">Niños</div>
+                  <div class="h6 mb-0">${{ tour.precio_nino }}</div>
+                </div>
+              </div>
+
+              {% if tour.descripcion %}
+                <div class="text-muted clamp-3" data-full="{{ tour.descripcion|striptags }}">
+                  {{ tour.descripcion|striptags }}
+                </div>
+                <div class="mt-2">
+                  <span class="read-more text-primary small">Ver descripción</span>
+                </div>
+              {% endif %}
+
+              <div class="cta-row d-flex align-items-center justify-content-between mt-3">
+                <a href="{% url 'tour_detail' tour.id %}" class="btn btn-success">Ver detalles</a>
+                {% if tour.disponible %}
+                  <a href="{% url 'reservar_tour' tour_id=tour.id %}" class="btn btn-outline-success">Reservar</a>
+                {% else %}
+                  <a href="{% url 'contacto' %}" class="btn btn-outline-secondary">No disponible</a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="col-12 text-center py-5">
+          <h5 class="mb-2">No hay tours publicados en este momento.</h5>
+          <p class="text-muted">Vuelve pronto o <a href="{% url 'contacto' %}">contáctanos</a> para recibir sugerencias.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
 
 {% endblock content %}
 
-
 {% block extra_js %}
-    
-
+<script>
+  // Expandir/contraer “Ver más” sin recargar (usa el contenido del data-full)
+  (function(){
+    var toggles = document.querySelectorAll('.read-more');
+    Array.prototype.forEach.call(toggles, function(t){
+      t.addEventListener('click', function(){
+        var text = this.closest('.card-body').querySelector('.clamp-3');
+        if(!text) return;
+        var expanded = text.classList.contains('expanded');
+        if(expanded){
+          text.classList.remove('expanded');
+          text.style.display = '-webkit-box';
+          this.textContent = this.textContent.toLowerCase().includes('descripción') ? 'Ver descripción' : 'Ver más';
+        }else{
+          text.classList.add('expanded');
+          text.style.display = 'block';
+          text.textContent = text.getAttribute('data-full');
+          this.textContent = 'Ver menos';
+        }
+      });
+    });
+  })();
+</script>
 {% endblock extra_js %}

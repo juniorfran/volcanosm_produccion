@@ -1,245 +1,218 @@
-
 {% extends 'base.html' %}
 {% load static %}
 
 {% block content %}
 
-	<!-- Google font -->
-	<link href="https://fonts.googleapis.com/css?family=Hind:400,700" rel="stylesheet">
+<link rel="icon" href="{% static 'reserva/img/favicon.png' %}"/>
 
-	{% comment %} <!-- Bootstrap -->
-	<link type="text/css" rel="stylesheet" href="{% static 'reserva/css/bootstrap.min.css' %}" /> {% endcomment %}
+<style>
+  /* Fondo con overlay */
+  .booking-hero {
+    background-image: url('{{ tour.url_azure }}');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    min-height: 70vh;
+  }
+  .booking-hero::before{
+    content:"";
+    position:absolute;left:0;top:0;right:0;bottom:0;
+    background: rgba(0,0,0,.45);
+  }
+  /* Card centrada */
+  .booking-card {
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(2px);
+    border: 0;
+    border-radius: .75rem;
+    box-shadow: 0 .75rem 2rem rgba(0,0,0,.25);
+  }
+  .form-text { line-height: 1.2; }
+</style>
 
-	<!-- Custom stlylesheet -->
-	<link type="text/css" rel="stylesheet" href="{% static 'reserva/css/style.css' %}" />
+<div class="container py-4">
+  <h2 class="font-weight-bold mb-4">Reservar Tour - {{ tour.titulo }}</h2>
+</div>
 
-    <div class="container mt-5">
-        <h2>Reservar Tour - {{ tour.titulo }}</h2>
-        <form method="post" action="{% url 'reservar_tour' tour_id=tour.id %}">
-          {% csrf_token %}
-          <div id="booking" class="section" style="background-image: url('{{ tour.url_azure }}');">
-            <div class="section-center">
-                <div class="container">
-                    <div class="row">
-                        <div class="booking-form">
-                            <div class="row">
-                                <div class="col-md-4">
-                                  <div class="form-group">
-                                    <span class="form-label">Nombre</span>
-                                    <input type="text" class="form-control" id="nombre" name="nombre" required>
-                                  </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <span class="form-label">Tipo Documento</span>
-                                        <select class="form-control" id="tipo_documento" name="tipo_documento" min="1" required>
-                                            {% for tipo_document_value, tipo_document_label in tipo_document %}
-                                                <option value="{{ tipo_document_value }}">{{ tipo_document_label }}</option>
-                                            {% endfor %}
-                                        </select>
-                                        <span class="select-arrow"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <span class="form-label" id="label_dui">DUI:</span>
-                                        <input type="text" class="form-control" id="dui" name="dui" required maxlength="9" pattern="\d{9}" title="Ingrese exactamente 9 dígitos (sin guiones)">
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <span class="form-label">País</span>
-                                        <select class="form-control" id="pais_residencia" name="pais_residencia" required>
-                                            <!-- Options se llenarán dinámicamente con JavaScript -->
-                                        </select>
-                                    </div>
-                                </div>
+<section class="booking-hero d-flex align-items-center">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10 col-xl-8">
+        <div class="card booking-card bg-white">
+          <div class="card-body p-4 p-md-5">
+            
+            <form id="form-reserva" method="post" action="{% url 'reservar_tour' tour_id=tour.id %}" novalidate class="needs-validation">
+              {% csrf_token %}
 
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <span class="form-label">Telefono</span>
-                                      <input type="number" class="form-control" id="telefono" name="telefono" required>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <span class="form-label">Correo Electronico</span>
-                                      <input type="email" class="form-control" id="correo_electronico" name="correo_electronico" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                    <span class="form-label">Direccion</span>
-                                    <input type="text" class="form-control" id="direccion" name="direccion" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                    <span class="form-label">Adultos</span>
-                                    <input type="number" class="form-control" id="cantidad_adultos" name="cantidad_adultos" required>
-                                    </div>
-                                </div>
-                                {% comment %} <div class="col-md-4">
-                                    <div class="form-group">
-                                    <span class="form-label">Niños</span>
-                                    <input type="number" class="form-control" id="cantidad_ninos" name="cantidad_ninos" required>
-                                    </div>
-                                </div> {% endcomment %}
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label for="fecha_reserva" class="form-label">Fecha de Reserva</label>
-                                        <input class="form-control" type="date" id="fecha_reserva" name="fecha_reserva" required>
-                                    </div>
-                                </div>
-                            </div>
-                            {% comment %} <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <span class="form-label">Fecha de Reserva</span>
-                                        <input class="form-control" type="date" id="fecha_reserva" name="fecha_reserva"  required>
-                                    </div>
-                                </div>
-                            </div> {% endcomment %}
-
-                            <!-- Con este bloque -->
-                            <div class="row">
-
-                            </div>
-                            <div class="form-btn">
-                                <button type="submit" class="primary submit-btn">Pagar</button>
-                            </div>
-                    </div>
+              <div class="form-row">
+                <div class="form-group col-md-4">
+                  <label for="nombre">Nombre</label>
+                  <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre y apellido" required autocomplete="name">
+                  <div class="invalid-feedback">Ingresa tu nombre.</div>
                 </div>
-            </div>
+
+                <div class="form-group col-md-4">
+                  <label for="tipo_documento">Tipo Documento</label>
+                  <select class="form-control" id="tipo_documento" name="tipo_documento" required>
+                    {% for value, label in tipo_document %}
+                      <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                  <div class="invalid-feedback">Selecciona una opción.</div>
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label for="dui" id="label_dui">DUI</label>
+                  <input type="text" class="form-control" id="dui" name="dui"
+                         placeholder="9 dígitos (sin guiones)" inputmode="numeric"
+                         maxlength="9" pattern="\d{9}" required>
+                  <small class="form-text text-muted">Ej: 041661239</small>
+                  <div class="invalid-feedback">Debe tener exactamente 9 dígitos (sin guiones).</div>
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label for="pais_residencia">País</label>
+                  <select class="form-control" id="pais_residencia" name="pais_residencia" required>
+                    <option value="" disabled selected>Cargando países…</option>
+                  </select>
+                  <div class="invalid-feedback">Selecciona un país.</div>
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label for="telefono">Teléfono</label>
+                  <input type="tel" class="form-control" id="telefono" name="telefono"
+                         placeholder="Solo números" inputmode="numeric"
+                         maxlength="15" pattern="\d{8,15}" required>
+                  <div class="invalid-feedback">Ingresa un teléfono válido (8–15 dígitos).</div>
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label for="correo_electronico">Correo Electrónico</label>
+                  <input type="email" class="form-control" id="correo_electronico" name="correo_electronico"
+                         placeholder="tucorreo@dominio.com" required>
+                  <div class="invalid-feedback">Ingresa un correo válido.</div>
+                </div>
+
+                <div class="form-group col-md-8">
+                  <label for="direccion">Dirección</label>
+                  <input type="text" class="form-control" id="direccion" name="direccion"
+                         placeholder="Calle, número, referencia" required autocomplete="street-address">
+                  <div class="invalid-feedback">Ingresa tu dirección.</div>
+                </div>
+
+                <div class="form-group col-md-2">
+                  <label for="cantidad_adultos">Adultos</label>
+                  <input type="number" class="form-control" id="cantidad_adultos" name="cantidad_adultos"
+                         min="1" step="1" value="1" required>
+                  <div class="invalid-feedback">Mínimo 1.</div>
+                </div>
+
+                <div class="form-group col-md-2">
+                  <label for="fecha_reserva">Fecha</label>
+                  <input type="date" class="form-control" id="fecha_reserva" name="fecha_reserva" required>
+                  <div class="invalid-feedback">Selecciona una fecha.</div>
+                </div>
+              </div>
+
+              <div class="mt-3 d-flex justify-content-end">
+                <button type="submit" class="btn btn-success btn-lg btn-block btn-md-auto">
+                  Pagar
+                </button>
+              </div>
+
+            </form>
+
+          </div>
         </div>
+      </div>
     </div>
-    </form>
   </div>
+</section>
+
 {% endblock %}
 
 {% block extra_js %}
-<!-- Agrega esto en el encabezado HTML -->
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 
-<script>
-    // Lista de países fallback (abreviada, puedes completarla)
-    const fallbackPaises = [
-        "Afganistán", "Alemania", "Argentina", "Australia", "Belice", "Bolivia",
-        "Brasil", "Canadá", "Chile", "China", "Colombia", "Costa Rica",
-        "Cuba", "Ecuador", "El Salvador", "España", "Estados Unidos",
-        "Francia", "Guatemala", "Honduras", "Italia", "Japón", "México",
-        "Nicaragua", "Panamá", "Paraguay", "Perú", "Portugal", "Reino Unido",
-        "República Dominicana", "Uruguay", "Venezuela"
-    ];
-
-    function cargarListaPaises(paises) {
-        const selectPais = document.getElementById('pais_residencia');
-        selectPais.innerHTML = '';
-
-        // Agregar opción predeterminada "El Salvador"
-        const defaultOption = document.createElement('option');
-        defaultOption.value = 'El Salvador';
-        defaultOption.text = 'El Salvador';
-        defaultOption.selected = true;
-        selectPais.add(defaultOption);
-
-        // Agregar los demás países, evitando duplicar "El Salvador"
-        paises.forEach(pais => {
-            if (pais !== 'El Salvador') {
-                const option = document.createElement('option');
-                option.value = pais;
-                option.text = pais;
-                selectPais.add(option);
-            }
-        });
-    }
-
-    // Intentar cargar desde la API
-    fetch('https://restcountries.com/v3.1/all')
-        .then(response => {
-            if (!response.ok) throw new Error('Error HTTP ' + response.status);
-            return response.json();
-        })
-        .then(data => {
-            if (!Array.isArray(data)) throw new Error('Formato no válido');
-            const paisesOrdenados = data
-                .map(p => p.name?.common)
-                .filter(Boolean)
-                .sort();
-            cargarListaPaises(paisesOrdenados);
-        })
-        .catch(error => {
-            console.warn('No se pudo obtener la lista de la API, usando fallback:', error);
-            cargarListaPaises(fallbackPaises);
-        });
-</script>
-
-
-
+{# flatpickr solo en fines de semana #}
 {% if tour.solo_finde %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        flatpickr("#fecha_reserva", {
-            minDate: 'today',  // A partir de hoy
-            disable: [
-                function(date) {
-                    // Deshabilitar todos los días excepto sábados (6) y domingos (0)
-                    return (date.getDay() !== 6 && date.getDay() !== 0);
-                }
-            ],
-            dateFormat: 'Y-m-d'  // Formato de fecha
-        });
+  document.addEventListener('DOMContentLoaded', function(){
+    flatpickr("#fecha_reserva", {
+      minDate: 'today',
+      disable: [d => (d.getDay() !== 6 && d.getDay() !== 0)],
+      dateFormat: 'Y-m-d'
     });
+  });
+</script>
+{% else %}
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    var f = document.getElementById('fecha_reserva');
+    var today = new Date().toISOString().split('T')[0];
+    f.setAttribute('min', today);
+  });
 </script>
 {% endif %}
 
 <script>
-        $(document).ready(function() {
-            // Manejar el evento de cambio del select
-            $('#tipo_documento').on('change', function() {
-                // Obtener el valor seleccionado
-                var selectedValue = $(this).val();
-        
-                // Obtener el texto correspondiente a ese valor del template
-                var labelText = obtenerTextoPorValor(selectedValue);
-        
-                // Actualizar el contenido del span
-                $('#label_dui').text(labelText + ":");
-            });
-        
-            // Función para obtener el texto correspondiente al valor seleccionado desde el template
-            function obtenerTextoPorValor(valor) {
-                // Utiliza la tupla proporcionada en el template
-                {% for tipo_document_value, tipo_document_label in tipo_document %}
-                    if ("{{ tipo_document_value }}" === valor) {
-                        return "{{ tipo_document_value }}";
-                    }
-                {% endfor %}
-                
-                // Si no se encuentra, devolver cadena vacía
-                return '';
-            }
-        });
+  // DUI: solo dígitos y máx 9
+  document.addEventListener('DOMContentLoaded', function(){
+    var dui = document.getElementById('dui');
+    dui.addEventListener('input', function(){
+      this.value = this.value.replace(/\D/g,'').slice(0,9);
+    });
+  });
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const duiInput = document.getElementById('dui');
-
-    duiInput.addEventListener('input', function() {
-        // Solo números
-        this.value = this.value.replace(/\D/g, '');
-        // Limitar a 9 dígitos
-        if (this.value.length > 9) {
-            this.value = this.value.slice(0, 9);
-        }
-    });
-});
+  // Países con fallback
+  const fallbackPaises = ["Afganistán","Alemania","Argentina","Australia","Belice","Bolivia","Brasil","Canadá","Chile","China","Colombia","Costa Rica","Cuba","Ecuador","El Salvador","España","Estados Unidos","Francia","Guatemala","Honduras","Italia","Japón","México","Nicaragua","Panamá","Paraguay","Perú","Portugal","Reino Unido","República Dominicana","Uruguay","Venezuela"];
+  function cargarListaPaises(paises){
+    var s = document.getElementById('pais_residencia');
+    s.innerHTML = '';
+    s.add(new Option('El Salvador','El Salvador', true, true));
+    paises.forEach(p => { if(p && p!=='El Salvador') s.add(new Option(p,p)); });
+  }
+  fetch('https://restcountries.com/v3.1/all')
+    .then(r => { if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(data => {
+      const list = (Array.isArray(data)?data:[])
+        .map(p => p && p.name && p.name.common).filter(Boolean)
+        .sort((a,b)=>a.localeCompare(b));
+      cargarListaPaises(list);
+    })
+    .catch(()=>cargarListaPaises(fallbackPaises));
 </script>
-        
 
-{% endblock extra_js %}
+<script>
+  // Etiqueta dinámica según tipo_documento (usa LABEL, no el value)
+  $(function(){
+    function getLabelByValue(v){
+      {% for value, label in tipo_document %}
+        if ("{{ value }}" === v) return "{{ label }}";
+      {% endfor %}
+      return 'Documento';
+    }
+    const $sel = $('#tipo_documento'), $lbl = $('#label_dui');
+    function sync(){ $lbl.text(getLabelByValue($sel.val())); }
+    $sel.on('change', sync); sync();
+  });
+</script>
+
+<script>
+  // Validación Bootstrap 4
+  (function(){
+    var form = document.getElementById('form-reserva');
+    form.addEventListener('submit', function (event) {
+      if (form.checkValidity() === false) {
+        event.preventDefault(); event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  })();
+</script>
+{% endblock %}

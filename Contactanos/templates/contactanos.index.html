@@ -2,55 +2,111 @@
 {% load static %}
 
 {% block content %}
-{% include "direccionamiento.html" %}
+<link rel="icon" href="{% static 'img/favicon.png' %}" />
 
-<div class="container-fluid py-5">
-  <div class="container py-5">
-    <div class="text-center mb-3 pb-3">
-      <h6 class="text-primary text-uppercase" style="letter-spacing:5px;">Contáctanos</h6>
-      <h2>Si tienes alguna duda puedes contactarnos</h2>
+<style>
+  .hero-cta{background:linear-gradient(135deg,#0f172a,#111827 55%,#0b1324);color:#fff;border-radius:.9rem;padding:2.25rem 1.25rem;text-align:center;margin-bottom:1.75rem}
+  .hero-cta h1{font-weight:800;margin:0 0 .35rem}
+  .hero-cta p{opacity:.9;margin:0}
+  .contact-wrap{max-width:1040px;margin:0 auto}
+  .card-clean{border:0;border-radius:.9rem;box-shadow:0 .75rem 1.75rem rgba(0,0,0,.08)}
+  .hp-field{position:absolute !important;left:-5000px !important;top:auto !important;width:1px !important;height:1px !important;overflow:hidden !important}
+  .char-hint{font-size:.85rem;color:#6c757d}
+  .btn-loading{pointer-events:none;opacity:.8}
+</style>
+
+<div class="container py-4 contact-wrap">
+  <!-- HERO -->
+  <section class="hero-cta">
+    <h1>Hablemos ✉️</h1>
+    <p>Resolvemos tus dudas sobre tours, reservas y logística.</p>
+  </section>
+
+  <!-- mensajes Django -->
+  {% if messages %}
+    <div class="mb-3">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} mb-2" role="alert">{{ message }}</div>
+      {% endfor %}
     </div>
+  {% endif %}
 
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <div class="contact-form bg-white" style="padding:30px;">
-          <form id="contact-form" method="post">
-            {% csrf_token %}
+  <div class="row">
+    <!-- Info lateral -->
+    <aside class="col-lg-4 mb-4">
+      <div class="card card-clean p-3">
+        <h5 class="mb-3">Contacto directo</h5>
+        <div class="mb-2"><i class="fa fa-phone mr-2 text-muted"></i> <a href="tel:+50377296225">+503 7729-6225</a></div>
+        <div class="mb-2"><i class="fa fa-envelope mr-2 text-muted"></i> <a href="mailto:volcanosanmiguel.sv@hotmail.com">volcanosanmiguel.sv@hotmail.com</a></div>
+        <div class="mb-3"><i class="fa fa-map-marker mr-2 text-muted"></i> San Miguel, El Salvador</div>
+        <a class="btn btn-success btn-block mb-2" href="https://wa.me/50377296225" target="_blank">
+          <i class="fa fa-whatsapp mr-1"></i> WhatsApp
+        </a>
+        <small class="text-muted d-block">Horario: Lun-Dom 7:00–20:00</small>
+      </div>
+    </aside>
 
-            <!-- TUS CAMPOS -->
-            <div class="form-row">
-              <div class="control-group col-sm-6">
-                <input class="form-control p-4"
-                       type="text" name="name" placeholder="Tu Nombre Completo" required>
-              </div>
-              <div class="control-group col-sm-6">
-                <input class="form-control p-4"
-                       type="email" name="email" placeholder="Tu Email" required>
-              </div>
+    <!-- Formulario -->
+    <div class="col-lg-8">
+      <div class="card card-clean p-4">
+        <h5 class="mb-3">Envíanos un mensaje</h5>
+        <form id="contact-form" method="post" novalidate>
+          {% csrf_token %}
+
+          <!-- Honeypot (no eliminar el name) -->
+          <input type="text" name="website" class="hp-field" autocomplete="off" tabindex="-1" aria-hidden="true">
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="name">Nombre completo</label>
+              <input id="name" name="name" type="text" class="form-control" required maxlength="80" autocomplete="name" placeholder="Tu nombre">
             </div>
-
-            <div class="control-group">
-              <input class="form-control p-4"
-                     type="text" name="subject" placeholder="Asunto" required>
+            <div class="form-group col-md-6">
+              <label for="email">Correo</label>
+              <input id="email" name="email" type="email" class="form-control" required maxlength="120" autocomplete="email" placeholder="tucorreo@ejemplo.com">
             </div>
+          </div>
 
-            <div class="control-group">
-              <textarea class="form-control py-3 px-4"
-                        name="message" rows="5" placeholder="¿Cómo podemos ayudarte?" required></textarea>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="phone">Teléfono (opcional)</label>
+              <input id="phone" name="phone" type="tel" class="form-control" maxlength="20" autocomplete="tel" placeholder="+503 …">
             </div>
-
-            <!-- ① token invisible -->
-            <input type="hidden" name="recaptcha_token" id="recaptcha_token">
-            <input type="hidden" name="recaptcha_action" value="contact">
-
-            <!-- ② Botón normal -->
-            <div class="text-center">
-              <button class="btn btn-primary py-3 px-4" type="submit">
-                Enviar Mensaje
-              </button>
+            <div class="form-group col-md-6">
+              <label for="subject">Asunto</label>
+              <input id="subject" name="subject" type="text" class="form-control" required maxlength="120" placeholder="Reserva, duda, precios…">
             </div>
-          </form>
-        </div>
+          </div>
+
+          <div class="form-group">
+            <label for="message">Mensaje</label>
+            <textarea id="message" name="message" class="form-control" rows="6" required maxlength="1000" placeholder="Cuéntanos en qué podemos ayudarte"></textarea>
+            <div class="d-flex justify-content-between">
+              <small class="char-hint"><span id="msgCount">0</span>/1000</small>
+              <small class="text-muted">Respuesta en menos de 24h</small>
+            </div>
+          </div>
+
+          <!-- reCAPTCHA v3 -->
+          <input type="hidden" name="recaptcha_token" id="recaptcha_token">
+          <input type="hidden" name="recaptcha_action" value="contact">
+          <!-- time-gate: timestamp en epoch segundos -->
+          <input type="hidden" name="form_ts" id="form_ts" value="">
+
+          <div class="custom-control custom-checkbox mb-3">
+            <input type="checkbox" class="custom-control-input" id="consent" required>
+            <label class="custom-control-label" for="consent">
+              Acepto el uso de mis datos para responder mi consulta.
+            </label>
+          </div>
+
+          <div class="text-right">
+            <button id="submitBtn" class="btn btn-primary px-4 py-2" type="submit">
+              <span class="btn-text"><i class="fa fa-paper-plane mr-1"></i> Enviar mensaje</span>
+              <span class="btn-spin d-none"><i class="fa fa-spinner fa-spin mr-1"></i> Enviando…</span>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -58,25 +114,57 @@
 {% endblock content %}
 
 {% block extra_js %}
-  <!-- ③ Carga la librería con TU site-key -->
-  <script src="https://www.google.com/recaptcha/api.js?render=6LfQS10rAAAAAGipDOGL2ee16Y355iZ6q4wt44rS"></script>
-
+  {# Usa tu site key; si no envías recaptcha_site_key en el contexto, usa el fallback #}
+  <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key|default:'6LfQS10rAAAAAGipDOGL2ee16Y355iZ6q4wt44rS' }}"></script>
   <script>
-    // Genera token y lo pone en el hidden antes de enviar
-    function setRecaptchaAndSubmit(event){
-      event.preventDefault();          // Detiene envío
-      grecaptcha.ready(function(){
-        grecaptcha.execute('6LfQS10rAAAAAGipDOGL2ee16Y355iZ6q4wt44rS', {
-          action: 'contact'
-        }).then(function(token){
-          document.getElementById('recaptcha_token').value = token;
-          event.target.submit();       // Envía con token
+    (function(){
+      var startedAt = Date.now()/1000;
+      document.getElementById('form_ts').value = startedAt;
+
+      // contador de caracteres
+      var msg = document.getElementById('message'), cnt = document.getElementById('msgCount');
+      if(msg && cnt){
+        var upd = function(){ cnt.textContent = msg.value.length; };
+        msg.addEventListener('input', upd); upd();
+      }
+
+      // submit con time-gate + recaptcha + bloqueo doble envío
+      var form = document.getElementById('contact-form');
+      var btn  = document.getElementById('submitBtn');
+      var btnText = btn.querySelector('.btn-text');
+      var btnSpin = btn.querySelector('.btn-spin');
+
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+
+        // honeypot
+        if(form.website && form.website.value){
+          alert('No pudimos validar el formulario.'); return;
+        }
+        // time-gate (>=3s)
+        var now = Date.now()/1000;
+        if(now - startedAt < 3){
+          alert('Por favor revisa tu mensaje antes de enviar.'); return;
+        }
+
+        // UI loading
+        btn.classList.add('btn-loading');
+        btnText.classList.add('d-none'); btnSpin.classList.remove('d-none');
+
+        // reCAPTCHA
+        grecaptcha.ready(function(){
+          grecaptcha.execute('{{ recaptcha_site_key|default:"6LfQS10rAAAAAGipDOGL2ee16Y355iZ6q4wt44rS" }}', {action:'contact'})
+          .then(function(token){
+            document.getElementById('recaptcha_token').value = token;
+            form.submit();
+          })
+          .catch(function(){
+            btn.classList.remove('btn-loading');
+            btnSpin.classList.add('d-none'); btnText.classList.remove('d-none');
+            alert('No se pudo validar reCAPTCHA. Intenta de nuevo.');
+          });
         });
       });
-    }
-
-    // Escucha el submit del formulario
-    document.getElementById('contact-form')
-            .addEventListener('submit', setRecaptchaAndSubmit);
+    })();
   </script>
 {% endblock extra_js %}
