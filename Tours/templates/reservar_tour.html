@@ -125,40 +125,58 @@
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 <script>
-    // Utilizando fetch para obtener la lista de países desde la API
+    // Lista de países fallback (abreviada, puedes completarla)
+    const fallbackPaises = [
+        "Afganistán", "Alemania", "Argentina", "Australia", "Belice", "Bolivia",
+        "Brasil", "Canadá", "Chile", "China", "Colombia", "Costa Rica",
+        "Cuba", "Ecuador", "El Salvador", "España", "Estados Unidos",
+        "Francia", "Guatemala", "Honduras", "Italia", "Japón", "México",
+        "Nicaragua", "Panamá", "Paraguay", "Perú", "Portugal", "Reino Unido",
+        "República Dominicana", "Uruguay", "Venezuela"
+    ];
+
+    function cargarListaPaises(paises) {
+        const selectPais = document.getElementById('pais_residencia');
+        selectPais.innerHTML = '';
+
+        // Agregar opción predeterminada "El Salvador"
+        const defaultOption = document.createElement('option');
+        defaultOption.value = 'El Salvador';
+        defaultOption.text = 'El Salvador';
+        defaultOption.selected = true;
+        selectPais.add(defaultOption);
+
+        // Agregar los demás países, evitando duplicar "El Salvador"
+        paises.forEach(pais => {
+            if (pais !== 'El Salvador') {
+                const option = document.createElement('option');
+                option.value = pais;
+                option.text = pais;
+                selectPais.add(option);
+            }
+        });
+    }
+
+    // Intentar cargar desde la API
     fetch('https://restcountries.com/v3.1/all')
-        .then(response => response.json())
-        .then(data => {
-            // Obtener el elemento select
-            const selectPais = document.getElementById('pais_residencia');
-
-            // Extraer nombres de países y ordenarlos alfabéticamente
-            const paisesOrdenados = data
-                .map(pais => pais.name.common) // Obtener solo los nombres
-                .sort(); // Ordenarlos alfabéticamente
-
-            // Limpiar el select antes de agregar opciones
-            selectPais.innerHTML = '';
-
-            // Agregar opción predeterminada "El Salvador" primero
-            const defaultOption = document.createElement('option');
-            defaultOption.value = 'El Salvador';
-            defaultOption.text = 'El Salvador';
-            defaultOption.selected = true; // Lo marca como seleccionado
-            selectPais.add(defaultOption);
-
-            // Agregar los demás países, evitando duplicar "El Salvador"
-            paisesOrdenados.forEach(pais => {
-                if (pais !== 'El Salvador') {
-                    const option = document.createElement('option');
-                    option.value = pais;
-                    option.text = pais;
-                    selectPais.add(option);
-                }
-            });
+        .then(response => {
+            if (!response.ok) throw new Error('Error HTTP ' + response.status);
+            return response.json();
         })
-        .catch(error => console.error('Error al obtener la lista de países:', error));
+        .then(data => {
+            if (!Array.isArray(data)) throw new Error('Formato no válido');
+            const paisesOrdenados = data
+                .map(p => p.name?.common)
+                .filter(Boolean)
+                .sort();
+            cargarListaPaises(paisesOrdenados);
+        })
+        .catch(error => {
+            console.warn('No se pudo obtener la lista de la API, usando fallback:', error);
+            cargarListaPaises(fallbackPaises);
+        });
 </script>
+
 
 
 {% if tour.solo_finde %}
