@@ -1,28 +1,12 @@
-# docker-compose.yml (prod)
-version: '3.8'
-
+version: '3'
+# implementacion con compose
 services:
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: volcanosm_web
-    environment:
-      # Ajuste esto a su realidad:
-      DJANGO_SETTINGS_MODULE: alpiedelvolcan_.settings
-      DEBUG: '0'
-      # SECRET_KEY, DB, ALLOWED_HOSTS, etc. mejor en un .env:
-      # ALLOWED_HOSTS: 'su-dominio.com,localhost,127.0.0.1'
-    restart: unless-stopped
-    # Sin montar el código del host en prod:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - /var/lib/volcanosm/static:/app/static
-      - /var/lib/volcanosm/media:/app/media
-    # Si Nginx corre en el host, mapee a loopback:
+      - .:/app
     ports:
-      - "127.0.0.1:8000:8000"
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8000/ || exit 1"]
-      interval: 20s
-      timeout: 5s
-      retries: 5
+      - "8000:8000"
+    environment:
+      - DEBUG=0
