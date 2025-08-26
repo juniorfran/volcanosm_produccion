@@ -43,7 +43,7 @@
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <span class="form-label" id="label_dui">DUI:</span>
-                                        <input type="text" class="form-control" id="dui" name="dui" required>
+                                        <input type="text" class="form-control" id="dui" name="dui" required maxlength="9" pattern="\d{9}" title="Ingrese exactamente 9 dígitos (sin guiones)">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -224,6 +224,21 @@
                 return '';
             }
         });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const duiInput = document.getElementById('dui');
+
+    duiInput.addEventListener('input', function() {
+        // Solo números
+        this.value = this.value.replace(/\D/g, '');
+        // Limitar a 9 dígitos
+        if (this.value.length > 9) {
+            this.value = this.value.slice(0, 9);
+        }
+    });
+});
 </script>
         
 
