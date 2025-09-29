@@ -10,7 +10,7 @@ services:
       - /var/lib/volcanosm/static:/app/staticfiles
       - /var/lib/volcanosm/media:/app/media
     ports:
-      - "127.0.0.1:80:8000"
+      - "80:8000"
     environment:
       - DEBUG=0
       - DJANGO_SETTINGS_MODULE=alpiedelvolcan_.settings
