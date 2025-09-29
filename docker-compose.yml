@@ -1,13 +1,17 @@
-version: '3'
+version: "3.9"
+
 services:
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    container_name: volcanosm_web
+    command: gunicorn alpiedelvolcan_.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/app
-      - /var/lib/volcanosm/static:/app/staticfiles   # ← STATIC_ROOT
-      - /var/lib/volcanosm/media:/app/media          # ← MEDIA_ROOT
+      - /var/lib/volcanosm/static:/app/staticfiles
+      - /var/lib/volcanosm/media:/app/media
     ports:
-      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:80:8000"
     environment:
       - DEBUG=0
+      - DJANGO_SETTINGS_MODULE=alpiedelvolcan_.settings
+      - DATABASE_URL=mysql://cuadmesv_tour:8LC*do.&7Emh@www.metrocuadrado.com.sv:3306/cuadmesv_tour
