@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: volcanosm_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/certs:/etc/letsencrypt
+    depends_on:
+      - web
+
+  certbot:
+    image: certbot/certbot
+    container_name: volcanosm_certbot
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/certs:/etc/letsencrypt
+    entrypoint: >
+      sh -c "trap exit TERM; while :; do
+        certbot renew --webroot -w /var/www/certbot;
+        sleep 12h & wait $${!};
+      done"
