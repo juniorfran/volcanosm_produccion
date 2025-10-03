@@ -1,15 +1,53 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Página no encontrada</title>
-    <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
-</head>
-<body>
-    <div class="container">
-        <h1>Error 404 - Página no encontrada</h1>
-        <p>Lo sentimos, la página que buscas no existe o ha sido movida.</p>
-        <a href="{% url 'inicio' %}">Volver al inicio</a>
+{% extends "base.html" %}
+{% load static %}
+    {% block extra_css %}
+
+        <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background-color: #f8f9fa;
+            color: #333;
+            padding: 50px;
+        }
+        h1 {
+            font-size: 4rem;
+            color: #dc3545;
+        }
+        p {
+            font-size: 1.2rem;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        a:hover {
+            background: #0056b3;
+        }
+    </style>
+    
+    {% endblock extra_css %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mt-4">
+                            <h1>404</h1>
+                            <p>Lo sentimos, la página que buscas no existe.</p>
+                            <a href="{% url "index" %}">Volver al inicio</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</body>
-</html>
+{% endblock content %}
+
