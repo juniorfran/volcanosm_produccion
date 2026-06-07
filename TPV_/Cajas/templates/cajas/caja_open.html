@@ -1,15 +1,42 @@
 {% extends "base_utilities.html" %}
 {% load static %}
 
-{% block tittle_sections %}
-    <h1>Apertura de Caja</h1>
-{% endblock %}
-
 {% block content %}
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Abrir Caja</button>
-</form>
-<p>Caja actual: {{ caja }}</p>
+<div class="container">
+  <h2 class="mb-3">Abrir caja</h2>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <p class="mb-1"><strong>Caja:</strong> {{ caja.nombre_caja }} (N.º {{ caja.numero_caja }})</p>
+      <p class="mb-0"><strong>Responsable:</strong> {{ request.user.get_full_name|default:request.user.username }}</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="mb-3">
+            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+        {% endfor %}
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-success">Abrir caja</button>
+          <a href="{% url 'cajas_list' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock content %}

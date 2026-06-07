@@ -1,15 +1,84 @@
 {% extends "base_utilities.html" %}
 {% load static %}
 
-{% block tittle_sections %}
-<h1>Cierre de Caja</h1>
-{% endblock %}
-
 {% block content %}
+<div class="container">
+  <h2 class="mb-3">Cierre / Arqueo de caja</h2>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Cerrar Caja</button>
-</form>
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <p class="mb-1"><strong>Caja:</strong> {{ caja.nombre_caja }} (N.º {{ caja.numero_caja }})</p>
+      <p class="mb-0"><strong>Responsable:</strong> {{ caja.usuario_responsable.get_full_name|default:caja.usuario_responsable.username }}</p>
+    </div>
+  </div>
+
+  {% if cerrada %}
+    {# Resultado del arqueo tras cerrar #}
+    <div class="card">
+      <div class="card-header bg-dark text-white">Resultado del arqueo</div>
+      <div class="card-body">
+        <table class="table table-bordered mb-0">
+          <tbody>
+            <tr>
+              <th>Efectivo esperado en caja</th>
+              <td class="text-end">${{ arqueo.esperado }}</td>
+            </tr>
+            <tr>
+              <th>Efectivo contado (arqueo)</th>
+              <td class="text-end">${{ arqueo.contado }}</td>
+            </tr>
+            <tr class="{% if arqueo.diferencia < 0 %}table-danger{% elif arqueo.diferencia > 0 %}table-warning{% else %}table-success{% endif %}">
+              <th>Diferencia</th>
+              <td class="text-end">
+                ${{ arqueo.diferencia }}
+                {% if arqueo.diferencia < 0 %}
+                  <span class="badge bg-danger">Faltante</span>
+                {% elif arqueo.diferencia > 0 %}
+                  <span class="badge bg-warning text-dark">Sobrante</span>
+                {% else %}
+                  <span class="badge bg-success">Cuadrada</span>
+                {% endif %}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card-footer">
+        <a href="{% url 'cajas_list' %}" class="btn btn-primary">Volver a cajas</a>
+        <a href="{% url 'caja_detalle' caja.pk %}" class="btn btn-info">Ver detalle</a>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      Efectivo esperado en caja: <strong>${{ esperado }}</strong>.
+      Ingrese el efectivo realmente contado para realizar el arqueo.
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="mb-3">
+              <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+              {{ field }}
+              {% for error in field.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endfor %}
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">Cerrar caja</button>
+            <a href="{% url 'cajas_list' %}" class="btn btn-secondary">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+</div>
 {% endblock content %}

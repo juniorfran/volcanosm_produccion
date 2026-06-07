@@ -1,22 +1,111 @@
 {% extends "base_utilities.html" %}
 {% load static %}
 
-{% block tittle_sections %}
-<h1>Seleccione la caja:</h1>
-{% endblock %}
-
 {% block content %}
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Reporte de aperturas / cierres</h2>
+    <a href="{% url 'cajas_list' %}" class="btn btn-secondary d-print-none">Volver</a>
+  </div>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.caja.label_tag }}
-    {{ form.caja }}
-    {{ form.start_date.label_tag }}
-    {{ form.start_date }}
-    {{ form.end_date.label_tag }}
-    {{ form.end_date }}
-    <br>
-    <button type="submit" class="btn btn-primary btn-sm">Generar Reporte</button>
-</form>
-    
-{% endblock content%}
+  <div class="card mb-4 d-print-none">
+    <div class="card-body">
+      <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label for="{{ form.caja.id_for_label }}" class="form-label">{{ form.caja.label }}</label>
+          {{ form.caja }}
+        </div>
+        <div class="col-md-3">
+          <label for="{{ form.fecha_inicio.id_for_label }}" class="form-label">{{ form.fecha_inicio.label }}</label>
+          {{ form.fecha_inicio }}
+        </div>
+        <div class="col-md-3">
+          <label for="{{ form.fecha_fin.id_for_label }}" class="form-label">{{ form.fecha_fin.label }}</label>
+          {{ form.fecha_fin }}
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100">Generar</button>
+        </div>
+        {% if form.non_field_errors %}
+          <div class="col-12">
+            {% for error in form.non_field_errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+
+  {% if filtros %}
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div>
+        <strong>Caja:</strong> {{ filtros.caja|default:"Todas" }} &nbsp;|&nbsp;
+        <strong>Del</strong> {{ filtros.fecha_inicio|date:"d/m/Y" }}
+        <strong>al</strong> {{ filtros.fecha_fin|date:"d/m/Y" }}
+      </div>
+      <button onclick="window.print()" class="btn btn-outline-secondary d-print-none">
+        <i class="bi bi-printer"></i> Imprimir
+      </button>
+    </div>
+
+    <h4>Aperturas</h4>
+    <div class="table-responsive mb-4">
+      <table class="table table-bordered table-sm">
+        <thead class="table-dark">
+          <tr>
+            <th>Fecha/Hora apertura</th>
+            <th>Caja</th>
+            <th>Responsable</th>
+            <th class="text-end">Efectivo inicial</th>
+            <th>Comentarios</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ap in aperturas %}
+          <tr>
+            <td>{{ ap.fecha_hora_apertura|date:"d/m/Y H:i" }}</td>
+            <td>{{ ap.caja.nombre_caja }}</td>
+            <td>{{ ap.usuario_responsable.get_full_name|default:ap.usuario_responsable.username }}</td>
+            <td class="text-end">${{ ap.efectivo_inicial }}</td>
+            <td>{{ ap.comentarios_notas|default:"-" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center text-muted">Sin aperturas en el rango.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Cierres</h4>
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm">
+        <thead class="table-dark">
+          <tr>
+            <th>Fecha/Hora cierre</th>
+            <th>Caja</th>
+            <th>Responsable</th>
+            <th class="text-end">Efectivo cierre</th>
+            <th>Comentarios</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ci in cierres %}
+          <tr>
+            <td>{{ ci.fecha_hora_cierre|date:"d/m/Y H:i" }}</td>
+            <td>{{ ci.caja.nombre_caja }}</td>
+            <td>{{ ci.usuario_responsable.get_full_name|default:ci.usuario_responsable.username }}</td>
+            <td class="text-end">${{ ci.efectivo_cierre }}</td>
+            <td>{{ ci.comentarios_notas|default:"-" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center text-muted">Sin cierres en el rango.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <p class="text-muted small mt-3">Generado el {{ generado|date:"d/m/Y H:i" }}</p>
+  {% endif %}
+</div>
+{% endblock content %}

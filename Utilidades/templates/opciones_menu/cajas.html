@@ -1,32 +1,4 @@
 <ul class="list-unstyled components mb-5">
-    <!-- Apertura de caja -->
-    <li class="nav-item">
-        <a class="nav-link active"  href="{% url "cajas_list" %}" role="button" aria-expanded="false">
-            Operaciones con Cajas
-        </a>
-    </li>
-
-    <!-- Cierre de caja -->
-    <li class="nav-item">
-        <a class="nav-link active" data-bs-toggle="collapse" href="#collapseCierreCaja" role="button" aria-expanded="false" aria-controls="collapseCierreCaja">
-            Reportes
-        </a>
-        <div class="collapse" id="collapseCierreCaja">
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item"><a href="{% url 'reporte_aperturas' %}" class="text-dark">Apertura y Cierre</a></li>
-                <li class="list-group-item"><a href="#" class="text-dark">Efectivo final</a></li>
-                <li class="list-group-item"><a href="#" class="text-dark">Movimientos</a></li>
-                <li class="list-group-item"><a href="#" class="text-dark">Arqueo de caja</a></li>
-            </ul>
-        </div>
-        <a class="nav-link active" data-bs-toggle="collapse" href="#collapseMovimientosCaja" role="button" aria-expanded="false" aria-controls="collapseMovimientosCaja">
-            Movimientos de caja
-        </a>
-        <div class="collapse" id="collapseMovimientosCaja">
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item"><a href="#" class="text-dark">Registrar entradas y salidas</a></li>
-                <li class="list-group-item"><a href="#" class="text-dark">Registrar diferencias</a></li>
-            </ul>
-        </div>
-    </li>
+    <li class="list-group-item"><a href="{% url 'cajas_list' %}" class="text-dark"><i class="bi bi-safe2"></i> Cajas</a></li>
+    <li class="list-group-item"><a href="{% url 'reporte_aperturas' %}" class="text-dark"><i class="bi bi-file-earmark-text"></i> Reporte de cajas</a></li>
 </ul>

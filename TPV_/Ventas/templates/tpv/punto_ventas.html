@@ -1,124 +1,351 @@
-
 {% extends 'base_utilities.html' %}
-{% load custom_filters_ventas %}
+{% load static %}
+
+{% block tittle_sections %}
+  <h3 class="fw-bold"><i class="bi bi-shop"></i> Punto de Venta</h3>
+{% endblock %}
 
 {% block content %}
 <style>
-    .product-list {
-        display: none;
-    }
-
-    .product-list.show {
-        display: block;
-    }
+  .pos-card { cursor: pointer; transition: transform .08s ease, box-shadow .08s ease; height: 100%; }
+  .pos-card:hover { transform: translateY(-2px); box-shadow: 0 .4rem .9rem rgba(0,0,0,.12); }
+  .pos-card .card-img-top { height: 110px; object-fit: cover; background:#f1f3f5; }
+  .pos-img-placeholder { height:110px; display:flex; align-items:center; justify-content:center; background:#f1f3f5; color:#adb5bd; font-size:2rem; }
+  .pos-grid { max-height: 70vh; overflow-y: auto; }
+  .cart-panel { position: sticky; top: 1rem; }
+  .cart-items { max-height: 42vh; overflow-y: auto; }
+  .total-box { font-size: 1.9rem; font-weight: 700; }
+  .qty-input { width: 56px; }
 </style>
-{% include "../includes/add_to_cart.html" %}
-<div class="container-fluid">
-    <div class="row">
-        <!-- LISTA DE PRODUCTOS -->
-        
-        <div class="col-md-5 product-list show">
-            <h3>Lista de Productos</h3>
-            <div>
-                <input type="search" class="form-control mt-3" placeholder="Buscar producto">
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+{% if not caja_abierta %}
+  <div class="alert alert-warning d-flex justify-content-between align-items-center" role="alert">
+    <div>
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <strong>No tienes una caja abierta.</strong> Debes abrir una caja para poder cobrar.
+    </div>
+    <a href="{% url 'cajas_list' %}" class="btn btn-warning btn-sm">
+      <i class="bi bi-cash-stack"></i> Ir a cajas
+    </a>
+  </div>
+{% else %}
+  <div class="alert alert-success py-2" role="alert">
+    <i class="bi bi-cash-coin"></i> Caja abierta: <strong>{{ caja_abierta.nombre_caja }}</strong>
+  </div>
+{% endif %}
+
+<div class="row g-3">
+  <!-- IZQUIERDA: productos -->
+  <div class="col-12 col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="row g-2 mb-3">
+          <div class="col-12 col-md-7">
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input type="text" id="buscador" class="form-control" placeholder="Buscar por nombre o código...">
             </div>
-            <div style="height: 300px; overflow-y: auto;">
-                <ol class="list-group list-group-numbered">  
-                    {% for product in productos  %}
-                        <form action="{% url 'add_to_cart' product.id %}" method="post" class="mt-2">
-                            {% csrf_token %}
-                            <li class="list-group-item d-flex justify-content-between align-items-start">
-                                <div class="ms-2 me-auto">
-                                    <div class="fw-bold">{{ product.nombre }}</div>
-                                    {{ product.descripcion }}
-                                </div>
-                                <span class="badge text-bg-primary rounded-pill">{{ product.stock }}</span>
-                            </li>
-                            <div style="position: relative;">
-                                <button type="submit" class="btn btn-primary btn-sm" style="position: absolute; bottom: 10px; right: 10px;">+</button>
-                            </div>
-                        </form>
-                    {% endfor %}
-                </ol>
-            </div>           
+          </div>
+          <div class="col-12 col-md-5">
+            <select id="filtroCategoria" class="form-select">
+              <option value="">Todas las categorías</option>
+              {% for c in categorias %}
+                <option value="{{ c.nombre }}">{{ c.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
-        
-        <!-- FIN LISTA DE PRODUCTOS -->
 
-        
-        <!-- CART DE PRODUCTOS -->
-<div class="col-7">
-    <h5 class="card-title">Lista de Compras</h5>
-    <form action="{% url 'process_sale' %}" method="post">
-        {% csrf_token %}
-        <table class="table table-bordered">
+        <div class="pos-grid">
+          <div class="row g-2" id="productosGrid">
+            {% for p in productos %}
+              <div class="col-6 col-md-4 col-xl-3 producto-item"
+                   data-nombre="{{ p.nombre|lower }}"
+                   data-codigo="{{ p.codigo_de_barras|lower }}"
+                   data-categoria="{{ p.categoria.nombre }}">
+                <div class="card pos-card text-center"
+                     data-id="{{ p.id }}"
+                     data-nombre-real="{{ p.nombre }}"
+                     data-precio="{{ p.precio_de_venta }}"
+                     data-stock="{{ p.stock }}">
+                  {% if p.imagen %}
+                    <img src="{{ p.imagen.url }}" class="card-img-top" alt="{{ p.nombre }}">
+                  {% else %}
+                    <div class="pos-img-placeholder"><i class="bi bi-box-seam"></i></div>
+                  {% endif %}
+                  <div class="card-body p-2">
+                    <div class="fw-semibold small text-truncate" title="{{ p.nombre }}">{{ p.nombre }}</div>
+                    <div class="text-primary fw-bold">${{ p.precio_de_venta }}</div>
+                    <div class="text-muted" style="font-size:.72rem;">Stock: {{ p.stock }}</div>
+                  </div>
+                </div>
+              </div>
+            {% empty %}
+              <div class="col-12">
+                <div class="alert alert-info mb-0">No hay productos disponibles con stock.</div>
+              </div>
+            {% endfor %}
+          </div>
+          <div id="sinResultados" class="alert alert-light text-center d-none mt-2">Sin coincidencias.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DERECHA: carrito -->
+  <div class="col-12 col-lg-5">
+    <div class="card shadow-sm cart-panel">
+      <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-cart3"></i> Carrito</span>
+        <button type="button" class="btn btn-sm btn-outline-light" id="btnVaciar">
+          <i class="bi bi-trash"></i> Vaciar
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="cart-items mb-2">
+          <table class="table table-sm align-middle mb-0">
             <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Código de barras</th>
-                    <th>Precio de venta</th>
-                    <th>Cantidad</th>
-                    <th>Acciones</th>
-                </tr>
+              <tr class="small text-muted">
+                <th>Producto</th><th class="text-center">Cant.</th><th class="text-end">Subtotal</th><th></th>
+              </tr>
             </thead>
-            <tbody id="cart-items">
-                {% for cart_item in cart.cartitem_set.all %}
-                    <tr>
-                        <td>{{ cart_item.product.nombre }}</td>
-                        <td>{{ cart_item.product.codigo_de_barras }}</td>
-                        <td>{{ cart_item.product.precio_de_venta }}</td>
-                        <td>{{ product_counts|get_item:cart_item.product.id }}</td>
-                        <td>
-                            <a href="{% url 'remove_from_cart' cart_item.id %}" class="btn btn-danger btn-sm" role="button">X</a>
-                        </td>
-                    </tr>
-                {% endfor %}
+            <tbody id="cartBody">
+              <tr id="cartVacio"><td colspan="4" class="text-center text-muted py-3">Carrito vacío</td></tr>
             </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="3" class="text-right">Subtotal:</td>
-                    <td id="subtotal" step="0.01">{{ cart.total_price|default:0|floatformat:2 }}</td>
-                </tr>
-                <tr>
-                    <td colspan="3" class="text-right">Impuesto:</td>
-                    <td>{{ impuesto|default:0|floatformat:2 }}</td>
-                </tr>
-                <tr>
-                    <td colspan="3" class="text-right">Total:</td>
-                    <td>
-                        <input type="text" step="0.01" id="total_venta" class="form-input" name="total_venta" value="{{ total|default:0|floatformat:2 }}" readonly />
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
-        <table>
-            <tr>
-                <td colspan="3" class="text-right">
-                    <label class="form-check-label" for="payment-type-partial">
-                        Efectivo: 
-                    </label>
-                </td>
-                <td id="subtotal" step="0.01">
-                    <input type="number" id="recibe_caja" step="0.01" name="recibe_caja" class="form-control">
-                </td>
-                <td>
-                </td>
-                <td colspan="3" class="text-right">
-                    <button type="submit" id="finalize-btn" class="btn btn-primary">Finalizar compra</button>
-                </td>
-            </tr>
-        </table>
-        <!-- Campos de entrada ocultos para ID y cantidad -->
-        {% comment %} <input type="number" id="recibe_caja" name="recibe_caja" style="display: none;" value="{{ recibe_caja|default:0|floatformat:2 }}"> {% endcomment %}
-        {% comment %} <input type="number" id="total_venta" name="total_venta" value="{{ total }}" style="display: none;"> {% endcomment %}
-        {% for cart_item in cart.cartitem_set.all %}
-        <input type="hidden" name="producto_id" value="{{ cart_item.product.id }}">
-        <input type="hidden" name="cantidad" value="{{ cart_item.quantity }}">
-        {% endfor %}
-        <button type="submit" id="hidden-submit-btn" style="display: none;"></button>
-    </form>
-</div>
-<!-- FIN DE CART DE PRODUCTOS -->
+          </table>
+        </div>
 
-    
+        <hr>
+        <div class="d-flex justify-content-between"><span>Subtotal (sin IVA)</span><span id="lblSubtotal">$0.00</span></div>
+        <div class="d-flex justify-content-between"><span>IVA (13%)</span><span id="lblIva">$0.00</span></div>
+        <div class="d-flex justify-content-between total-box text-success mt-1"><span>Total</span><span id="lblTotal">$0.00</span></div>
+
+        <hr>
+        <div class="mb-2">
+          <label class="form-label small mb-1">Cliente (opcional)</label>
+          <select id="clienteSel" class="form-select form-select-sm">
+            <option value="">Consumidor final</option>
+            {% for cl in clientes %}
+              <option value="{{ cl.id }}">{{ cl.nombre }} {{ cl.apellido }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label small mb-1">Tipo de pago</label>
+          <div class="btn-group w-100" role="group">
+            <input type="radio" class="btn-check" name="tipoPago" id="pagoEfectivo" value="efectivo" checked>
+            <label class="btn btn-outline-success" for="pagoEfectivo"><i class="bi bi-cash"></i> Efectivo</label>
+            <input type="radio" class="btn-check" name="tipoPago" id="pagoTarjeta" value="tarjeta">
+            <label class="btn btn-outline-primary" for="pagoTarjeta"><i class="bi bi-credit-card"></i> Tarjeta</label>
+          </div>
+        </div>
+
+        <div id="zonaEfectivo">
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label small mb-1">Recibe</label>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">$</span>
+                <input type="number" step="0.01" min="0" id="recibeInput" class="form-control" placeholder="0.00">
+              </div>
+            </div>
+            <div class="col-6">
+              <label class="form-label small mb-1">Cambio</label>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">$</span>
+                <input type="text" id="cambioInput" class="form-control" value="0.00" readonly>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <form id="ventaForm" method="post" action="{% url 'process_sale' %}" class="mt-3">
+          {% csrf_token %}
+          {# items: JSON [{producto_id, cantidad}, ...] generado por JS #}
+          <input type="hidden" name="items" id="itemsInput">
+          <input type="hidden" name="tipo_pago" id="tipoPagoInput">
+          <input type="hidden" name="cliente_id" id="clienteIdInput">
+          <input type="hidden" name="recibe" id="recibeHidden">
+          <button type="submit" class="btn btn-success btn-lg w-100" id="btnCobrar" {% if not caja_abierta %}disabled{% endif %}>
+            <i class="bi bi-bag-check"></i> Cobrar
+          </button>
+          {% if not caja_abierta %}
+            <small class="text-danger d-block mt-1">Abre una caja para poder cobrar.</small>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const fmt = new Intl.NumberFormat('es-SV', { style: 'currency', currency: 'USD' });
+  const cart = new Map(); // id -> {id, nombre, precio, stock, cantidad}
+  const IVA_RATE = 0.13;
+
+  const cartBody   = document.getElementById('cartBody');
+  const cartVacio  = document.getElementById('cartVacio');
+  const lblSubtotal= document.getElementById('lblSubtotal');
+  const lblIva     = document.getElementById('lblIva');
+  const lblTotal   = document.getElementById('lblTotal');
+  const recibeInput= document.getElementById('recibeInput');
+  const cambioInput= document.getElementById('cambioInput');
+
+  function totalCarrito() {
+    let t = 0;
+    cart.forEach(it => { t += it.precio * it.cantidad; });
+    return Math.round(t * 100) / 100;
+  }
+
+  function renderCart() {
+    cartBody.querySelectorAll('tr[data-row]').forEach(r => r.remove());
+    if (cart.size === 0) {
+      cartVacio.classList.remove('d-none');
+    } else {
+      cartVacio.classList.add('d-none');
+      cart.forEach(it => {
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-row', it.id);
+        tr.innerHTML = `
+          <td class="small">${it.nombre}<br><span class="text-muted">${fmt.format(it.precio)}</span></td>
+          <td class="text-center">
+            <input type="number" min="1" max="${it.stock}" value="${it.cantidad}"
+                   class="form-control form-control-sm qty-input d-inline-block" data-qty="${it.id}">
+          </td>
+          <td class="text-end">${fmt.format(it.precio * it.cantidad)}</td>
+          <td class="text-end">
+            <button type="button" class="btn btn-sm btn-outline-danger" data-del="${it.id}"><i class="bi bi-x-lg"></i></button>
+          </td>`;
+        cartBody.appendChild(tr);
+      });
+    }
+    const total = totalCarrito();
+    const subtotal = Math.round((total / (1 + IVA_RATE)) * 100) / 100;
+    const iva = Math.round((total - subtotal) * 100) / 100;
+    lblSubtotal.textContent = fmt.format(subtotal);
+    lblIva.textContent = fmt.format(iva);
+    lblTotal.textContent = fmt.format(total);
+    calcularCambio();
+  }
+
+  function addProducto(card) {
+    const id = card.dataset.id;
+    const stock = parseInt(card.dataset.stock, 10);
+    if (cart.has(id)) {
+      const it = cart.get(id);
+      if (it.cantidad < stock) it.cantidad += 1;
+    } else {
+      cart.set(id, {
+        id: id,
+        nombre: card.dataset.nombreReal,
+        precio: parseFloat(card.dataset.precio),
+        stock: stock,
+        cantidad: 1,
+      });
+    }
+    renderCart();
+  }
+
+  document.getElementById('productosGrid').addEventListener('click', e => {
+    const card = e.target.closest('.pos-card');
+    if (card) addProducto(card);
+  });
+
+  cartBody.addEventListener('click', e => {
+    const del = e.target.closest('[data-del]');
+    if (del) { cart.delete(del.getAttribute('data-del')); renderCart(); }
+  });
+
+  cartBody.addEventListener('input', e => {
+    const qty = e.target.closest('[data-qty]');
+    if (qty) {
+      const it = cart.get(qty.getAttribute('data-qty'));
+      let v = parseInt(qty.value, 10);
+      if (isNaN(v) || v < 1) v = 1;
+      if (v > it.stock) { v = it.stock; qty.value = v; }
+      it.cantidad = v;
+      renderCart();
+    }
+  });
+
+  document.getElementById('btnVaciar').addEventListener('click', () => { cart.clear(); renderCart(); });
+
+  // Buscador + filtro de categoría
+  const buscador = document.getElementById('buscador');
+  const filtroCat = document.getElementById('filtroCategoria');
+  function filtrar() {
+    const q = buscador.value.trim().toLowerCase();
+    const cat = filtroCat.value;
+    let visibles = 0;
+    document.querySelectorAll('.producto-item').forEach(item => {
+      const matchTexto = !q || item.dataset.nombre.includes(q) || item.dataset.codigo.includes(q);
+      const matchCat = !cat || item.dataset.categoria === cat;
+      const show = matchTexto && matchCat;
+      item.classList.toggle('d-none', !show);
+      if (show) visibles++;
+    });
+    document.getElementById('sinResultados').classList.toggle('d-none', visibles !== 0);
+  }
+  buscador.addEventListener('input', filtrar);
+  filtroCat.addEventListener('change', filtrar);
+
+  // Pago
+  const zonaEfectivo = document.getElementById('zonaEfectivo');
+  function tipoPago() {
+    return document.querySelector('input[name="tipoPago"]:checked').value;
+  }
+  function calcularCambio() {
+    if (tipoPago() !== 'efectivo') { cambioInput.value = '0.00'; return; }
+    const recibe = parseFloat(recibeInput.value) || 0;
+    const cambio = recibe - totalCarrito();
+    cambioInput.value = (cambio >= 0 ? cambio : 0).toFixed(2);
+  }
+  document.querySelectorAll('input[name="tipoPago"]').forEach(r => {
+    r.addEventListener('change', () => {
+      zonaEfectivo.style.display = (tipoPago() === 'efectivo') ? '' : 'none';
+      calcularCambio();
+    });
+  });
+  recibeInput.addEventListener('input', calcularCambio);
+
+  // Cobrar
+  document.getElementById('ventaForm').addEventListener('submit', e => {
+    if (cart.size === 0) {
+      e.preventDefault();
+      alert('El carrito está vacío.');
+      return;
+    }
+    const total = totalCarrito();
+    const pago = tipoPago();
+    if (pago === 'efectivo') {
+      const recibe = parseFloat(recibeInput.value) || 0;
+      if (recibe < total) {
+        e.preventDefault();
+        alert('El efectivo recibido es menor que el total.');
+        return;
+      }
+    }
+    const items = [];
+    cart.forEach(it => items.push({ producto_id: parseInt(it.id, 10), cantidad: it.cantidad }));
+    document.getElementById('itemsInput').value = JSON.stringify(items);
+    document.getElementById('tipoPagoInput').value = pago;
+    document.getElementById('clienteIdInput').value = document.getElementById('clienteSel').value;
+    document.getElementById('recibeHidden').value = (pago === 'efectivo') ? (parseFloat(recibeInput.value) || 0) : total;
+    document.getElementById('btnCobrar').disabled = true;
+  });
+
+  renderCart();
+})();
+</script>
 {% endblock content %}

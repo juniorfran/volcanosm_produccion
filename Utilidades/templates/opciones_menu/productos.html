@@ -1,28 +1,4 @@
 <ul class="list-unstyled components mb-5">
-    <!-- Gestión de productos -->
-    <li class="nav-item">
-        <a class="nav-link active" data-bs-toggle="collapse" href="#collapseGestionProductos" role="button" aria-expanded="false" aria-controls="collapseGestionProductos">
-            Gestión de productos
-        </a>
-        <div class="collapse" id="collapseGestionProductos">
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item"><a href="{% url "producto_list" %}" class="text-dark">Alta, baja y modificación de productos</a></li>
-                <li class="list-group-item"><a href="#" class="text-dark">Categorías y subcategorías</a></li>
-            </ul>
-        </div>
-    </li>
-
-    <!-- Inventarios -->
-    <li class="nav-item">
-        <a class="nav-link active" data-bs-toggle="collapse" href="#collapseInventarios" role="button" aria-expanded="false" aria-controls="collapseInventarios">
-            Inventarios
-        </a>
-        <div class="collapse" id="collapseInventarios">
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item"><a href="#" class="text-dark">Ajustes de inventario</a></li>
-                <li class="list-group-item"><a href="#" class="text-dark">Conteo físico de stock</a></li>
-                <li class="list-group-item"><a href="#" class="text-dark">Valoración de inventario</a></li>
-            </ul>
-        </div>
-    </li>
+    <li class="list-group-item"><a href="{% url 'producto_list' %}" class="text-dark"><i class="bi bi-box-seam"></i> Productos</a></li>
+    {% if user.is_staff %}<li class="list-group-item"><a href="{% url 'entrada_inventario' %}" class="text-dark"><i class="bi bi-box-arrow-in-down"></i> Entrada de inventario</a></li>{% endif %}
 </ul>

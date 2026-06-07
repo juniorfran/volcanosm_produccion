@@ -34,6 +34,9 @@ urlpatterns = [
     path('TPV/Cajas/', include('TPV_.Cajas.urls')),
     path('TPV/Productos/', include('TPV_.Productos.urls')),
     path('TPV/Ventas/', include('TPV_.Ventas.urls')),
+    path('TPV/Clientes/', include('TPV_.Clientes.urls')),
+    path('TPV/Kardex/', include('TPV_.Kardex.urls')),
+    path('TPV/Alquileres/', include('TPV_.Alquileres.urls')),
     
     # Otras URLs de la aplicación
     path('utilidades/', include('Utilidades.urls')),

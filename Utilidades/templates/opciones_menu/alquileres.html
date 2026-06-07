@@ -1,0 +1,5 @@
+<ul class="list-unstyled components mb-5">
+    <li class="list-group-item"><a href="{% url 'alquiler_nuevo' %}" class="text-dark"><i class="bi bi-box-arrow-right"></i> Nuevo alquiler</a></li>
+    <li class="list-group-item"><a href="{% url 'alquiler_list' %}" class="text-dark"><i class="bi bi-list-check"></i> Alquileres</a></li>
+    {% if user.is_staff %}<li class="list-group-item"><a href="{% url 'articulo_list' %}" class="text-dark"><i class="bi bi-tags"></i> Artículos de alquiler</a></li>{% endif %}
+</ul>

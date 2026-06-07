@@ -1,0 +1,110 @@
+{% extends 'base_utilities.html' %}
+{% block content %}
+<div class="container-fluid">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show d-print-none" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 d-print-none">
+        <h3 class="mb-0"><i class="bi bi-receipt"></i> Alquiler {{ alquiler.numero|default:alquiler.pk }}</h3>
+        <div class="d-flex gap-2">
+            <a href="{% url 'alquiler_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+            {% if alquiler.estado != 'devuelto' %}
+            <a href="{% url 'alquiler_devolver' alquiler.pk %}" class="btn btn-success">
+                <i class="bi bi-box-arrow-in-left"></i> Registrar devolución
+            </a>
+            {% endif %}
+            <button onclick="window.print()" class="btn btn-outline-dark">
+                <i class="bi bi-printer"></i> Imprimir
+            </button>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mx-auto" style="max-width: 720px;">
+        <div class="card-body">
+            <div class="text-center mb-3">
+                <h4 class="mb-0">Comprobante de alquiler</h4>
+                <div class="text-muted">Volcano · Camping</div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-6">
+                    <strong>N°:</strong> {{ alquiler.numero|default:alquiler.pk }}<br>
+                    <strong>Estado:</strong>
+                    {% if alquiler.estado == 'activo' %}<span class="badge bg-warning text-dark">Activo</span>
+                    {% elif alquiler.estado == 'parcial' %}<span class="badge bg-info text-dark">Parcial</span>
+                    {% else %}<span class="badge bg-success">Devuelto</span>{% endif %}
+                </div>
+                <div class="col-6 text-end">
+                    <strong>Salida:</strong> {{ alquiler.fecha_salida|date:"d/m/Y H:i" }}<br>
+                    {% if alquiler.fecha_devolucion %}
+                        <strong>Devolución:</strong> {{ alquiler.fecha_devolucion|date:"d/m/Y H:i" }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <strong>Cliente:</strong>
+                {% if alquiler.cliente %}{{ alquiler.cliente.nombre }} {{ alquiler.cliente.apellido }}
+                    {% if alquiler.cliente.telefono %} · {{ alquiler.cliente.telefono }}{% endif %}
+                {% else %}Cliente eventual{% endif %}<br>
+                <strong>Atendió:</strong> {{ alquiler.usuario.username|default:"—" }} ·
+                <strong>Pago:</strong> {{ alquiler.tipo_pago|title }}
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Artículo</th>
+                            <th class="text-center">Cant.</th>
+                            <th class="text-center">Devuelto</th>
+                            <th class="text-center">Pend.</th>
+                            <th class="text-end">Tarifa</th>
+                            <th class="text-end">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in detalles %}
+                        <tr>
+                            <td>{{ d.articulo.nombre }}</td>
+                            <td class="text-center">{{ d.cantidad }}</td>
+                            <td class="text-center">{{ d.cantidad_devuelta }}</td>
+                            <td class="text-center">{{ d.pendiente }}</td>
+                            <td class="text-end">${{ d.tarifa_unitaria }}</td>
+                            <td class="text-end">${{ d.subtotal }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="5" class="text-end">Total tarifa (IVA incl.):</th>
+                            <th class="text-end">${{ alquiler.total_tarifa }}</th>
+                        </tr>
+                        <tr>
+                            <th colspan="5" class="text-end">Depósito (garantía):</th>
+                            <th class="text-end">${{ alquiler.deposito }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            {% if alquiler.notas %}
+            <div class="mt-2"><strong>Notas:</strong> {{ alquiler.notas }}</div>
+            {% endif %}
+
+            <p class="text-muted small mt-3 mb-0">
+                El depósito es una garantía reembolsable al devolver el equipo completo y en buen estado.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock content %}

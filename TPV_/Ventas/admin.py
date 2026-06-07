@@ -7,15 +7,17 @@ class TiposDeVentasAdmin(admin.ModelAdmin):
 admin.site.register(TipoVenta, TiposDeVentasAdmin)
 
 class VentasAdmin(admin.ModelAdmin):
-    list_display = ('caja', 'tipo_venta', 'subtotal')
+    list_display = ('numero', 'caja', 'total', 'tipo_pago', 'estado', 'fecha_creacion')
+    list_filter = ('estado', 'tipo_pago', 'fecha_creacion')
+    search_fields = ('numero',)
 admin.site.register(Ventas, VentasAdmin)
 
 #detalle ventas
 @admin.register(DetalleVenta)
 class DetalleVentaAdmin(admin.ModelAdmin):
-    list_display = ('venta', 'ticket_factura', 'cantidad', 'precio_unitario', 'iva', 'subtotal', 'fecha_creacion')
+    list_display = ('venta', 'producto', 'cantidad', 'precio_unitario', 'iva', 'subtotal', 'fecha_creacion')
     list_filter = ('fecha_creacion',)
-    search_fields = ('venta__id', 'ticket_factura', 'producto__nombre')
+    search_fields = ('venta__numero', 'producto__nombre')
     
     
 @admin.register(Cart)

@@ -130,6 +130,7 @@ INSTALLED_APPS = [
     'TPV_.Proveedores',
     'TPV_.Ventas',
     'TPV_.Reportes',
+    'TPV_.Alquileres',
     'django_celery_beat',
     'Internet',
     'rest_framework',

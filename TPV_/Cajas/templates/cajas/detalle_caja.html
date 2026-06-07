@@ -1,19 +1,90 @@
 {% extends "base_utilities.html" %}
 {% load static %}
 
-{% block tittle_sections %}
-    <h1>Detalle de Caja</h1>
-{% endblock %}
-
 {% block content %}
-<form method="post">
-    {% csrf_token %}
-    <label for="caja">Seleccione la caja:</label>
-    <select name="caja" id="caja">
-        {% for caja in cajas %}
-            <option value="{{ caja.id }}">{{ caja.id }}</option>
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Detalle de caja: {{ caja.nombre_caja }}</h2>
+    <a href="{% url 'cajas_list' %}" class="btn btn-secondary">Volver</a>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <div class="card h-100">
+        <div class="card-header bg-dark text-white">Información de la caja</div>
+        <div class="card-body">
+          <table class="table table-sm mb-0">
+            <tr><th>Número</th><td>{{ caja.numero_caja }}</td></tr>
+            <tr><th>Estado</th><td>{{ caja.get_estado_display }}</td></tr>
+            <tr><th>Responsable</th><td>{{ caja.usuario_responsable.get_full_name|default:caja.usuario_responsable.username }}</td></tr>
+            <tr><th>Apertura</th><td>{{ caja.fecha_hora_apertura|date:"d/m/Y H:i"|default:"-" }}</td></tr>
+            <tr><th>Cierre</th><td>{{ caja.fecha_hora_cierre|date:"d/m/Y H:i"|default:"-" }}</td></tr>
+            {% if caja.comentarios_notas %}
+            <tr><th>Notas</th><td>{{ caja.comentarios_notas }}</td></tr>
+            {% endif %}
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <div class="card h-100">
+        <div class="card-header bg-dark text-white">Totales</div>
+        <div class="card-body">
+          <table class="table table-sm mb-0">
+            <tr><th>Efectivo inicial</th><td class="text-end">${{ caja.efectivo_inicial }}</td></tr>
+            <tr><th>Ventas</th><td class="text-end">${{ caja.monto_ventas }}</td></tr>
+            <tr><th>Gastos / Devoluciones</th><td class="text-end">${{ caja.monto_gastos_devoluciones }}</td></tr>
+            <tr><th>Total efectivo (esperado)</th><td class="text-end">${{ caja.monto_total_efectivo }}</td></tr>
+            <tr><th>Efectivo contado (cierre)</th><td class="text-end">{% if caja.efectivo_cierre is not None %}${{ caja.efectivo_cierre }}{% else %}-{% endif %}</td></tr>
+            {% if diferencia is not None %}
+            <tr class="{% if diferencia < 0 %}table-danger{% elif diferencia > 0 %}table-warning{% else %}table-success{% endif %}">
+              <th>Diferencia</th><td class="text-end">${{ diferencia }}</td>
+            </tr>
+            {% endif %}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h4 class="mt-2">Movimientos</h4>
+  <div class="table-responsive">
+    <table class="table table-striped table-sm align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Fecha</th>
+          <th>Tipo</th>
+          <th>Usuario</th>
+          <th class="text-end">Efectivo anterior</th>
+          <th class="text-end">Cantidad</th>
+          <th class="text-end">Efectivo actual</th>
+          <th>Motivo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for mov in movimientos %}
+        <tr>
+          <td>{{ mov.fecha_creacion|date:"d/m/Y H:i" }}</td>
+          <td>{{ mov.get_tipo_movimiento_display }}</td>
+          <td>{{ mov.usuario.get_full_name|default:mov.usuario.username }}</td>
+          <td class="text-end">${{ mov.efectivo_anterior }}</td>
+          <td class="text-end">${{ mov.cantidad_efectivo }}</td>
+          <td class="text-end">${{ mov.efectivo_actual }}</td>
+          <td>{{ mov.motivo|default:"-" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center text-muted">No hay movimientos registrados.</td>
+        </tr>
         {% endfor %}
-    </select>
-    <button type="submit">Imprimir Comprobante</button>
-</form>
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock content %}

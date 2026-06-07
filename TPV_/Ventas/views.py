@@ -1,311 +1,302 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+"""Módulo de VENTAS del punto de venta (POS) de Volcano.
+
+Reglas clave:
+- Los precios YA INCLUYEN IVA (13 %). El total se calcula SIEMPRE con los
+  precios del servidor, nunca con montos enviados por el cliente.
+- Todo descuento/reingreso de stock pasa por el kardex
+  (``registrar_movimiento``) y todo movimiento de efectivo por la caja
+  (``registrar_movimiento_caja``), dentro de ``transaction.atomic`` y con la
+  caja bloqueada con ``select_for_update``.
+"""
+import json
+from decimal import Decimal, InvalidOperation
+
 from django.contrib import messages
-from django.db.models import Sum
-from TPV_.Cajas.models import Cajas, MovimientoCaja
-from TPV_.Clientes.models import Cliente
-from TPV_.Productos.models import Categoria, Producto
-from .models import Cart, CartItem, DetalleVenta, TipoVenta, Ventas, VentasCredito
-from django.views.generic import View
-from django.contrib.auth.models import User
-from django.http import HttpResponse, JsonResponse
-from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from decimal import Decimal
-from collections import defaultdict
-from django import template
-import pdb
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
+
+from TPV_.Cajas.models import Cajas
+from TPV_.Cajas.services import registrar_movimiento_caja
+from TPV_.Clientes.models import Cliente
+from TPV_.Kardex.services import registrar_movimiento
+from TPV_.Productos.models import Categoria, Producto
+from TPV_.utils import admin_required, desglose_iva, q
+
+from .models import DetalleVenta, Ventas
 
 
-# VISTA PARA REALIZAR UNA VENTA CREANDO DE FORMA AUTOMATICA EL CARRITO DE COMPRAS
+def _caja_abierta_usuario(user):
+    """Caja abierta del usuario (o None)."""
+    return Cajas.objects.filter(estado='abierto', usuario_responsable=user).first()
 
-
-
-def get_caja_abierta():
-    """Return the open cash register"""
-    return Cajas.objects.filter(estado='abierto').first()
 
 @login_required
+def punto_de_venta(request):
+    """Pantalla POS: grilla de productos + carrito (JS)."""
+    productos = (
+        Producto.objects
+        .filter(status='A', stock__gt=0)
+        .select_related('categoria')
+        .order_by('nombre')
+    )
+    categorias = Categoria.objects.order_by('nombre')
+    caja_abierta = _caja_abierta_usuario(request.user)
+    clientes = Cliente.objects.filter(estado='ACTIVO').order_by('nombre', 'apellido')
+
+    context = {
+        'productos': productos,
+        'categorias': categorias,
+        'caja_abierta': caja_abierta,
+        'clientes': clientes,
+    }
+    return render(request, 'tpv/punto_ventas.html', context)
+
+
+def _parse_items(request):
+    """Devuelve la lista de items {producto_id, cantidad} desde el POST.
+
+    El template envía los items como JSON en el campo ``items``. Se admite
+    también el formato de POST repetidos (``producto_id`` + ``cantidad``) como
+    respaldo.
+    """
+    raw = request.POST.get('items')
+    if raw:
+        try:
+            data = json.loads(raw)
+        except (ValueError, TypeError):
+            return []
+        items = []
+        for it in data:
+            try:
+                pid = int(it.get('producto_id'))
+                cant = int(it.get('cantidad'))
+            except (TypeError, ValueError, AttributeError):
+                continue
+            if cant > 0:
+                items.append({'producto_id': pid, 'cantidad': cant})
+        return items
+
+    # Respaldo: listas paralelas en el POST.
+    ids = request.POST.getlist('producto_id')
+    cantidades = request.POST.getlist('cantidad')
+    items = []
+    for pid, cant in zip(ids, cantidades):
+        try:
+            pid = int(pid)
+            cant = int(cant)
+        except (TypeError, ValueError):
+            continue
+        if cant > 0:
+            items.append({'producto_id': pid, 'cantidad': cant})
+    return items
+
+
+@login_required
+@require_POST
 def process_sale(request):
+    """Procesa una venta: descuenta stock, registra caja y crea la venta."""
+    caja = _caja_abierta_usuario(request.user)
+    if not caja:
+        messages.error(
+            request,
+            'No tienes una caja abierta. Abre una caja antes de vender.',
+        )
+        return redirect('punto_de_venta')
+
+    items = _parse_items(request)
+    if not items:
+        messages.error(request, 'No hay productos en la venta.')
+        return redirect('punto_de_venta')
+
+    tipo_pago = request.POST.get('tipo_pago', 'efectivo')
+    if tipo_pago not in ('efectivo', 'tarjeta', 'otro'):
+        tipo_pago = 'efectivo'
+
+    cliente = None
+    cliente_id = request.POST.get('cliente_id')
+    if cliente_id:
+        cliente = Cliente.objects.filter(pk=cliente_id).first()
+
     try:
-        cart = Cart.objects.filter(user=request.user, status='A').first()
-        if not cart:
-            return HttpResponse("El carrito está vacío")
+        with transaction.atomic():
+            # Bloquea la caja para la duración de la transacción.
+            caja = Cajas.objects.select_for_update().get(pk=caja.pk)
 
-        if request.method == 'POST':
-            recibe_caja_str = request.POST.get('recibe_caja')
-            recibe_caja_str = recibe_caja_str.replace(',', '.') 
-            recibe_caja = Decimal(recibe_caja_str) if recibe_caja_str else Decimal(0.0)
-            
-            total_venta_str = request.POST.get('total_venta')
-            total_venta_str = total_venta_str.replace(',', '.')  
-            total_venta = Decimal(total_venta_str)
+            # Carga productos y consolida cantidades por producto.
+            cantidades = {}
+            for it in items:
+                cantidades[it['producto_id']] = cantidades.get(it['producto_id'], 0) + it['cantidad']
 
-            venta_total = Decimal(0)  # Variable para almacenar el total de la venta
+            productos = {
+                p.pk: p
+                for p in Producto.objects.filter(pk__in=cantidades.keys(), status='A')
+            }
+            if len(productos) != len(cantidades):
+                raise ValueError('Uno o más productos ya no están disponibles.')
 
-            # Calcular el total de la venta sumando el precio de venta de cada producto en el carrito
-            for cart_item in cart.cartitem_set.all():
-                producto = cart_item.product
-                cantidad = cart_item.quantity
-                venta_total += producto.precio_de_venta * cantidad
+            # Total calculado SOLO con precios del servidor.
+            total = Decimal('0')
+            for pid, cant in cantidades.items():
+                total += productos[pid].precio_de_venta * cant
+            total = q(total)
 
-            # Calcular el total de la venta incluyendo el impuesto
-            total = venta_total + (venta_total * Decimal(0.13))
+            if total <= 0:
+                raise ValueError('El total de la venta debe ser mayor que cero.')
 
-            # Crear una única venta en la base de datos
+            # Resuelve el pago.
+            if tipo_pago == 'efectivo':
+                recibe_raw = (request.POST.get('recibe') or '0').replace(',', '.')
+                try:
+                    recibe = Decimal(recibe_raw)
+                except InvalidOperation:
+                    raise ValueError('El monto recibido no es válido.')
+                if recibe < total:
+                    raise ValueError('El efectivo recibido es menor que el total.')
+                recibe = q(recibe)
+                cambio = q(recibe - total)
+            else:
+                recibe = total
+                cambio = Decimal('0')
+
+            subtotal, iva = desglose_iva(total)
+
+            # Crea la venta (sin número aún para conocer el pk).
             venta = Ventas.objects.create(
-                cart=cart,
-                caja=Cajas.objects.get(estado='abierto'),
-                tipo_venta=TipoVenta.objects.get(nombre='Venta al público'),
-                tipo_pago='Efectivo',
-                descuento=0,
-                recibe_caja=recibe_caja,
-                cambio=recibe_caja - total_venta,
-                subtotal=venta_total,
-                iva=Decimal(0.13),
+                estado='F',
+                caja=caja,
+                cliente=cliente,
+                usuario=request.user,
+                tipo_pago=tipo_pago,
+                descuento=Decimal('0'),
+                recibe_caja=recibe,
+                cambio=cambio,
+                subtotal=subtotal,
+                iva=iva,
                 total=total,
-                fecha_hora_venta=timezone.now(),
-                estado="F"
             )
+            venta.numero = f"VL-{venta.pk:05d}"
+            venta.save(update_fields=['numero'])
 
-            # Para cada producto en el carrito, crear un detalle de venta asociado a la venta creada
-            for cart_item in cart.cartitem_set.all():
-                producto = cart_item.product
-                cantidad = cart_item.quantity
-                subtotal = producto.precio_de_venta * cantidad
-
-                detalle_venta = DetalleVenta.objects.create(
+            # Descuenta stock (kardex) y crea los detalles.
+            for pid, cant in cantidades.items():
+                producto = productos[pid]
+                # Lanza ValueError si no hay stock suficiente -> rollback.
+                registrar_movimiento(
+                    producto,
+                    'salida',
+                    -cant,
+                    usuario=request.user,
+                    motivo=f"Venta {venta.numero}",
+                    referencia=venta.numero,
+                )
+                linea_total = q(producto.precio_de_venta * cant)
+                _, linea_iva = desglose_iva(linea_total)
+                DetalleVenta.objects.create(
                     venta=venta,
-                    cantidad=cantidad,
+                    producto=producto,
+                    cantidad=cant,
                     precio_unitario=producto.precio_de_venta,
-                    iva=Decimal(0.13),
-                    subtotal=subtotal
+                    iva=linea_iva,
+                    subtotal=linea_total,
                 )
 
-                detalle_venta.productos.add(producto)
+            # Movimiento de caja: el efectivo solo varía si el pago fue efectivo.
+            registrar_movimiento_caja(
+                caja,
+                request.user,
+                'venta',
+                efectivo=(total if tipo_pago == 'efectivo' else Decimal('0')),
+                venta=total,
+                motivo=f"Venta {venta.numero}",
+            )
+    except ValueError as exc:
+        messages.error(request, str(exc))
+        return redirect('punto_de_venta')
 
-                # Actualizar el stock del producto
-                producto.stock -= cantidad
-                producto.save()
-            
-            
-            # Registrar movimiento en caja
-            caja = Cajas.objects.get(estado='abierto')
-            caja.monto_ventas += total
-            caja.monto_total_efectivo += venta_total
-            caja.efectivo_cierre = caja.efectivo_cierre or Decimal(0)
-            caja.efectivo_cierre += total
-            caja.save()
-
-            # Marcar el carrito como inactivo
-            cart.status = 'I'
-            cart.save()
-
-            # Redirigir a la vista de venta exitosa con el ID de la venta recién creada
-            return redirect("venta_exitosa", venta_id=venta.id)
-        
-        else:
-            return HttpResponse("Método no permitido")
-    except Exception as e:
-        return HttpResponse(f"Error al procesar la venta: {str(e)}")
-
-
-@login_required
-def punto_ventas(request):
-    productos = Producto.objects.filter(status='A')
-    caja_abierta = Cajas.objects.filter(estado='abierto').first()
-    caja_usuario = Cajas.objects.get(usuario_responsable=request.user)
-
-    current_date = timezone.now().date()
-    
-    caja_nombre = caja_usuario.nombre_caja
-    
-    context = {
-        'productos': productos, 
-        'caja_abierta': caja_abierta,
-        'current_date': current_date,
-        'caja_nombre': caja_nombre,
-    }
-    
-    return render(request, 'tpv/punto_ventas.html', context)
-
-
-def calcular_impuesto(cart):
-    # Supongamos que el impuesto es el 10% del subtotal
-    impuesto_porcentaje = Decimal('0.13')
-    impuesto = cart.total_price() * impuesto_porcentaje
-    return impuesto
-
-@login_required
-def venta_exitosa(request, venta_id):
-    try:
-        # Obtener los detalles de la venta con el ID proporcionado
-        venta = Ventas.objects.get(id=venta_id)
-
-        # Obtener los detalles del carrito relacionado a la venta
-        cart = venta.cart
-
-        # Crear una lista de diccionarios con los detalles de los productos
-        productos = []
-        for cart_item in cart.cartitem_set.all():
-            producto = cart_item.product
-            cantidad = cart_item.quantity
-            subtotal = producto.precio_de_venta * cantidad
-            productos.append({
-                'nombre': producto.nombre,
-                'cantidad': cantidad,
-                'precio_de_venta': producto.precio_de_venta,
-                'subtotal': subtotal,
-            })
-
-        # Calcular los subtotales, el IVA y el total
-        subtotal = sum(item['subtotal'] for item in productos)
-        impuesto = subtotal * Decimal(0.13)
-        total = subtotal + impuesto
-
-        # Pasar los detalles de la venta al contexto de la plantilla
-        context = {
-            'venta': venta,
-            'productos': productos,
-            'subtotal': subtotal,
-            'impuesto': impuesto,
-            'total': total,
-        }
-
-        return render(request, 'tpv/venta_exitosa.html', context)
-    except Ventas.DoesNotExist:
-        return HttpResponse("No se encontró la venta especificada.")
-
-
-
-@login_required
-def shopping_cart(request):
-    cart = Cart.objects.filter(user=request.user, status='A').first()
-    productos = Producto.objects.filter(status='A')
-    
-    if cart:
-        cart_items = cart.cartitem_set.all()
-        
-        # Calcular la cantidad total de cada producto en el carrito
-        product_counts = {}
-        for item in cart_items:
-            product_id = item.product.id
-            if product_id in product_counts:
-                product_counts[product_id] += item.quantity
-            else:
-                product_counts[product_id] = item.quantity
-        
-        subtotal = cart.total_price()
-        impuesto = calcular_impuesto(cart)  # Puedes calcular el impuesto aquí
-        total = subtotal + impuesto
-        
-        context = {
-            'cart': cart, 
-            'productos': productos, 
-            'impuesto': impuesto, 
-            'total': total, 
-            'subtotal': subtotal, 
-            'product_counts': product_counts,
-        }
-        print (total, impuesto, subtotal)
-    else:
-        # Si el usuario no tiene un carrito activo, puedes manejar este caso como desées
-        context = {
-            'message': 'No tienes ningún carrito activo',
-        }
-
-    return render(request, 'tpv/punto_ventas.html', context)
-
-
-@login_required
-def add_to_cart(request, product_id):
-    product = get_object_or_404(Producto, id=product_id)
-    cart = Cart.objects.filter(user=request.user, status='A').first()
-    
-    if not cart:
-        # Crear un nuevo carrito activo para el usuario si no existe uno o si el existente está inactivo
-        cart = Cart.objects.create(user=request.user, status='A')
-
-    if product in cart.productos.all():
-        # El producto ya está en el carrito, actualiza la cantidad
-        cart_item = CartItem.objects.get(cart=cart, product=product)
-        cart_item.quantity += 1
-        cart_item.save()
-    else:
-        # El producto no está en el carrito, agregalo al carrito
-        cart_item = CartItem.objects.create(cart=cart, product=product, quantity=1)
-
-    messages.success(request, f'Producto "{product.nombre}" añadido al carrito de compras.')
-    return redirect('shopping_cart')
-
-@login_required
-def update_cart_item(request, cart_item_id, new_quantity):
-    cart_item = get_object_or_404(Cart, id=cart_item_id)
-    cart_item.update_quantity(new_quantity)
-    return redirect('shopping_cart')
-
-@login_required
-def remove_from_cart(request, cart_item_id):
-    cart_item = get_object_or_404(CartItem, id=cart_item_id)
-    cart_item.decrement_quantity()  # No es necesario pasar el producto aquí
-    return redirect('shopping_cart')
-
-
+    messages.success(request, f"Venta {venta.numero} registrada correctamente.")
+    return redirect('venta_detalle', venta_id=venta.pk)
 
 
 @login_required
 def ventas_por_caja(request):
+    """Lista de ventas, filtrable por rango de fechas (opcional)."""
+    ventas = (
+        Ventas.objects
+        .select_related('caja', 'cliente', 'usuario')
+        .order_by('-fecha_hora_venta')
+    )
+
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
-
-    if start_date and end_date:
-        ventas = Ventas.objects.filter(fecha_hora_venta__range=[start_date, end_date], caja__isnull=False)
-    else:
-        ventas = Ventas.objects.filter(caja__isnull=False)
+    if start_date:
+        ventas = ventas.filter(fecha_hora_venta__date__gte=start_date)
+    if end_date:
+        ventas = ventas.filter(fecha_hora_venta__date__lte=end_date)
 
     context = {
-        'ventas': ventas
+        'ventas': ventas,
+        'start_date': start_date or '',
+        'end_date': end_date or '',
     }
-
     return render(request, 'tpv/general_ventas.html', context)
+
 
 @login_required
 def venta_detalle(request, venta_id):
+    """Ticket / recibo imprimible de una venta."""
+    venta = get_object_or_404(
+        Ventas.objects
+        .select_related('caja', 'cliente', 'usuario')
+        .prefetch_related('detalles__producto'),
+        pk=venta_id,
+    )
+    return render(request, 'tpv/detalle_venta.html', {'venta': venta})
+
+
+@admin_required
+@require_POST
+def anular_venta(request, venta_id):
+    """Anula una venta: reingresa stock y revierte el movimiento de caja."""
+    venta = get_object_or_404(
+        Ventas.objects.select_related('caja').prefetch_related('detalles__producto'),
+        pk=venta_id,
+    )
+
+    if venta.estado == 'A':
+        messages.info(request, f"La venta {venta.numero} ya estaba anulada.")
+        return redirect('ventas_por_caja')
+
     try:
-        # Obtener los detalles de la venta con el ID proporcionado
-        venta = Ventas.objects.get(id=venta_id)
+        with transaction.atomic():
+            caja = Cajas.objects.select_for_update().get(pk=venta.caja_id)
 
-        # Obtener los detalles del carrito relacionado a la venta
-        cart = venta.cart
+            for detalle in venta.detalles.all():
+                if detalle.producto_id:
+                    registrar_movimiento(
+                        detalle.producto,
+                        'devolucion',
+                        detalle.cantidad,
+                        usuario=request.user,
+                        motivo=f"Anulación venta {venta.numero}",
+                        referencia=venta.numero,
+                    )
 
-        # Crear una lista de diccionarios con los detalles de los productos
-        productos = []
-        for cart_item in cart.cartitem_set.all():
-            producto = cart_item.product
-            cantidad = cart_item.quantity
-            subtotal = producto.precio_de_venta * cantidad
-            productos.append({
-                'nombre': producto.nombre,
-                'cantidad': cantidad,
-                'precio_de_venta': producto.precio_de_venta,
-                'subtotal': subtotal,
-            })
+            registrar_movimiento_caja(
+                caja,
+                request.user,
+                'devuelta',
+                efectivo=(-venta.total if venta.tipo_pago == 'efectivo' else Decimal('0')),
+                venta=-venta.total,
+                motivo=f"Anulación venta {venta.numero}",
+            )
 
-        # Calcular los subtotales, el IVA y el total
-        subtotal = sum(item['subtotal'] for item in productos)
-        impuesto = subtotal * Decimal(0.13)
-        total = subtotal + impuesto
+            venta.estado = 'A'
+            venta.save(update_fields=['estado'])
+    except ValueError as exc:
+        messages.error(request, f"No se pudo anular la venta: {exc}")
+        return redirect('ventas_por_caja')
 
-        # Pasar los detalles de la venta al contexto de la plantilla
-        context = {
-            'venta': venta,
-            'productos': productos,
-            'subtotal': subtotal,
-            'impuesto': impuesto,
-            'total': total,
-        }
-
-        return render(request, 'tpv/detalle_venta.html', context)
-    except Ventas.DoesNotExist:
-        return HttpResponse("No se encontró la venta especificada.")
+    messages.success(request, f"Venta {venta.numero} anulada y stock reingresado.")
+    return redirect('ventas_por_caja')

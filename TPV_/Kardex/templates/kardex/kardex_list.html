@@ -1,0 +1,110 @@
+{% extends 'base_utilities.html' %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h1 class="h3 mb-0"><i class="bi bi-journal-text"></i> Kardex de inventario</h1>
+  <a href="{% url 'entrada_inventario' %}" class="btn btn-success">
+    <i class="bi bi-box-arrow-in-down"></i> Registrar entrada / ajuste
+  </a>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-5">
+    <select name="producto" class="form-select">
+      <option value="">Todos los productos</option>
+      {% for p in productos %}
+        <option value="{{ p.pk }}" {% if producto_id == p.pk|stringformat:'s' %}selected{% endif %}>{{ p.nombre }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-4">
+    <select name="tipo" class="form-select">
+      <option value="">Todos los tipos</option>
+      {% for value, label in tipos %}
+        <option value="{{ value }}" {% if tipo == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3 d-flex gap-2">
+    <button type="submit" class="btn btn-outline-primary w-100"><i class="bi bi-funnel"></i> Filtrar</button>
+    <a href="{% url 'kardex_list' %}" class="btn btn-outline-secondary">Limpiar</a>
+  </div>
+</form>
+
+<div class="table-responsive">
+  <table class="table table-hover table-sm align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>Fecha</th>
+        <th>Producto</th>
+        <th>Tipo</th>
+        <th class="text-end">Cantidad</th>
+        <th class="text-end">Stock ant.</th>
+        <th class="text-end">Stock nuevo</th>
+        <th>Motivo</th>
+        <th>Referencia</th>
+        <th>Usuario</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in movimientos %}
+        <tr>
+          <td class="text-nowrap">{{ m.fecha_creacion|date:"d/m/Y H:i" }}</td>
+          <td>{{ m.producto.nombre }}</td>
+          <td>
+            {% if m.tipo == 'entrada' %}<span class="badge bg-success">{{ m.get_tipo_display }}</span>
+            {% elif m.tipo == 'salida' %}<span class="badge bg-danger">{{ m.get_tipo_display }}</span>
+            {% elif m.tipo == 'devolucion' %}<span class="badge bg-info text-dark">{{ m.get_tipo_display }}</span>
+            {% else %}<span class="badge bg-warning text-dark">{{ m.get_tipo_display }}</span>{% endif %}
+          </td>
+          <td class="text-end {% if m.cantidad < 0 %}text-danger{% else %}text-success{% endif %}">
+            {% if m.cantidad > 0 %}+{% endif %}{{ m.cantidad }}
+          </td>
+          <td class="text-end">{{ m.stock_anterior }}</td>
+          <td class="text-end fw-bold">{{ m.stock_nuevo }}</td>
+          <td>{{ m.motivo|default:"-" }}</td>
+          <td>{{ m.referencia|default:"-" }}</td>
+          <td>{{ m.usuario.username|default:"-" }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="9" class="text-center text-muted py-4">No hay movimientos registrados.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav aria-label="Paginación">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if producto_id %}&producto={{ producto_id }}{% endif %}{% if tipo %}&tipo={{ tipo }}{% endif %}">Anterior</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+    {% endif %}
+    <li class="page-item disabled">
+      <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if producto_id %}&producto={{ producto_id }}{% endif %}{% if tipo %}&tipo={{ tipo }}{% endif %}">Siguiente</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

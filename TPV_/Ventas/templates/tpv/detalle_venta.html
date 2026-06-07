@@ -1,74 +1,105 @@
 {% extends 'base_utilities.html' %}
-{% load custom_filters_ventas %}
+
+{% block tittle_sections %}
+  <h3 class="fw-bold"><i class="bi bi-receipt-cutoff"></i> Ticket de venta</h3>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-header">¡Detalles de la Venta {{ venta.id }}!</div>
-        <div class="card-body">
-          {% if productos %}
-          <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Precio unitario</th>
-                <th>Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for producto in productos %}
-              <tr>
-                <td>{{ producto.nombre }}</td>
-                <td>{{ producto.cantidad }}</td>
-                <td>{{ producto.precio_de_venta }}</td>
-                <td>{{ producto.subtotal }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colspan="3" class="text-right"><strong>Subtotal:</strong></td>
-                <td>{{ subtotal }}</td>
-              </tr>
-              <tr>
-                <td colspan="3" class="text-right"><strong>Impuesto:</strong></td>
-                <td>{{ impuesto|default:0|floatformat:2 }}</td>
-              </tr>
-              <tr>
-                <td colspan="3" class="text-right"><strong>Total:</strong></td>
-                <td>{{ total|default:0|floatformat:2 }}</td>
-              </tr>
-            </tfoot>
-          </table>
-          <hr>
-          <p><strong>Vendedor:</strong> {{ request.user }}</p>
-          <div class="text-center">
-            <button class="btn btn-primary" onclick="imprimirTicket()">Imprimir</button>
-          </div>
-          {% else %}
-          <p>No se encontraron detalles de la última venta exitosa.</p>
-          {% endif %}
-        </div>
+<style>
+  .ticket { max-width: 380px; margin: 0 auto; font-family: 'Courier New', Courier, monospace; }
+  .ticket .brand { font-size: 1.5rem; font-weight: 700; letter-spacing: 1px; }
+  .ticket table { width: 100%; font-size: .85rem; }
+  .ticket .dashed { border-top: 1px dashed #999; margin: .5rem 0; }
+  @media print {
+    body * { visibility: hidden; }
+    #ticketArea, #ticketArea * { visibility: visible; }
+    #ticketArea { position: absolute; left: 0; top: 0; width: 100%; }
+    .no-print { display: none !important; }
+    #sidebar, .navbar { display: none !important; }
+  }
+</style>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show no-print" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div class="card shadow-sm" id="ticketArea">
+  <div class="card-body">
+    <div class="ticket">
+      <div class="text-center">
+        <div class="brand"><i class="bi bi-fire"></i> VOLCANO</div>
+        <div class="small text-muted">Tienda de turismo</div>
+        {% if venta.estado == 'A' %}
+          <div class="badge bg-danger mt-1">VENTA ANULADA</div>
+        {% endif %}
       </div>
+
+      <div class="dashed"></div>
+
+      <div class="small">
+        <div><strong>Ticket:</strong> {{ venta.numero|default:venta.pk }}</div>
+        <div><strong>Fecha:</strong> {{ venta.fecha_hora_venta|date:"d/m/Y H:i" }}</div>
+        <div><strong>Cajero:</strong> {{ venta.usuario.get_full_name|default:venta.usuario.username|default:"-" }}</div>
+        <div><strong>Caja:</strong> {{ venta.caja.nombre_caja }}</div>
+        <div><strong>Cliente:</strong> {% if venta.cliente %}{{ venta.cliente.nombre }} {{ venta.cliente.apellido }}{% else %}Consumidor final{% endif %}</div>
+      </div>
+
+      <div class="dashed"></div>
+
+      <table>
+        <thead>
+          <tr class="text-muted">
+            <th class="text-start">Producto</th>
+            <th class="text-center">Cant</th>
+            <th class="text-end">Precio</th>
+            <th class="text-end">Subt.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in venta.detalles.all %}
+            <tr>
+              <td class="text-start">{{ d.producto.nombre|default:"(producto)" }}</td>
+              <td class="text-center">{{ d.cantidad }}</td>
+              <td class="text-end">${{ d.precio_unitario }}</td>
+              <td class="text-end">${{ d.subtotal }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="dashed"></div>
+
+      <table>
+        <tr><td class="text-start">Subtotal (sin IVA)</td><td class="text-end">${{ venta.subtotal }}</td></tr>
+        <tr><td class="text-start">IVA (13%)</td><td class="text-end">${{ venta.iva }}</td></tr>
+        <tr class="fw-bold" style="font-size:1.05rem;"><td class="text-start">TOTAL</td><td class="text-end">${{ venta.total }}</td></tr>
+        <tr><td class="text-start">Pago</td><td class="text-end text-capitalize">{{ venta.get_tipo_pago_display }}</td></tr>
+        {% if venta.tipo_pago == 'efectivo' %}
+          <tr><td class="text-start">Recibido</td><td class="text-end">${{ venta.recibe_caja }}</td></tr>
+          <tr><td class="text-start">Cambio</td><td class="text-end">${{ venta.cambio }}</td></tr>
+        {% endif %}
+      </table>
+
+      <div class="dashed"></div>
+      <div class="text-center small text-muted">¡Gracias por su compra!</div>
     </div>
   </div>
 </div>
 
-<script>
-  function imprimirTicket() {
-    var ticket = document.querySelector('.card-body');
-    var ventana = window.open('', '_blank');
-    ventana.document.write('<html><head><title>Ticket de venta</title>');
-    ventana.document.write('</head><body>');
-    ventana.document.write('<style>@media print { body { visibility: hidden; } .card { visibility: visible; } }</style>');
-    ventana.document.write(ticket.outerHTML);
-    ventana.document.write('<script>window.print();<\/script>');
-    ventana.document.write('</body></html>');
-    ventana.document.close();
-  }
-</script>
-
+<div class="text-center mt-3 no-print d-flex justify-content-center gap-2 flex-wrap">
+  <button onclick="window.print()" class="btn btn-dark"><i class="bi bi-printer"></i> Imprimir</button>
+  <a href="{% url 'punto_de_venta' %}" class="btn btn-success"><i class="bi bi-plus-circle"></i> Nueva venta</a>
+  <a href="{% url 'ventas_por_caja' %}" class="btn btn-outline-secondary"><i class="bi bi-list-ul"></i> Lista de ventas</a>
+  {% if venta.estado == 'F' and request.user.is_staff %}
+    <form method="post" action="{% url 'anular_venta' venta.id %}" onsubmit="return confirm('¿Anular esta venta? Se reingresará el stock.');" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-danger"><i class="bi bi-x-octagon"></i> Anular venta</button>
+    </form>
+  {% endif %}
+</div>
 {% endblock content %}
