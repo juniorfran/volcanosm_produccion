@@ -1,0 +1,93 @@
+/* ============================================================
+   Volcano SM — capa de mejoras de UI del sitio público
+   Respeta la paleta original (verde #7AB730). Se carga DESPUÉS de style.css.
+   ============================================================ */
+:root { --vsm-primary: #7AB730; --vsm-dark: #527a20; }
+
+body { color: #4b4f56; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4, h5 { font-weight: 700; letter-spacing: -.01em; color: #1f2a16; }
+
+/* ---------- Encabezados de sección ---------- */
+.text-center h6.text-primary { font-weight: 700; }
+.text-center h1, .text-center h3 { position: relative; display: inline-block; padding-bottom: .6rem; }
+.text-center h1::after, .text-center h3::after {
+  content: ""; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+  width: 70px; height: 4px; border-radius: 4px; background: var(--vsm-primary);
+}
+
+/* ---------- Botones ---------- */
+.btn { border-radius: 10px; font-weight: 600; transition: all .2s ease; }
+.btn-primary { background-color: var(--vsm-primary); border-color: var(--vsm-primary); }
+.btn-primary:hover, .btn-primary:focus {
+  background-color: var(--vsm-dark); border-color: var(--vsm-dark);
+  transform: translateY(-2px); box-shadow: 0 8px 18px rgba(122,183,48,.35);
+}
+.btn-outline-primary { color: var(--vsm-primary); border-color: var(--vsm-primary); }
+.btn-outline-primary:hover { background: var(--vsm-primary); border-color: var(--vsm-primary); }
+.btn-square { border-radius: 10px !important; }
+
+/* ---------- Topbar / Navbar ---------- */
+.nav-bar .navbar {
+  border-radius: 0 0 16px 16px; box-shadow: 0 6px 22px rgba(0,0,0,.08) !important;
+  transition: box-shadow .2s;
+}
+.navbar-brand h1 { font-weight: 800; }
+.navbar-nav .nav-link { font-weight: 600; padding: .5rem 1rem !important; border-radius: 8px; transition: color .2s, background .2s; }
+.navbar-nav .nav-link:hover { color: var(--vsm-primary) !important; background: rgba(122,183,48,.08); }
+.navbar-nav .nav-link.active { color: var(--vsm-primary) !important; }
+
+/* ---------- Carrusel principal (alto y encuadre uniforme) ---------- */
+#header-carousel .carousel-item img,
+#header-carousel .carousel-inner img {
+  width: 100% !important; height: 62vh !important; min-height: 360px; object-fit: cover !important;
+}
+#header-carousel .carousel-caption { background: linear-gradient(transparent, rgba(0,0,0,.55)); }
+#header-carousel .carousel-caption h1, .carousel-caption .display-3 {
+  font-weight: 800; text-shadow: 0 2px 14px rgba(0,0,0,.55);
+}
+
+/* ---------- Tarjetas de Tours (destination) ---------- */
+.destination-item {
+  border-radius: 16px; overflow: hidden; box-shadow: 0 6px 20px rgba(20,30,15,.10);
+  transition: transform .25s ease, box-shadow .25s ease; background: #fff;
+}
+.destination-item:hover { transform: translateY(-6px); box-shadow: 0 16px 34px rgba(20,30,15,.18); }
+.destination-item img { width: 100%; height: 260px; object-fit: cover; display: block; transition: transform .5s ease; }
+.destination-item:hover img { transform: scale(1.07); }
+
+/* ---------- Servicios ---------- */
+.service-item {
+  border-radius: 16px; box-shadow: 0 6px 20px rgba(20,30,15,.07);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.service-item:hover { transform: translateY(-6px); box-shadow: 0 16px 34px rgba(20,30,15,.13); }
+.service-item i { color: var(--vsm-primary); }
+.service-item img { height: 110px; width: auto; object-fit: contain; margin: 0 auto; }
+
+/* ---------- Equipo ---------- */
+.team-item { border-radius: 16px; overflow: hidden; box-shadow: 0 6px 20px rgba(20,30,15,.10); transition: transform .25s ease, box-shadow .25s ease; }
+.team-item:hover { transform: translateY(-6px); box-shadow: 0 16px 34px rgba(20,30,15,.16); }
+.team-img { overflow: hidden; }
+.team-img img { height: 320px; object-fit: cover; transition: transform .5s ease; }
+.team-item:hover .team-img img { transform: scale(1.06); }
+
+/* ---------- Tarjetas genéricas / cabañas / camping ---------- */
+.card { border: 0; border-radius: 16px; box-shadow: 0 6px 20px rgba(20,30,15,.08); overflow: hidden; }
+.card img, .card-img-top { object-fit: cover; }
+
+/* ---------- Footer ---------- */
+.footer-newsletter .input-group input, .input-group .form-control { border-radius: 10px 0 0 10px; }
+.input-group .btn { border-radius: 0 10px 10px 0; }
+
+/* ---------- Botón back-to-top ---------- */
+.back-to-top { border-radius: 12px; box-shadow: 0 6px 16px rgba(0,0,0,.2); }
+
+/* ---------- Respiro de secciones en móvil ---------- */
+@media (max-width: 767.98px) {
+  .container-fluid.py-5, .container-fluid.py-6 { padding-top: 2.5rem !important; padding-bottom: 2.5rem !important; }
+  #header-carousel .carousel-item img { height: 46vh !important; min-height: 260px; }
+  .destination-item img { height: 220px; }
+}
+
+/* Formularios (reserva/contacto) más limpios */
+.form-control { border-radius: 10px; }
