@@ -21,11 +21,10 @@ try:
     latest_config = wompi_config.objects.latest('created_at')
     Client_id = latest_config.client_id
     Client_secret = latest_config.client_secret
-except wompi_config.DoesNotExist:
+except Exception:
     latest_config = None
     Client_id = None
     Client_secret = None
-    # Puedes asignar valores predeterminados aquí si es necesario.
 
 @login_required
 def index_utilidades(request):

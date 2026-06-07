@@ -8,28 +8,16 @@ from datetime import datetime, timedelta
 # Create your views here.
 from Configuraciones.models import wompi_config
 
+# Credenciales Wompi cargadas de forma segura: NO debe romper el arranque si
+# la BD no está disponible o la tabla aún no existe (migraciones / dev local).
 try:
     latest_config = wompi_config.objects.latest('created_at')
     Client_id = latest_config.client_id
     Client_secret = latest_config.client_secret
-except wompi_config.DoesNotExist:
+except Exception:
     latest_config = None
     Client_id = None
     Client_secret = None
-    # Puedes asignar valores predeterminados aquí si es necesario.
-
-# Autenticarse y obtener el token
-access_token = authenticate_wompi(Client_id, Client_secret)
-
-if access_token:
-    # Hacer una consulta utilizando el token
-    consulta_result = make_wompi_get_request("EnlacePago", access_token)
-
-    if consulta_result:
-        print("Consulta exitosa:")
-        #imprimir el resultado de la consulta como diccionario ordenado
-        #print("\n".join([f"{k}: {v}" for k, v in sorted(consulta_result.items())]))
-        #print(consulta_result)
 
 
 def consultar_enlace_pago(enlace_pago_id, client_id, client_secret):
@@ -51,8 +39,4 @@ def consultar_enlace_pago(enlace_pago_id, client_id, client_secret):
     else:
         print("Error al obtener información del enlace de pago.")
 
-# ID del enlace de pago que deseas consultar
-enlace_pago_id = "1072404"
-
-# Llamar a la función para realizar la consulta del enlace de pago
-consultar_enlace_pago(enlace_pago_id, Client_id, Client_secret)
+# (Eliminada la llamada de prueba a nivel de módulo que hacía red al importar.)

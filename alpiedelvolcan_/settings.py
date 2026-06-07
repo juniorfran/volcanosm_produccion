@@ -348,3 +348,12 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = "/app/media"
 
+
+# Override local para desarrollo (no versionado). Si existe
+# alpiedelvolcan_/local_settings.py, sus valores sobrescriben lo anterior
+# (p. ej. usar SQLite o un MySQL/MariaDB local, DEBUG, rutas, etc.).
+try:
+    from .local_settings import *  # noqa: F401,F403
+except ImportError:
+    pass
+
