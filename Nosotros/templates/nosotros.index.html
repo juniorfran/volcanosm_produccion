@@ -5,12 +5,21 @@
 
   {% include "direccionamiento.html" %}
 
-  <!-- Hero de página -->
-  <section class="vsm-pagehero vsm-bleed">
+  <!-- Hero de página (con imagen, estilo inicio) -->
+  <section class="vsm-pagehero vsm-pagehero--img vsm-bleed"{% if nosotros.imagen_url %} style="background-image:url('{{ nosotros.imagen_url }}');"{% endif %}>
     <div class="vsm-pagehero__in">
       <span class="vsm-eyebrow">Nosotros</span>
       <h1>{{ nosotros.titulo|default:"Sobre Volcano SM" }}</h1>
-      <p>{{ nosotros.subtitulo }}</p>
+      <p>{{ nosotros.subtitulo|default:"Turismo de aventura en el Volcán de San Miguel" }}</p>
+      <div class="vsm-pagehero__cta">
+        <a href="{% url 'tours' %}" class="btn btn-primary">Ver tours</a>
+        <a href="{% url 'contacto' %}" class="btn btn-light">Contáctanos</a>
+      </div>
+      <div class="vsm-pagehero__stats">
+        <div><div class="n">+5</div><div class="l">Años de experiencia</div></div>
+        <div><div class="n">100%</div><div class="l">Guías certificados</div></div>
+        <div><div class="n">★ 4.9</div><div class="l">Valoración</div></div>
+      </div>
     </div>
   </section>
 
@@ -19,38 +28,35 @@
     <div class="vsm-wrap">
       <div class="row align-items-center g-5">
         <div class="col-lg-6">
-          <div class="vsm-detail-img" style="min-height:420px;">
-            {% if nosotros.imagen_url %}
-              <img src="{{ nosotros.imagen_url }}" alt="{{ nosotros.titulo|default:'Volcano SM' }}">
-            {% endif %}
+          <div class="row g-3">
+            <div class="col-7">
+              <div class="vsm-detail-img" style="height:340px;">
+                {% if nosotros.imagen_pequena_1_url %}<img src="{{ nosotros.imagen_pequena_1_url }}" alt="Volcano SM">
+                {% elif nosotros.imagen_url %}<img src="{{ nosotros.imagen_url }}" alt="Volcano SM">{% endif %}
+              </div>
+            </div>
+            <div class="col-5">
+              <div class="vsm-detail-img" style="height:340px;">
+                {% if nosotros.imagen_pequena_2_url %}<img src="{{ nosotros.imagen_pequena_2_url }}" alt="Volcano SM">
+                {% elif nosotros.imagen_url %}<img src="{{ nosotros.imagen_url }}" alt="Volcano SM">{% endif %}
+              </div>
+            </div>
           </div>
         </div>
         <div class="col-lg-6">
-          {% if nosotros.subtitulo %}<span class="vsm-eyebrow">{{ nosotros.subtitulo }}</span>{% endif %}
+          <span class="vsm-eyebrow">Quiénes somos</span>
           <h2 class="mb-3">{{ nosotros.titulo|default:"Sobre Volcano SM" }}</h2>
           <div class="mb-4" style="color:var(--muted);">{{ nosotros.descripcion|safe }}</div>
-
-          {% if nosotros.imagen_pequena_1_url or nosotros.imagen_pequena_2_url %}
           <div class="row g-3 mb-4">
-            {% if nosotros.imagen_pequena_1_url %}
-            <div class="col-6">
-              <div class="vsm-detail-img" style="height:180px;">
-                <img src="{{ nosotros.imagen_pequena_1_url }}" alt="Volcano SM">
-              </div>
-            </div>
-            {% endif %}
-            {% if nosotros.imagen_pequena_2_url %}
-            <div class="col-6">
-              <div class="vsm-detail-img" style="height:180px;">
-                <img src="{{ nosotros.imagen_pequena_2_url }}" alt="Volcano SM">
-              </div>
-            </div>
-            {% endif %}
+            <div class="col-sm-6"><div class="d-flex align-items-center"><i class="fa fa-mountain text-primary me-2" style="font-size:1.25rem;"></i><span>Tours al cráter</span></div></div>
+            <div class="col-sm-6"><div class="d-flex align-items-center"><i class="fa fa-campground text-primary me-2" style="font-size:1.25rem;"></i><span>Camping equipado</span></div></div>
+            <div class="col-sm-6"><div class="d-flex align-items-center"><i class="fa fa-leaf text-primary me-2" style="font-size:1.25rem;"></i><span>Turismo responsable</span></div></div>
+            <div class="col-sm-6"><div class="d-flex align-items-center"><i class="fa fa-shield-alt text-primary me-2" style="font-size:1.25rem;"></i><span>Guías certificados</span></div></div>
           </div>
-          {% endif %}
-
           {% if nosotros.url_boton and nosotros.texto_boton %}
             <a href="{{ nosotros.url_boton }}" class="btn btn-primary">{{ nosotros.texto_boton }}</a>
+          {% else %}
+            <a href="{% url 'tours' %}" class="btn btn-primary">Ver nuestros tours</a>
           {% endif %}
         </div>
       </div>

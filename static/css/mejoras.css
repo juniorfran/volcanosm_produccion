@@ -223,6 +223,15 @@ body{ overflow-x:hidden; }
 .vsm-crumbs a{ color:#fff; text-decoration:none; }
 .vsm-crumbs a:hover{ text-decoration:underline; }
 
+/* Variante de encabezado con imagen de fondo (estilo hero del inicio) */
+.vsm-pagehero--img{ padding:7rem 0 5.5rem; background-size:cover; background-position:center; }
+.vsm-pagehero--img::before{ content:""; position:absolute; inset:0; z-index:1; background:linear-gradient(120deg,rgba(8,20,6,.84),rgba(8,20,6,.45) 60%,rgba(8,20,6,.30)); }
+.vsm-pagehero--img .vsm-pagehero__in{ z-index:2; }
+.vsm-pagehero__cta{ display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-top:1.6rem; }
+.vsm-pagehero__stats{ display:flex; gap:2.8rem; justify-content:center; flex-wrap:wrap; margin-top:2rem; }
+.vsm-pagehero__stats .n{ font-size:1.95rem; font-weight:800; color:#fff; line-height:1; }
+.vsm-pagehero__stats .l{ font-size:.82rem; color:#cfe0c4; }
+
 /* Pricing / planes */
 .vsm-price{ background:#fff; border:1px solid var(--line); border-radius:var(--r); padding:2rem 1.5rem; text-align:center; box-shadow:var(--shadow-sm); transition:transform .25s,box-shadow .25s,border-color .25s; height:100%; }
 .vsm-price:hover{ transform:translateY(-8px); box-shadow:var(--shadow); border-color:var(--green); }
