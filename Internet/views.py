@@ -194,10 +194,10 @@ def get_wompi_headers(access_token):
 
 def servicio_inter_index(request):
     
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
-    data_contact = Contacts.objects.latest()
+    barra_principal = Barra_Principal.objects.order_by('-fecha_creacion').first()
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first()
     urls_info = Urls_info.objects.all()
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first()
     urls_interes = Urls_interes.objects.all()
     
     #obtener fecha actual
@@ -263,10 +263,10 @@ def transaccion3ds_compra_acceso(request, tipo_acceso_id):
     # Autenticarse y obtener el token
     access_token = authenticate_wompi(Client_id, Client_secret)
 
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
-    data_contact = Contacts.objects.latest()
+    barra_principal = Barra_Principal.objects.order_by('-fecha_creacion').first()
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first()
     urls_info = Urls_info.objects.all()
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first()
     urls_interes = Urls_interes.objects.all()
     
     tipo_acceso = get_object_or_404(Tipos, id=tipo_acceso_id)
@@ -380,10 +380,10 @@ def transaccion3ds_compra_acceso(request, tipo_acceso_id):
     
 # Nueva vista para mostrar el mensaje de éxito
 def transaccion3ds_exitosa(request, transaccion3ds_id):
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
-    data_contact = Contacts.objects.latest()
+    barra_principal = Barra_Principal.objects.order_by('-fecha_creacion').first()
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first()
     urls_info = Urls_info.objects.all()
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first()
     urls_interes = Urls_interes.objects.all()
     
     transaccion3ds_compra = get_object_or_404(TransaccionCompra3DS, pk=transaccion3ds_id)
@@ -418,10 +418,10 @@ def transaccion3ds_exitosa(request, transaccion3ds_id):
 
 
 def transaccion3ds_fallida(request):
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
-    data_contact = Contacts.objects.latest()
+    barra_principal = Barra_Principal.objects.order_by('-fecha_creacion').first()
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first()
     urls_info = Urls_info.objects.all()
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first()
     urls_interes = Urls_interes.objects.all()
     
    
@@ -484,10 +484,10 @@ def comprar_acceso(request, tipo_acceso_id):
     # Autenticarse y obtener el token
     access_token = authenticate_wompi(Client_id, Client_secret)
 
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
-    data_contact = Contacts.objects.latest()
+    barra_principal = Barra_Principal.objects.order_by('-fecha_creacion').first()
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first()
     urls_info = Urls_info.objects.all()
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first()
     urls_interes = Urls_interes.objects.all()
     
     tipo_acceso = get_object_or_404(Tipos, pk=tipo_acceso_id)
@@ -599,10 +599,10 @@ def comprar_acceso(request, tipo_acceso_id):
 
 def transaccion_exitosa(request, transaccion_id):
     # Obtener datos necesarios
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
-    data_contact = Contacts.objects.latest()
+    barra_principal = Barra_Principal.objects.order_by('-fecha_creacion').first()
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first()
     urls_info = Urls_info.objects.all()
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first()
     urls_interes = Urls_interes.objects.all()
     
     transaccion_compra = get_object_or_404(TransaccionCompra, pk=transaccion_id)

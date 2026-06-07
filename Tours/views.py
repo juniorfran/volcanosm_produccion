@@ -138,12 +138,12 @@ def tours_index(request):
     # Datos globales
     titulo = "Nuestros Tours"
     direccion_actual = "tours"
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
-    data_contact = Contacts.objects.latest()
+    barra_principal = Barra_Principal.objects.order_by('-fecha_creacion').first()
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first()
     urls_info = Urls_info.objects.all()
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first()
     urls_interes = Urls_interes.objects.all()
-    conf_direccionamiento = Direccionamiento.objects.latest('fecha_creacion')
+    conf_direccionamiento = Direccionamiento.objects.order_by('-fecha_creacion').first()
     servicio = Servicios.objects.first()
 
     # Imagen header opcional
@@ -180,14 +180,14 @@ def tours_index(request):
     return render(request, 'show_tours.html', context)
 
 def tour_detail(request, tour_id):
-    tour = Tour.objects.get(pk=tour_id)
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
+    tour = get_object_or_404(Tour, pk=tour_id)
+    barra_principal = Barra_Principal.objects.order_by('-fecha_creacion').first()
     resenas = Resena.objects.filter(tour=tour)
-    data_contact = Contacts.objects.latest()
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first()
     urls_info = Urls_info.objects.all()
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first()
     urls_interes = Urls_interes.objects.all()
-    conf_direccionamiento = Direccionamiento.objects.latest('fecha_creacion')
+    conf_direccionamiento = Direccionamiento.objects.order_by('-fecha_creacion').first()
 
     # Crear una lista con todas las imágenes relacionadas, incluida la principal
     imagenes = [tour.url_azure] + [getattr(imagen_tour, f'url_azure_{i}') for i in range(1, 5) for imagen_tour in ImagenTour.objects.filter(tour=tour)]
@@ -328,10 +328,10 @@ def reservar_tour(request, tour_id):
     tour = get_object_or_404(Tour, pk=tour_id)
     tipo_document = Reserva.DOCUMENTOS_VALIDOS
 
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
-    data_contact = Contacts.objects.latest()
+    barra_principal = Barra_Principal.objects.order_by('-fecha_creacion').first()
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first()
     urls_info = Urls_info.objects.all()
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first()
     urls_interes = Urls_interes.objects.all()
 
     if request.method == 'POST':
@@ -412,10 +412,10 @@ def reserva_exitosa(request, reserva_id):
     print("ID de Enlace:", enlace_pago.idEnlace if enlace_pago else "No hay ID")
 
     # Obtener otros datos necesarios para la plantilla
-    data_contact = Contacts.objects.latest()
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first()
+    barra_principal = Barra_Principal.objects.order_by('-fecha_creacion').first()
     urls_info = Urls_info.objects.all()
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first()
     urls_interes = Urls_interes.objects.all()
 
     context = {

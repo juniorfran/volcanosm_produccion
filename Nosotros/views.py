@@ -13,9 +13,9 @@ def nosotros_index(request):
     
     services = Services_Bar.objects.filter(services_visible=True)  # Filtra los servicios visibles y Obtener todos los services bar
     teams_bar = Team_bar.objects.all().order_by("id") #obetner todos los teams
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion') # Obtén la última descripción general
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion') # obtener la barra principal
-    data_contact = Contacts.objects.latest() #obtener todos los datos de contacto
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first() # Obtén la última descripción general
+    barra_principal = Barra_Principal.objects.order_by('-fecha_creacion').first() # obtener la barra principal
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first() #obtener todos los datos de contacto
     urls_info = Urls_info.objects.all() #obtener todas las url de informacion
     urls_interes = Urls_interes.objects.all() #urls de interes
     
@@ -26,7 +26,7 @@ def nosotros_index(request):
         email = request.POST.get('email')
         telefono = request.POST.get('telefono')
         solicitud = Solicitud_Oferta.objects.create(nombre=nombre, email=email, telefono=telefono) # Crear una nueva solicitud de oferta
-        ultima_oferta = Nosotros_Oferta.objects.latest('fecha_creacion') # Obtener la última oferta registrada
+        ultima_oferta = Nosotros_Oferta.objects.order_by('-fecha_creacion').first() # Obtener la última oferta registrada
         solicitud.oferta_relacionada = ultima_oferta # Relacionar la solicitud con la última oferta
         solicitud.save()
 
@@ -38,10 +38,10 @@ def nosotros_index(request):
     nosotros = Nosotros.objects.first()
     servicios = Nosotros_Servicios.objects.all().order_by('-fecha_creacion')[:4] # Obtener los últimos 4 servicios
     
-    ultima_oferta = Nosotros_Oferta.objects.latest('fecha_creacion') # Obtener la última oferta registrada
+    ultima_oferta = Nosotros_Oferta.objects.order_by('-fecha_creacion').first() # Obtener la última oferta registrada
     # try:
     #     # Intenta obtener la última oferta registrada
-    #     ultima_oferta = Nosotros_Oferta.objects.latest('fecha_creacion')
+    #     ultima_oferta = Nosotros_Oferta.objects.order_by('-fecha_creacion').first()
     # except Nosotros_Oferta.DoesNotExist:
     #     # Maneja la excepción si no hay ninguna oferta registrada
     #     raise Http404("No hay ofertas registradas en este momento.")
@@ -51,7 +51,7 @@ def nosotros_index(request):
     titulo = "Nosotros"
     direccion_actual = "nosotros"
     
-    conf_direccionamiento = Direccionamiento.objects.latest('fecha_creacion')
+    conf_direccionamiento = Direccionamiento.objects.order_by('-fecha_creacion').first()
     
     
     context={
@@ -78,20 +78,20 @@ def nosotros_index(request):
 
 def mostrar_ultimos_terminos(request):
      
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion') # Obtén la última descripción general
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion') # obtener la barra principal
-    data_contact = Contacts.objects.latest() #obtener todos los datos de contacto
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first() # Obtén la última descripción general
+    barra_principal = Barra_Principal.objects.order_by('-fecha_creacion').first() # obtener la barra principal
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first() #obtener todos los datos de contacto
     urls_info = Urls_info.objects.all() #obtener todas las url de informacion
     urls_interes = Urls_interes.objects.all() #urls de interes
     
     titulo = "Terminos y Condiciones"
     direccion_actual = "Terminos y Condiciones"
     
-    conf_direccionamiento = Direccionamiento.objects.latest('fecha_creacion')
+    conf_direccionamiento = Direccionamiento.objects.order_by('-fecha_creacion').first()
     
     
     # Obtenemos el último registro de Generalidades
-    ultimo_termino = Generalidades.objects.latest('fecha_creacion')
+    ultimo_termino = Generalidades.objects.order_by('-fecha_creacion').first()
     
     context={
         'titulo':titulo,
@@ -109,20 +109,20 @@ def mostrar_ultimos_terminos(request):
 
 def politicas_mision_vision(request):
      
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion') # Obtén la última descripción general
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion') # obtener la barra principal
-    data_contact = Contacts.objects.latest() #obtener todos los datos de contacto
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first() # Obtén la última descripción general
+    barra_principal = Barra_Principal.objects.order_by('-fecha_creacion').first() # obtener la barra principal
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first() #obtener todos los datos de contacto
     urls_info = Urls_info.objects.all() #obtener todas las url de informacion
     urls_interes = Urls_interes.objects.all() #urls de interes
     
     titulo = "Politicas, Visión y Misión"
     direccion_actual = "Politicas, Visión y Misión"
     
-    conf_direccionamiento = Direccionamiento.objects.latest('fecha_creacion')
+    conf_direccionamiento = Direccionamiento.objects.order_by('-fecha_creacion').first()
     
     
     # Obtenemos el último registro de Generalidades
-    generalidades = Generalidades.objects.latest('fecha_creacion')
+    generalidades = Generalidades.objects.order_by('-fecha_creacion').first()
     
     context={
         'titulo':titulo,

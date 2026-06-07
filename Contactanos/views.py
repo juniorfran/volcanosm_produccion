@@ -43,12 +43,12 @@ def verificar_recaptcha(token, accion, ip):
 def contacto(request):
     # ---- datos comunes para el template
     tours = Tour.objects.all().order_by("-tipo_tour")
-    barra_principal = Barra_Principal.objects.latest("fecha_creacion")
-    data_contact = Contacts.objects.latest()
+    barra_principal = Barra_Principal.objects.order_by('-fecha_creacion').first()
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first()
     urls_info = Urls_info.objects.all()
-    ultima_descripcion = General_Description.objects.latest("fecha_creacion")
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first()
     urls_interes = Urls_interes.objects.all()
-    conf_direccionamiento = Direccionamiento.objects.latest("fecha_creacion")
+    conf_direccionamiento = Direccionamiento.objects.order_by('-fecha_creacion').first()
 
     if request.method == "POST":
         # --- anti-spam: honeypot

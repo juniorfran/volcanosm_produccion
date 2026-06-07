@@ -9,7 +9,7 @@ def index(request):
     tours = Tour.objects.all()
     
     #obtener la barra principal
-    barra_principal = Barra_Principal.objects.latest('fecha_creacion')
+    barra_principal = Barra_Principal.objects.order_by('-fecha_creacion').first()
     
     #obtener todos los carrusel de incio
     carrusel_incio = CarruselInicio.objects.all()
@@ -21,18 +21,18 @@ def index(request):
     teams_bar = Team_bar.objects.all().order_by("id")
     
     #obtener todos los datos de contacto
-    data_contact = Contacts.objects.latest()
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first()
     
     #obtener todas las url de informacion
     urls_info = Urls_info.objects.all()
     
     # Obtén la última descripción general
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion')
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first()
 
     #urls de interes
     urls_interes = Urls_interes.objects.all()
     
-    conf_direccionamiento = Direccionamiento.objects.latest('fecha_creacion')
+    conf_direccionamiento = Direccionamiento.objects.order_by('-fecha_creacion').first()
     
         # Verificar la disponibilidad de cada tour
             # Obtener la fecha actual
@@ -65,9 +65,9 @@ def index(request):
 def footer(request):
     
     
-    data_contact = Contacts.objects.latest()#obtener todos los datos de contacto
+    data_contact = Contacts.objects.order_by('-fecha_creacion').first()#obtener todos los datos de contacto
     urls_info = Urls_info.objects.all() #obtener todas las url de informacion
-    ultima_descripcion = General_Description.objects.latest('fecha_creacion') # Obtén la última descripción general
+    ultima_descripcion = General_Description.objects.order_by('-fecha_creacion').first() # Obtén la última descripción general
     urls_interes = Urls_interes.objects.all() #urls de interes
     
     context={

@@ -61,11 +61,11 @@ class Direccionamiento(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
-        # Conexión al servicio Blob de Azure
-        blob_service_client = BlobServiceClient.from_connection_string(settings.AZURE_CONNECTION_STRING)
-        container_client = blob_service_client.get_container_client(settings.AZURE_CONTAINER_NAME)
-
         if self.imagen:
+            # Conexión al servicio Blob de Azure (solo si hay imagen que subir)
+            blob_service_client = BlobServiceClient.from_connection_string(settings.AZURE_CONNECTION_STRING)
+            container_client = blob_service_client.get_container_client(settings.AZURE_CONTAINER_NAME)
+
             fecha_actual = timezone.now()
             ruta_carpeta = f"tours/{fecha_actual.year}/{fecha_actual.month}/{fecha_actual.day}/"
             blob_name = f"{self.id}_imagen_{os.path.basename(self.imagen.name)}"
@@ -76,8 +76,8 @@ class Direccionamiento(models.Model):
                 with open(self.imagen.path, "rb") as data:
                     blob_client.upload_blob(data, content_settings=ContentSettings(content_disposition=None, content_type="image/jpeg"))
                 self.url_azure = blob_client.url
-    
-        super().save(*args, **kwargs)
+            # Persistir solo la url_azure recién calculada, sin reinsertar la fila.
+            super().save(update_fields=["url_azure"])
         
     def obtener_imagen_principal(self):
         return self.url_azure
