@@ -119,3 +119,8 @@
 }
 .tpv-quick:hover{ transform:translateY(-3px); box-shadow:0 10px 22px rgba(20,30,50,.13); color:#0d6efd; }
 .tpv-quick .bi{ font-size:2rem; color:#0d6efd; }
+
+/* Sesión en el sidebar */
+.sidebar-session{ border-top:1px solid rgba(255,255,255,.08); padding-top:.9rem; margin-top:.5rem; }
+.sidebar-user{ color:#d4dbe3; font-weight:600; font-size:.9rem; }
+.sidebar-user .bi{ font-size:1.35rem; color:#ffc107; }

@@ -108,6 +108,22 @@
                 </li>
             </ul>
     
+            <div class="sidebar-session px-3 mb-3">
+                {% if user.is_authenticated %}
+                    <div class="d-flex align-items-center gap-2 mb-2 sidebar-user">
+                        <i class="bi bi-person-circle"></i>
+                        <span>{{ user.get_username }}</span>
+                    </div>
+                    <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-light w-100">
+                        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-sm btn-outline-light w-100">
+                        <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
+                    </a>
+                {% endif %}
+            </div>
+
             <div class="footer">
                 <p>
                     Copyright &copy;<script>document.write(new Date().getFullYear());</script>
@@ -118,84 +134,6 @@
     
         <!-- Page Content  -->
         <div id="content" class="p-4 p-md-5">
-    
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <div class="container-fluid">
-    
-                    <button type="button" id="sidebarCollapse" class="btn btn-primary d-none">
-                        <i class="fa fa-bars"></i>
-                        <span class="sr-only">Toggle Menu</span>
-                    </button>
-    
-                    <div class=" navbar-nav collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="nav navbar-nav mr-auto">
-                            {% if is_logged_in %}
-                                <!-- Menús del lado izquierdo -->
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'utilidades:mikrotik_status' %}">Estado</a>
-                                </li>
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Configuraciones</a>
-                                    <ul class="dropdown-menu dropdown-menu-dark">
-                                        <li><a class="dropdown-item" href="{% url 'utilidades:create_mikrotik_config' %}">Acceso</a></li>
-                                        <li><a class="dropdown-item" href="#">Detalles</a></li>
-                                        <li><a class="dropdown-item" href="#">Portal Cautivo</a></li>
-                                    </ul>
-                                </li>
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Seguridad</a>
-                                    <ul class="dropdown-menu dropdown-menu-dark">
-                                        <li><a class="dropdown-item" href="#">Firewall</a></li>
-                                        <li><a class="dropdown-item" href="#">PPP0E</a></li>
-                                        <li><a class="dropdown-item" href="#">VPN</a></li>
-                                        <li><a class="dropdown-item" href="#">SMB</a></li>
-                                        <li><a class="dropdown-item" href="#">Rutes</a></li>
-                                        <li><a class="dropdown-item" href="#">POOL</a></li>
-                                        <li><a class="dropdown-item" href="#">UPnP</a></li>
-                                        <li><a class="dropdown-item" href="#">Web Proxy</a></li>
-                                    </ul>
-                                </li>
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Hostpot</a>
-                                    <ul class="dropdown-menu dropdown-menu-dark">
-                                        <li><a class="dropdown-item" href="#">Estatus</a></li>
-                                        <li><a class="dropdown-item" href="{% url 'utilidades:create_hotspot_user' %}">Usuarios</a></li>
-                                        <li><a class="dropdown-item" href="{% url 'utilidades:create_hotspot_user_profile' %}">Perfiles de Usuarios</a></li>
-                                    </ul>
-                                </li>
-
-                            {% endif %}
-                        </ul>
-                        <ul class="nav navbar-nav ml-auto">
-                            <li class="nav-item active">
-                                <a class="nav-link" href="{% url 'utilidades:utilidades' %}">Inicio <span class="sr-only">(current)</span></a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link active" href="{% url 'utilidades:detalle' %}">
-                                    Consultar Reserva
-                                </a>
-                            </li>
-                            {% comment %} <li class="nav-item">
-                                <a class="nav-link active" href="{% url 'procesar_pago' %}">
-                                    PRUEBA DE PAGO 3Ds
-                                </a>
-                            </li> {% endcomment %}
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Perfil
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-                                    <!-- Información del perfil -->
-                                    <a class="dropdown-item" href="#">Mi perfil</a>
-                                    <div class="dropdown-divider"></div>
-                                    <!-- Botón para cerrar sesión -->
-                                    <a class="dropdown-item" href="{% url 'logout' %}">Cerrar sesión</a>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
     
             <!-- Contenido principal -->
             <main role="main" class="col-md-9 col-lg-10 px-md-1">
