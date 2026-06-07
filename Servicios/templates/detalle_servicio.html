@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+  .vsm-detail-grid{ display:grid; grid-template-columns:1.15fr .85fr; gap:2rem; align-items:start; }
+  .vsm-gallery__main{ border-radius:var(--r); overflow:hidden; box-shadow:var(--shadow); aspect-ratio:16/10; }
+  .vsm-gallery__main img{ width:100%; height:100%; object-fit:cover; }
+  .vsm-gallery__thumbs{ display:grid; grid-template-columns:repeat(4,1fr); gap:.7rem; margin-top:.8rem; }
+  .vsm-gallery__thumbs button{ padding:0; border:2px solid transparent; border-radius:var(--r-sm); overflow:hidden; background:none; cursor:pointer; aspect-ratio:1/1; transition:border-color .2s; }
+  .vsm-gallery__thumbs button.active,.vsm-gallery__thumbs button:hover{ border-color:var(--green); }
+  .vsm-gallery__thumbs img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .vsm-detail-info{ background:#fff; border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow-sm); padding:2rem; position:sticky; top:90px; }
+  .vsm-detail-info .vsm-tour__badge{ position:static; display:inline-block; margin-bottom:.8rem; }
+  .vsm-detail-info h2{ font-size:1.6rem; margin:0 0 1rem; }
+  .vsm-detail-info .desc{ color:var(--body); line-height:1.7; }
+  .vsm-detail-info .desc :is(h1,h2,h3){ font-size:1.1rem; margin:1rem 0 .4rem; }
+  .vsm-detail-actions{ display:flex; gap:.7rem; flex-wrap:wrap; margin-top:1.6rem; }
+  @media (max-width:991.98px){ .vsm-detail-grid{ grid-template-columns:1fr; } .vsm-detail-info{ position:static; } }
+</style>
+
+<!-- ====== Encabezado de página ====== -->
+<section class="vsm-pagehero vsm-bleed">
+  <div class="vsm-pagehero__in">
+    <span class="vsm-eyebrow">Servicios</span>
+    <h1>{{ servicio.nombre|default:"Detalle del servicio" }}</h1>
+    {% if servicio.tipo %}<p>{{ servicio.tipo }}</p>{% endif %}
+    <div class="vsm-crumbs">
+      <a href="{% url 'index' %}">Inicio</a> /
+      <a href="{% url 'servicios' %}">Servicios</a> / {{ servicio.nombre }}
+    </div>
+  </div>
+</section>
+
+<!-- ====== Detalle del servicio ====== -->
+<section class="vsm-section vsm-bleed">
+  <div class="vsm-wrap">
+    <div class="vsm-detail-grid">
+
+      <!-- Galería -->
+      <div class="vsm-gallery">
+        <div class="vsm-gallery__main">
+          <img id="vsmMainImg" src="{{ servicio.url_azure }}" alt="{{ servicio.nombre }}">
+        </div>
+
+        {% with imgs=servicio.imagenes.all %}
+          {% if imgs %}
+            <div class="vsm-gallery__thumbs">
+              <button type="button" class="active" data-src="{{ servicio.url_azure }}">
+                <img src="{{ servicio.url_azure }}" alt="{{ servicio.nombre }}" loading="lazy">
+              </button>
+              {% for grupo in imgs %}
+                {% if grupo.url_azure_1 %}<button type="button" data-src="{{ grupo.url_azure_1 }}"><img src="{{ grupo.url_azure_1 }}" alt="{{ servicio.nombre }}" loading="lazy"></button>{% endif %}
+                {% if grupo.url_azure_2 %}<button type="button" data-src="{{ grupo.url_azure_2 }}"><img src="{{ grupo.url_azure_2 }}" alt="{{ servicio.nombre }}" loading="lazy"></button>{% endif %}
+                {% if grupo.url_azure_3 %}<button type="button" data-src="{{ grupo.url_azure_3 }}"><img src="{{ grupo.url_azure_3 }}" alt="{{ servicio.nombre }}" loading="lazy"></button>{% endif %}
+                {% if grupo.url_azure_4 %}<button type="button" data-src="{{ grupo.url_azure_4 }}"><img src="{{ grupo.url_azure_4 }}" alt="{{ servicio.nombre }}" loading="lazy"></button>{% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      <!-- Información -->
+      <aside class="vsm-detail-info">
+        {% if servicio.tipo %}<span class="vsm-tour__badge">{{ servicio.tipo }}</span>{% endif %}
+        <h2>{{ servicio.nombre }}</h2>
+
+        {% if servicio.descripcion %}
+          <div class="desc">{{ servicio.descripcion|safe }}</div>
+        {% else %}
+          <p class="text-muted">Aún no hay una descripción disponible para este servicio.</p>
+        {% endif %}
+
+        <div class="vsm-detail-actions">
+          <a href="{% url 'contacto' %}" class="btn btn-primary">Contáctanos</a>
+          <a href="{% url 'servicios' %}" class="btn btn-outline-primary">Ver más servicios</a>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</section>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+  // Galería: cambiar la imagen principal al hacer clic en una miniatura
+  (function(){
+    var main = document.getElementById('vsmMainImg');
+    var thumbs = document.querySelectorAll('.vsm-gallery__thumbs button');
+    if(!main || !thumbs.length) return;
+    Array.prototype.forEach.call(thumbs, function(btn){
+      btn.addEventListener('click', function(){
+        var src = this.getAttribute('data-src');
+        if(!src) return;
+        main.src = src;
+        Array.prototype.forEach.call(thumbs, function(b){ b.classList.remove('active'); });
+        this.classList.add('active');
+      });
+    });
+  })();
+</script>
+{% endblock extra_js %}

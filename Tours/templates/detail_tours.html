@@ -11,12 +11,12 @@
   .ratio-img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;object-position:center;}
 
   /* Miniaturas uniformes */
-  .thumb{width:78px;height:78px;object-fit:cover;object-position:center;cursor:pointer;}
-  .thumb.active{box-shadow:0 0 0 2px #007bff inset;}
+  .thumb{width:78px;height:78px;object-fit:cover;object-position:center;cursor:pointer;border-radius:10px;}
+  .thumb.active{box-shadow:0 0 0 2px var(--green) inset;}
 
   /* Sticky CTA */
   @media (min-width: 992px){
-    .sticky-cta{position:sticky;top:80px;}
+    .sticky-cta{position:sticky;top:90px;}
   }
 
   /* Modal zoom */
@@ -25,16 +25,21 @@
 
   .media .avatar{
     width:40px;height:40px;border-radius:50%;
-    background:#6c757d;color:#fff;display:flex;align-items:center;justify-content:center;
+    background:var(--green-d);color:#fff;display:flex;align-items:center;justify-content:center;
   }
+
+  .detail-price{ display:flex; align-items:flex-end; gap:2rem; }
+  .detail-price .amt{ font-size:2rem; font-weight:800; color:var(--green-d); line-height:1; }
+  .detail-price .amt small{ font-size:.85rem; color:var(--muted); font-weight:600; }
 </style>
 
-<div class="container py-4">
-  <div class="d-flex align-items-center justify-content-between flex-wrap">
-    <h1 class="h3 mb-2 mb-sm-0">{{ tour.titulo }}</h1>
-
+<!-- ===== Encabezado de página ===== -->
+<section class="vsm-pagehero vsm-bleed">
+  <div class="vsm-pagehero__in">
+    <span class="vsm-eyebrow">Tour</span>
+    <h1>{{ tour.titulo }}</h1>
     {% if tour.promedio_estrellas and tour.cantidad_resenas %}
-      <div class="text-right small">
+      <p>
         <span class="text-warning">
           {% for i in "12345" %}
             {% if forloop.counter <= tour.promedio_estrellas|floatformat:0 %}
@@ -44,171 +49,177 @@
             {% endif %}
           {% endfor %}
         </span>
-        <span class="text-muted">({{ tour.cantidad_resenas }} reseñas)</span>
-      </div>
+        <span class="ml-1">({{ tour.cantidad_resenas }} reseñas)</span>
+      </p>
     {% endif %}
+    <div class="vsm-crumbs"><a href="{% url 'index' %}">Inicio</a> / <a href="{% url 'tours' %}">Tours</a> / {{ tour.titulo }}</div>
   </div>
+</section>
 
-  <hr>
+<!-- ===== Detalle del tour ===== -->
+<section class="vsm-section vsm-bleed">
+  <div class="vsm-wrap">
+    <div class="row">
+      <!-- Galería -->
+      <div class="col-lg-7 mb-4">
+        <!-- Imagen principal en marco 16:9 -->
+        <div class="vsm-detail-img mb-3">
+          <a href="#" id="zoom-trigger" aria-label="Ver imagen ampliada">
+            <div class="ratio-box ratio-16x9">
+              <img id="imagen-principal" src="{{ tour.obtener_imagen_principal }}" alt="Imagen del tour" class="ratio-img">
+            </div>
+          </a>
+        </div>
 
-  <div class="row">
-    <!-- Galería -->
-    <div class="col-lg-7">
-      <!-- Imagen principal en marco 16:9 -->
-      <div class="card border-0 shadow-sm mb-3">
-        <a href="#" id="zoom-trigger" aria-label="Ver imagen ampliada">
-          <div class="ratio-box ratio-16x9">
-            <img id="imagen-principal" src="{{ tour.obtener_imagen_principal }}" alt="Imagen del tour" class="ratio-img">
-          </div>
-        </a>
+        <!-- Miniaturas -->
+        <div class="d-flex flex-wrap">
+          {% if imagenes %}
+            {% for imagen in imagenes %}
+              <div class="p-1">
+                <img src="{{ imagen }}" alt="Miniatura {{ forloop.counter }}"
+                     class="img-thumbnail thumb imagen-miniatura{% if forloop.first %} active{% endif %}"
+                     data-imagen="{{ imagen }}">
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-muted">No hay miniaturas disponibles.</p>
+          {% endif %}
+        </div>
+
+        <!-- Descripción -->
+        <div class="mt-4">
+          {% if tour.descripcion %}<div class="mb-3">{{ tour.descripcion|safe }}</div>{% endif %}
+          {% if tour.descripcion1 %}<div class="mb-3">{{ tour.descripcion1|safe }}</div>{% endif %}
+          {% if tour.descripcion2 %}<div class="mb-3">{{ tour.descripcion2|safe }}</div>{% endif %}
+        </div>
       </div>
 
-      <!-- Miniaturas -->
-      <div class="d-flex flex-wrap">
-        {% if imagenes %}
-          {% for imagen in imagenes %}
-            <div class="p-1">
-              <img src="{{ imagen }}" alt="Miniatura {{ forloop.counter }}"
-                   class="img-thumbnail thumb imagen-miniatura{% if forloop.first %} active{% endif %}"
-                   data-imagen="{{ imagen }}">
+      <!-- Columna derecha: info / CTA -->
+      <div class="col-lg-5">
+        <div class="sticky-cta">
+          <div class="card">
+            <div class="card-body">
+              <div class="mb-3">
+                <span class="badge badge-info mr-1">{{ tour.tipo_tour }}</span>
+                <span class="badge badge-secondary">Duración: {{ tour.duracion }} h</span>
+                {% if tour.solo_finde %}<span class="badge badge-warning ml-1">Sábados y Domingos</span>{% endif %}
+              </div>
+
+              {% if tour.incluye_tour %}
+                <h5 class="mt-3"><i class="fa fa-check-circle text-primary mr-1"></i> Incluye</h5>
+                <div class="text-muted small">{{ tour.incluye_tour|safe }}</div>
+              {% endif %}
+
+              <hr>
+
+              <div class="detail-price">
+                <div>
+                  <div class="text-muted small">Adultos</div>
+                  <div class="amt">${{ tour.precio_adulto }}</div>
+                </div>
+                <div>
+                  <div class="text-muted small">Niños</div>
+                  <div class="amt"><small>$</small>{{ tour.precio_nino }}</div>
+                </div>
+              </div>
+
+              <a href="{% url 'reservar_tour' tour_id=tour.id %}" class="btn btn-primary btn-lg btn-block mt-4">
+                <i class="fa fa-calendar-check-o mr-1"></i> Reservar ahora
+              </a>
+
+              <div class="d-flex justify-content-between mt-3 text-muted small">
+                <span><i class="fa fa-clock text-primary"></i> Cancelación flexible*</span>
+                <span><i class="fa fa-credit-card text-primary"></i> Pago seguro</span>
+              </div>
+            </div>
+          </div>
+
+          {% if tour.puntos_importantes %}
+            <div class="card mt-3">
+              <div class="card-body">
+                <h6 class="mb-2"><i class="fa fa-exclamation-circle text-primary mr-1"></i> Importante</h6>
+                <div class="small text-muted">{{ tour.puntos_importantes|safe }}</div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-5">
+
+    <!-- Reseñas -->
+    <div class="row">
+      <div class="col-lg-7">
+        <h4 class="mb-3">Escribe una reseña</h4>
+        <div class="card mb-4">
+          <div class="card-body">
+            <form method="post" action="{% url 'tour_detail' tour_id=tour.id %}" class="needs-validation" novalidate>
+              {% csrf_token %}
+
+              <div class="form-group">
+                <label class="d-block">Tu calificación</label>
+                <div class="custom-control-inline">
+                  {% for i in "12345" %}
+                    <div class="custom-control custom-radio mr-3">
+                      <input type="radio" id="rating-{{ forloop.counter }}" name="rating" value="{{ forloop.counter }}"
+                             class="custom-control-input" {% if forloop.counter == 5 %}checked{% endif %}>
+                      <label class="custom-control-label" for="rating-{{ forloop.counter }}">
+                        {% for j in "12345" %}
+                          {% if forloop.parentloop.counter >= forloop.counter %}
+                            <i class="fas fa-star text-warning"></i>
+                          {% else %}
+                            <i class="far fa-star text-warning"></i>
+                          {% endif %}
+                        {% endfor %}
+                      </label>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="comentario">Comentario</label>
+                <textarea id="comentario" name="comentario" rows="3" class="form-control" placeholder="¿Qué te pareció?" required></textarea>
+                <div class="invalid-feedback">Cuéntanos tu experiencia.</div>
+              </div>
+
+              <button type="submit" class="btn btn-primary">Enviar reseña</button>
+            </form>
+          </div>
+        </div>
+
+        <h4 class="mb-3">Reseñas</h4>
+        {% if resenas %}
+          {% for resena in resenas %}
+            <div class="media mb-3 p-3 rounded border">
+              <div class="mr-3 avatar">
+                <span class="small">{{ resena.autor_iniciales|default:"U" }}</span>
+              </div>
+              <div class="media-body">
+                <div class="d-flex justify-content-between">
+                  <div class="text-warning">
+                    {% for i in "12345" %}
+                      {% if forloop.counter <= resena.estrellas %}
+                        <i class="fas fa-star"></i>
+                      {% else %}
+                        <i class="far fa-star"></i>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                  <small class="text-muted">{{ resena.creado_en|date:"d/m/Y" }}</small>
+                </div>
+                <div class="mt-1">{{ resena.comentario }}</div>
+              </div>
             </div>
           {% endfor %}
         {% else %}
-          <p class="text-muted">No hay miniaturas disponibles.</p>
-        {% endif %}
-      </div>
-
-      <!-- Descripción -->
-      <div class="mt-4">
-        {% if tour.descripcion %}<div class="mb-3">{{ tour.descripcion|safe }}</div>{% endif %}
-        {% if tour.descripcion1 %}<div class="mb-3">{{ tour.descripcion1|safe }}</div>{% endif %}
-        {% if tour.descripcion2 %}<div class="mb-3">{{ tour.descripcion2|safe }}</div>{% endif %}
-      </div>
-    </div>
-
-    <!-- Columna derecha: info / CTA -->
-    <div class="col-lg-5">
-      <div class="sticky-cta">
-        <div class="card border-0 shadow-sm">
-          <div class="card-body">
-            <div class="mb-2">
-              <span class="badge badge-info mr-1">{{ tour.tipo_tour }}</span>
-              <span class="badge badge-secondary">Duración: {{ tour.duracion }} h</span>
-              {% if tour.solo_finde %}<span class="badge badge-warning ml-1">Sábados y Domingos</span>{% endif %}
-            </div>
-
-            {% if tour.incluye_tour %}
-              <h5 class="mt-3">Incluye</h5>
-              <div class="text-muted small">{{ tour.incluye_tour|safe }}</div>
-            {% endif %}
-
-            <hr>
-
-            <div class="d-flex align-items-baseline">
-              <div class="mr-4">
-                <div class="text-muted small">Adultos</div>
-                <div class="h4 mb-0">${{ tour.precio_adulto }}</div>
-              </div>
-              <div>
-                <div class="text-muted small">Niños</div>
-                <div class="h5 mb-0">${{ tour.precio_nino }}</div>
-              </div>
-            </div>
-
-            <a href="{% url 'reservar_tour' tour_id=tour.id %}" class="btn btn-success btn-lg btn-block mt-4">
-              Reservar ahora
-            </a>
-
-            <div class="d-flex justify-content-between mt-3 text-muted small">
-              <span><i class="far fa-clock"></i> Cancelación flexible*</span>
-              <span><i class="far fa-credit-card"></i> Pago seguro</span>
-            </div>
-          </div>
-        </div>
-
-        {% if tour.puntos_importantes %}
-          <div class="card border-0 shadow-sm mt-3">
-            <div class="card-body">
-              <h6 class="mb-2">Importante</h6>
-              <div class="small text-muted">{{ tour.puntos_importantes|safe }}</div>
-            </div>
-          </div>
+          <p class="text-muted">Aún no hay reseñas.</p>
         {% endif %}
       </div>
     </div>
   </div>
-
-  <hr class="my-4">
-
-  <!-- Reseñas -->
-  <div class="row">
-    <div class="col-lg-7">
-      <h4 class="mb-3">Escribe una reseña</h4>
-      <form method="post" action="{% url 'tour_detail' tour_id=tour.id %}" class="needs-validation" novalidate>
-        {% csrf_token %}
-
-        <div class="form-group">
-          <label class="d-block">Tu calificación</label>
-          <div class="custom-control-inline">
-            {% for i in "12345" %}
-              <div class="custom-control custom-radio mr-3">
-                <input type="radio" id="rating-{{ forloop.counter }}" name="rating" value="{{ forloop.counter }}"
-                       class="custom-control-input" {% if forloop.counter == 5 %}checked{% endif %}>
-                <label class="custom-control-label" for="rating-{{ forloop.counter }}">
-                  {% for j in "12345" %}
-                    {% if forloop.parentloop.counter >= forloop.counter %}
-                      <i class="fas fa-star text-warning"></i>
-                    {% else %}
-                      <i class="far fa-star text-warning"></i>
-                    {% endif %}
-                  {% endfor %}
-                </label>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="comentario">Comentario</label>
-          <textarea id="comentario" name="comentario" rows="3" class="form-control" placeholder="¿Qué te pareció?" required></textarea>
-          <div class="invalid-feedback">Cuéntanos tu experiencia.</div>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Enviar reseña</button>
-      </form>
-
-      <hr class="my-4">
-
-      <h4 class="mb-3">Reseñas</h4>
-      {% if resenas %}
-        {% for resena in resenas %}
-          <div class="media mb-3 p-3 rounded border">
-            <div class="mr-3 avatar">
-              <span class="small">{{ resena.autor_iniciales|default:"U" }}</span>
-            </div>
-            <div class="media-body">
-              <div class="d-flex justify-content-between">
-                <div class="text-warning">
-                  {% for i in "12345" %}
-                    {% if forloop.counter <= resena.estrellas %}
-                      <i class="fas fa-star"></i>
-                    {% else %}
-                      <i class="far fa-star"></i>
-                    {% endif %}
-                  {% endfor %}
-                </div>
-                <small class="text-muted">{{ resena.creado_en|date:"d/m/Y" }}</small>
-              </div>
-              <div class="mt-1">{{ resena.comentario }}</div>
-            </div>
-          </div>
-        {% endfor %}
-      {% else %}
-        <p class="text-muted">Aún no hay reseñas.</p>
-      {% endif %}
-    </div>
-  </div>
-</div>
+</section>
 
 <!-- Modal de Zoom -->
 <div class="modal fade" id="modalZoom" tabindex="-1" role="dialog" aria-hidden="true">

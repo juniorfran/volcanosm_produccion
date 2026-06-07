@@ -1,291 +1,225 @@
 {% extends "base.html" %}
-
 {% load static %}
 
 {% block content %}
 
-<head>
-    <!-- Tus otras etiquetas head aquí -->
+  {% include "direccionamiento.html" %}
 
-    <!-- Incluye jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-
-    <!-- Incluye Popper.js y Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-
-    <!-- Add the slick-theme.css if you want default styling -->
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/kenwheeler/slick@1.8.1/slick/slick.css"/>
-    <!-- Add the slick-theme.css if you want default styling -->
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/kenwheeler/slick@1.8.1/slick/slick-theme.css"/>
-    
-    <!-- Tus otras etiquetas head aquí -->
-</head>
-
-
-    <!-- Header Start -->
-    {% include "direccionamiento.html" %}
-    <!-- Header End -->
-
-<!-- About Start -->
-<div class="container-fluid py-5">
-    <div class="container pt-5">
-        <div class="row">
-            <div class="col-lg-6" style="min-height: 500px;">
-                <div class="position-relative h-100">
-                    <img class="position-absolute w-100 h-100" src="{{ nosotros.imagen_url }}" style="object-fit: cover;" alt="{{ nosotros.titulo }}">
-                </div>
-            </div>
-            <div class="col-lg-6 pt-5 pb-lg-5">
-                <div class="about-text bg-white p-4 p-lg-5 my-lg-5">
-                    <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">{{ nosotros.subtitulo }}</h6>
-                    <h1 class="mb-3">{{ nosotros.titulo }}</h1>
-                    <p>{{ nosotros.descripcion | safe }}</p>
-                    <div class="row mb-4">
-                        <div class="col-6">
-                            <img class="img-fluid" src="{{ nosotros.imagen_pequena_1_url }}" alt="Image 1">
-                        </div>
-                        <div class="col-6">
-                            <img class="img-fluid" src="{{ nosotros.imagen_pequena_2_url }}" alt="Image 2">
-                        </div>
-                    </div>
-                    <a href="{{ nosotros.url_boton }}" class="btn btn-primary mt-1">{{ nosotros.texto_boton }}</a>
-                </div>
-            </div>
-        </div>
+  <!-- Hero de página -->
+  <section class="vsm-pagehero vsm-bleed">
+    <div class="vsm-pagehero__in">
+      <span class="vsm-eyebrow">Nosotros</span>
+      <h1>{{ nosotros.titulo|default:"Sobre Volcano SM" }}</h1>
+      <p>{{ nosotros.subtitulo }}</p>
     </div>
-</div>
-<!-- About End -->
+  </section>
 
-{% comment %} <!-- Feature Start -->
-<div class="container-fluid pb-5">
-    <div class="container pb-8">
-        
-        <div class="row">
-            {% for servicio in servicios %}
-            <div class="col-md-6">
-                <div class="d-flex mb-4 mb-lg-0">
-                    <div class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary mr-3" style="height: 100px; width: 100px;">
-                        <img src="{{ servicio.Servicio_icono.url }}" alt="{{ servicio.servicio_titulo }}" class="fa fa-2x text-white"  style="height: 100px;">
-                    </div>
-                    <div class="d-flex flex-column">
-                        <h5 class="">{{ servicio.servicio_titulo }}</h5>
-                        <p class="m-1">{{ servicio.servicio_descripcion }}</p>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
+  <!-- Quiénes somos -->
+  <section class="vsm-section vsm-bleed">
+    <div class="vsm-wrap">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+          <div class="vsm-detail-img" style="min-height:420px;">
+            {% if nosotros.imagen_url %}
+              <img src="{{ nosotros.imagen_url }}" alt="{{ nosotros.titulo|default:'Volcano SM' }}">
+            {% endif %}
+          </div>
         </div>
-        
-    </div>
-</div>
-<!-- Feature End --> {% endcomment %}
+        <div class="col-lg-6">
+          {% if nosotros.subtitulo %}<span class="vsm-eyebrow">{{ nosotros.subtitulo }}</span>{% endif %}
+          <h2 class="mb-3">{{ nosotros.titulo|default:"Sobre Volcano SM" }}</h2>
+          <div class="mb-4" style="color:var(--muted);">{{ nosotros.descripcion|safe }}</div>
 
-<!-- Feature Start -->
-
-<div class="container-fluid pb-5">
-    <div class="container pb-8">
-        <div class="row">
-            <div class="slider-container">
-                {% for servicio in servicios %}
-                {% if forloop.counter0|divisibleby:3 %}
-                <div class="row">
-                {% endif %}
-                
-                    <div class="col-md-4">
-                        <div class="d-flex mb-4 mb-lg-0">
-                            <a class="destination-overlay text-white text-decoration-none" href="#">
-                            <div class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary mr-3" style="height: 100px; width: 100px;">
-                                <img src="{{ servicio.icono_url }}" alt="{{ servicio.servicio_titulo }}" class="fa fa-2x text-white"  style="height: 100px;">
-                            </div>
-                            </a>
-                            <div class="d-flex flex-column">
-                                <h5 class="">{{ servicio.servicio_titulo }}</h5>
-                                <p class="m-1">{{ servicio.servicio_descripcion }}</p>
-                            </div>
-                        </div>
-                    </div>
-                
-                {% if forloop.counter0|add:1|divisibleby:3 or forloop.last %}
-                </div>
-                {% endif %}
-                {% endfor %}
+          {% if nosotros.imagen_pequena_1_url or nosotros.imagen_pequena_2_url %}
+          <div class="row g-3 mb-4">
+            {% if nosotros.imagen_pequena_1_url %}
+            <div class="col-6">
+              <div class="vsm-detail-img" style="height:180px;">
+                <img src="{{ nosotros.imagen_pequena_1_url }}" alt="Volcano SM">
+              </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- Feature End -->
-
-
-{% if ultima_oferta.estado_oferta %}
-    <!-- Registration Start -->
-    <style>
-        .bg-registration-1 {
-        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ ultima_oferta.imagen_url }}') no-repeat center center;
-        background-size: cover;
-        }
-    </style>
-    <div class="container-fluid bg-registration-1 py-5" style="margin: 90px 0;">
-        <div class="container py-5">
-            <div class="row align-items-center">
-
-                <div class="col-lg-7 mb-5 mb-lg-0">
-                    <div class="mb-4">
-                        <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">{{ ultima_oferta.titulo_oferta }}</h6>
-                        <h1 class="text-white"><span class="text-primary">{{ ultima_oferta.porcentaje_descuento }} OFF</span> {{ ultima_oferta.servicio_descuento }}</h1>
-                    </div>
-                    <p class="text-white">{{ ultima_oferta.descripcion | safe }}</p>
-                    <ul class="list-inline text-white m-0">
-                        <li class="py-2"><i class="fa fa-check text-primary mr-3"></i>{{ ultima_oferta.detalle_1 }}</li>
-                        <li class="py-2"><i class="fa fa-check text-primary mr-3"></i>{{ ultima_oferta.detalle_2 }}</li>
-                        <li class="py-2"><i class="fa fa-check text-primary mr-3"></i>{{ ultima_oferta.detalle_3 }}</li>
-                    </ul>
-                </div>
-
-                <div class="col-lg-5">
-                    <div class="card border-0">
-                        <div class="card-header bg-primary text-center p-4">
-                            <h1 class="text-white m-0">Solicitar oferta</h1>
-                        </div>
-                        <div class="card-body rounded-bottom bg-white p-5">
-
-                            <form method="post" id="solicitud_oferta" action="{% url 'nosotros' %}">
-                                {% csrf_token %}
-                                <div class="form-group">
-                                    <input type="text" class="form-control p-4" placeholder="Tu Nombre" name="nombre" required="required" />
-                                </div>
-                                <div class="form-group">
-                                    <input type="email" class="form-control p-4" placeholder="Tu correo" name="email" required="required" />
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" class="form-control p-4" placeholder="Tu telefono" name="telefono" required="required" />
-                                </div>
-                                <div>
-                                    <button class="btn btn-primary btn-block py-3" type="submit">Solicitar Oferta</button>
-                                </div>
-                            </form>
-
-                        </div>
-                    </div>
-                </div>
+            {% endif %}
+            {% if nosotros.imagen_pequena_2_url %}
+            <div class="col-6">
+              <div class="vsm-detail-img" style="height:180px;">
+                <img src="{{ nosotros.imagen_pequena_2_url }}" alt="Volcano SM">
+              </div>
             </div>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {% if nosotros.url_boton and nosotros.texto_boton %}
+            <a href="{{ nosotros.url_boton }}" class="btn btn-primary">{{ nosotros.texto_boton }}</a>
+          {% endif %}
         </div>
+      </div>
     </div>
-{% endif %}
+  </section>
 
+  <!-- Servicios / Lo que ofrecemos -->
+  {% if servicios %}
+  <section class="vsm-section vsm-section--tint vsm-bleed">
+    <div class="vsm-wrap">
+      <div class="vsm-head">
+        <span class="vsm-eyebrow">Lo que ofrecemos</span>
+        <h2>Nuestros servicios</h2>
+      </div>
+      <div class="vsm-features">
+        {% for servicio in servicios %}
+        <div class="vsm-feature">
+          <div class="vsm-feature__ico">
+            {% if servicio.icono_url %}
+              <img src="{{ servicio.icono_url }}" alt="{{ servicio.servicio_titulo }}">
+            {% else %}
+              <i class="fa fa-leaf"></i>
+            {% endif %}
+          </div>
+          <h5>{{ servicio.servicio_titulo }}</h5>
+          <p>{{ servicio.servicio_descripcion }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
 
+  <!-- Oferta destacada -->
+  {% if ultima_oferta.estado_oferta %}
+  <style>
+    .vsm-offer{
+      position:relative; overflow:hidden; border-radius:30px;
+      background:linear-gradient(rgba(63,107,20,.82), rgba(63,107,20,.82)),
+                 url('{{ ultima_oferta.imagen_url }}') no-repeat center center;
+      background-size:cover; color:#fff; box-shadow:var(--shadow-lg);
+    }
+  </style>
+  <section class="vsm-section vsm-bleed">
+    <div class="vsm-wrap">
+      <div class="vsm-offer p-4 p-lg-5">
+        <div class="row align-items-center g-4 g-lg-5">
+          <div class="col-lg-7">
+            {% if ultima_oferta.titulo_oferta %}
+              <span class="vsm-eyebrow" style="color:#cdeaa6;">{{ ultima_oferta.titulo_oferta }}</span>
+            {% endif %}
+            <h2 class="text-white mb-3">
+              <span class="text-primary">{{ ultima_oferta.porcentaje_descuento }} OFF</span>
+              {{ ultima_oferta.servicio_descuento }}
+            </h2>
+            <div class="mb-3" style="color:#e7f5d7;">{{ ultima_oferta.descripcion|safe }}</div>
+            <ul class="list-unstyled m-0">
+              {% if ultima_oferta.detalle_1 %}<li class="py-1"><i class="fa fa-check text-primary me-2"></i>{{ ultima_oferta.detalle_1 }}</li>{% endif %}
+              {% if ultima_oferta.detalle_2 %}<li class="py-1"><i class="fa fa-check text-primary me-2"></i>{{ ultima_oferta.detalle_2 }}</li>{% endif %}
+              {% if ultima_oferta.detalle_3 %}<li class="py-1"><i class="fa fa-check text-primary me-2"></i>{{ ultima_oferta.detalle_3 }}</li>{% endif %}
+            </ul>
+          </div>
 
-    <!-- Registration End -->
+          <div class="col-lg-5">
+            <div class="card border-0 shadow-lg" style="border-radius:var(--r); overflow:hidden;">
+              <div class="card-header bg-primary text-center p-4 border-0">
+                <h4 class="text-white m-0">Solicitar oferta</h4>
+              </div>
+              <div class="card-body bg-white p-4 p-lg-5">
+                <form method="post" id="solicitud_oferta" action="{% url 'nosotros' %}">
+                  {% csrf_token %}
+                  <div class="form-group mb-3">
+                    <input type="text" class="form-control p-3" placeholder="Tu nombre" name="nombre" required="required" />
+                  </div>
+                  <div class="form-group mb-3">
+                    <input type="email" class="form-control p-3" placeholder="Tu correo" name="email" required="required" />
+                  </div>
+                  <div class="form-group mb-3">
+                    <input type="text" class="form-control p-3" placeholder="Tu teléfono" name="telefono" required="required" />
+                  </div>
+                  <div class="d-grid">
+                    <button class="btn btn-primary py-3" type="submit">Solicitar oferta</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
 
+  <!-- Equipo -->
+  {% include "sections/team.html" %}
 
-    <!-- Team Start -->
-    {% include "sections/team.html" %}
-    <!-- Team End -->
-
-
-
-<!-- Modal de Éxito -->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <!-- Modal de Éxito -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Solicitud Enviada con Éxito</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <!-- Muestra la información que desees aquí -->
-                <p>¡Tu solicitud ha sido enviada correctamente!</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Solicitud enviada con éxito</h5>
+          <button type="button" class="close btn-close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
+        <div class="modal-body">
+          <p>¡Tu solicitud ha sido enviada correctamente!</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 
-<!-- Modal de Error -->
-<div class="modal fade" id="myModalError" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabelError" aria-hidden="true">
+  <!-- Modal de Error -->
+  <div class="modal fade" id="myModalError" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabelError" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabelError">Error al Enviar la Solicitud</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <!-- Muestra la información de error que desees aquí -->
-                <p>Hubo un problema al enviar la solicitud. Inténtelo de nuevo.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabelError">Error al enviar la solicitud</h5>
+          <button type="button" class="close btn-close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
+        <div class="modal-body">
+          <p>Hubo un problema al enviar la solicitud. Inténtelo de nuevo.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 
 {% endblock content %}
 
 {% block extra_js %}
+<!-- jQuery (requerido por el envío AJAX del formulario y los modales de Bootstrap 4) -->
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<script type="text/javascript" src="//cdn.jsdelivr.net/gh/kenwheeler/slick@1.8.1/slick/slick.min.js"></script>
 <script>
-    $(document).ready(function () {
-        // Captura el evento submit del formulario
-        $('#solicitud_oferta').submit(function (e) {
-            e.preventDefault();  // Evita que el formulario se envíe normalmente
+  $(document).ready(function () {
+    // Captura el evento submit del formulario de solicitud de oferta
+    $('#solicitud_oferta').submit(function (e) {
+      e.preventDefault();  // Evita el envío normal del formulario
 
-            // Realiza la petición Ajax para enviar el formulario
-            $.ajax({
-                type: 'POST',
-                url: $(this).attr('action'),
-                data: $(this).serialize(),
-                dataType: 'json',
-                success: function (response) {
-                    if (response.success) {
-                        // Muestra la modal de éxito
-                        $('#myModal').modal('show');
-                    } else {
-                        // Muestra una modal de error si la solicitud no se guardó correctamente
-                        $('#myModalError').modal('show');
-                    }
-                },
-                error: function () {
-                    // Muestra una modal de error si hay un error en la petición Ajax
-                    $('#myModalError').modal('show');
-                }
-            });
-        });
-
-        // Recargar la página al cerrar el modal de éxito
-        $('#myModal').on('hidden.bs.modal', function () {
-            location.reload();
-        });
+      $.ajax({
+        type: 'POST',
+        url: $(this).attr('action'),
+        data: $(this).serialize(),
+        dataType: 'json',
+        success: function (response) {
+          if (response.success) {
+            $('#myModal').modal('show');
+          } else {
+            $('#myModalError').modal('show');
+          }
+        },
+        error: function () {
+          $('#myModalError').modal('show');
+        }
+      });
     });
+
+    // Recarga la página al cerrar el modal de éxito
+    $('#myModal').on('hidden.bs.modal', function () {
+      location.reload();
+    });
+  });
 </script>
-{% comment %} 
-<!-- Inicializa el slider con las opciones deseadas -->
-<script>
-    $(document).ready(function(){
-        $('.slider-container').slick({
-            slidesToShow: 3,  // Número de slides a mostrar
-            slidesToScroll: 1,  // Número de slides a desplazarse
-            autoplay: true,  // Reproducción automática
-            autoplaySpeed: 2000,  // Velocidad de reproducción automática en milisegundos
-            infinite: true,  // Bucle infinito
-            arrows: true,  // Desactiva las flechas de navegación
-            responsive: [
-                {
-                    breakpoint: 768,
-                    settings: {
-                        slidesToShow: 1,
-                    }
-                }
-            ]
-        });
-    });
-</script> {% endcomment %}
 {% endblock extra_js %}

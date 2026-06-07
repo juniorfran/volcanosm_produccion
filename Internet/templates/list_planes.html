@@ -2,49 +2,50 @@
 
 {% block content %}
 
-<!-- Destination Start -->
-<div class="container-fluid py-5">
-    <div class="container pt-5 pb-3">
-        <div class="text-center mb-3 pb-3">
-            <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">INTERNET Volcano SM</h6>
-            <h1>Explora nuestros servicios de internet</h1>
-        </div>
+<!-- Hero Start -->
+<section class="vsm-pagehero vsm-bleed">
+    <div class="vsm-pagehero__in">
+        <span class="vsm-eyebrow">VolcanoSM Internet</span>
+        <h1>Planes de Internet</h1>
+        <p>Conéctate en el volcán y sus alrededores.</p>
+    </div>
+</section>
+<!-- Hero End -->
+
+<!-- Planes Start -->
+<section class="vsm-section vsm-bleed">
+    <div class="vsm-wrap">
         <div class="row justify-content-center">
             {% for tipo_acceso in tipos_accesos %}
             <div class="col-lg-4 col-md-6 mb-4">
-                {% if tipo_acceso.disponible %}
-                <div class="destination-item position-relative overflow-hidden mb-2">
-                    <img class="img-fluid" src="{{ tipo_acceso.url_azure }}" alt="{{ tipo_acceso.nombre }}">
-                    <a class="destination-overlay text-white text-decoration-none" href="{% url 'comprar_acceso_3ds' tipo_acceso.id %}">
-                        <h5 class="text-white">{{ tipo_acceso.nombre }}</h5>
-                        <p class="text-white">Precio: ${{ tipo_acceso.precio|floatformat:2 }}</p>
-                        <p class="text-white">Velocidad : {{ tipo_acceso.velocidad_mb }} MB</p>
-                        <p class="text-white">Tiempo : {{ tipo_acceso.tiempo_conexion }} Horas</p>
-                    </a>
-                </div>
-                {% else %}
-                <div class="destination-item position-relative overflow-hidden mb-2">
-                    <img class="img-fluid" src="{{ tipo_acceso.url_azure }}" alt="{{ tipo_acceso.nombre }}">
-                    <div class="destination-overlay text-white text-decoration-none">
-                            <h5 class="text-white">{{ tipo_acceso.nombre }}</h5>
-                            <p class="text-white">Precio: ${{ tipo_acceso.precio|floatformat:2 }}</p>
-                            <p class="text-white">Velocidad : {{ tipo_acceso.velocidad_mb }} MB</p>
-                            <p class="text-white">Tiempo : {{ tipo_acceso.tiempo_conexion }} Horas</p>
-                        <div class="alert alert-danger" role="alert" style="background-color: rgba(255, 235, 59, 0.5);">
-                            <h4 class="alert-heading text-white">¡No disponible!</h4>
-                            <p class="text-white">Por el momento este servicio no se encuentra disponible.</p>
-                            <hr>
-                            <p class="mb-0 text-white"><a class="text-white" href="{% url 'contacto'%}">Solicitar Ayuda</a></p>
-                        </div>
+                <div class="vsm-price">
+                    {% if tipo_acceso.url_azure %}
+                    <img class="img-fluid mb-3" src="{{ tipo_acceso.url_azure }}" alt="{{ tipo_acceso.nombre }}" style="width:100%; height:180px; object-fit:cover; border-radius:14px;">
+                    {% endif %}
+                    <h4>{{ tipo_acceso.nombre }}</h4>
+                    <div class="vsm-price__amt">${{ tipo_acceso.precio|floatformat:2 }} <small>/ {{ tipo_acceso.tiempo_conexion }} horas</small></div>
+                    <ul>
+                        <li><i class="fa fa-check"></i> Velocidad: {{ tipo_acceso.velocidad_mb }} MB</li>
+                        <li><i class="fa fa-check"></i> Tiempo de conexión: {{ tipo_acceso.tiempo_conexion }} horas</li>
+                        {% if tipo_acceso.descripcion %}
+                        <li><i class="fa fa-check"></i> {{ tipo_acceso.descripcion }}</li>
+                        {% endif %}
+                    </ul>
+                    {% if tipo_acceso.disponible %}
+                    <a class="btn btn-primary" href="{% url 'comprar_acceso_3ds' tipo_acceso.id %}">Comprar acceso</a>
+                    {% else %}
+                    <div class="alert alert-warning" role="alert">
+                        <strong>¡No disponible!</strong>
+                        <p class="mb-1">Por el momento este servicio no se encuentra disponible.</p>
+                        <a href="{% url 'contacto' %}">Solicitar ayuda</a>
                     </div>
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
             {% endfor %}
         </div>
     </div>
-</div>
-<!-- Destination End -->
-
+</section>
+<!-- Planes End -->
 
 {% endblock content %}

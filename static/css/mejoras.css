@@ -211,3 +211,28 @@ body{ overflow-x:hidden; }
 
 /* Servicios: nueva sección con íconos */
 .vsm-feature__ico img{ width:42px; height:42px; object-fit:contain; }
+
+/* ===== Encabezado de página (páginas internas) ===== */
+.vsm-pagehero{ position:relative; padding:5rem 0 3.6rem; color:#fff; text-align:center; overflow:hidden; background:linear-gradient(120deg,var(--green-dd),var(--green-d)); border-radius:0 0 32px 32px; }
+.vsm-pagehero::after{ content:""; position:absolute; inset:0; background:radial-gradient(circle at 82% 18%, rgba(255,255,255,.14), transparent 52%); }
+.vsm-pagehero__in{ position:relative; z-index:2; max-width:780px; margin:0 auto; padding:0 1.25rem; }
+.vsm-pagehero h1{ color:#fff; font-size:clamp(2rem,4.6vw,3.2rem); margin:.3rem 0 .4rem; }
+.vsm-pagehero p{ color:#e9f5da; font-size:1.08rem; margin:0; }
+.vsm-pagehero .vsm-eyebrow{ color:#cdeaa6; }
+.vsm-crumbs{ color:#d6e8c9; font-size:.85rem; margin-top:.7rem; }
+.vsm-crumbs a{ color:#fff; text-decoration:none; }
+.vsm-crumbs a:hover{ text-decoration:underline; }
+
+/* Pricing / planes */
+.vsm-price{ background:#fff; border:1px solid var(--line); border-radius:var(--r); padding:2rem 1.5rem; text-align:center; box-shadow:var(--shadow-sm); transition:transform .25s,box-shadow .25s,border-color .25s; height:100%; }
+.vsm-price:hover{ transform:translateY(-8px); box-shadow:var(--shadow); border-color:var(--green); }
+.vsm-price__amt{ font-size:2.4rem; font-weight:800; color:var(--green-d); }
+.vsm-price__amt small{ font-size:.95rem; color:var(--muted); font-weight:600; }
+.vsm-price ul{ list-style:none; padding:0; margin:1rem 0; text-align:left; }
+.vsm-price li{ padding:.4rem 0; border-bottom:1px dashed var(--line); color:var(--body); }
+.vsm-price li i{ color:var(--green); margin-right:.5rem; }
+
+/* Form card (contacto/reserva) */
+.vsm-formcard{ background:#fff; border-radius:var(--r); box-shadow:var(--shadow); padding:2.2rem; }
+.vsm-detail-img{ border-radius:var(--r); overflow:hidden; box-shadow:var(--shadow); }
+.vsm-detail-img img{ width:100%; height:100%; object-fit:cover; }

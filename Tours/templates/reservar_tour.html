@@ -6,126 +6,159 @@
 <link rel="icon" href="{% static 'img/favicon.ico' %}"/>
 
 <style>
-  /* Fondo con overlay */
-  .booking-hero {
-    background-image: url('{{ tour.url_azure }}');
-    background-size: cover;
-    background-position: center;
-    position: relative;
-    min-height: 70vh;
+  .vsm-detail-img.vsm-detail-img--reserva img { height: 230px; }
+  .vsm-summary-list { list-style: none; margin: 0; padding: 0; }
+  .vsm-summary-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .65rem 0;
+    border-bottom: 1px solid rgba(0,0,0,.06);
   }
-  .booking-hero::before{
-    content:"";
-    position:absolute;left:0;top:0;right:0;bottom:0;
-    background: rgba(0,0,0,.45);
-  }
-  /* Card centrada */
-  .booking-card {
-    position: relative;
-    z-index: 1;
-    backdrop-filter: blur(2px);
-    border: 0;
-    border-radius: .75rem;
-    box-shadow: 0 .75rem 2rem rgba(0,0,0,.25);
-  }
+  .vsm-summary-list li:last-child { border-bottom: 0; }
+  .vsm-summary-list .vsm-summary-label { color: #5a6b50; font-weight: 500; }
+  .vsm-summary-list .vsm-summary-value { font-weight: 700; color: #2f3d27; }
+  .vsm-summary-total { color: #7AB730 !important; font-size: 1.25rem; }
+  .vsm-formcard label { font-weight: 600; color: #3a4a30; }
   .form-text { line-height: 1.2; }
+  @media (min-width: 992px) {
+    .vsm-sticky-card { position: sticky; top: 90px; }
+  }
 </style>
 
-<div class="container py-4">
-  <h2 class="font-weight-bold mb-4">Reservar Tour - {{ tour.titulo }}</h2>
-</div>
+<section class="vsm-pagehero vsm-bleed">
+  <div class="vsm-pagehero__in">
+    <span class="vsm-eyebrow">Reserva</span>
+    <h1>Reservar {{ tour.titulo }}</h1>
+    <p>Completa tus datos y asegura tu lugar.</p>
+  </div>
+</section>
 
-<section class="booking-hero d-flex align-items-center">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-12 col-lg-10 col-xl-8">
-        <div class="card booking-card bg-white">
-          <div class="card-body p-4 p-md-5">
-            
-            <form id="form-reserva" method="post" action="{% url 'reservar_tour' tour_id=tour.id %}" novalidate class="needs-validation">
-              {% csrf_token %}
+<section class="vsm-section vsm-bleed">
+  <div class="vsm-wrap">
+    <div class="row">
 
-              <div class="form-row">
-                <div class="form-group col-md-4">
-                  <label for="nombre">Nombre</label>
-                  <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre y apellido" required autocomplete="name">
-                  <div class="invalid-feedback">Ingresa tu nombre.</div>
-                </div>
+      <!-- Columna izquierda: formulario -->
+      <div class="col-12 col-lg-8 mb-4">
+        <div class="vsm-formcard">
 
-                <div class="form-group col-md-4">
-                  <label for="tipo_documento">Tipo Documento</label>
-                  <select class="form-control" id="tipo_documento" name="tipo_documento" required>
-                    {% for value, label in tipo_document %}
-                      <option value="{{ value }}">{{ label }}</option>
-                    {% endfor %}
-                  </select>
-                  <div class="invalid-feedback">Selecciona una opción.</div>
-                </div>
+          <form id="form-reserva" method="post" action="{% url 'reservar_tour' tour_id=tour.id %}" novalidate class="needs-validation">
+            {% csrf_token %}
 
-                <div class="form-group col-md-4">
-                  <label for="dui" id="label_dui">DUI</label>
-                  <input type="text" class="form-control" id="dui" name="dui"
-                         placeholder="9 dígitos (sin guiones)" inputmode="numeric"
-                         maxlength="9" pattern="\d{9}" required>
-                  <small class="form-text text-muted">Ej: 041661239</small>
-                  <div class="invalid-feedback">Debe tener exactamente 9 dígitos (sin guiones).</div>
-                </div>
-
-                <div class="form-group col-md-4">
-                  <label for="pais_residencia">País</label>
-                  <select class="form-control" id="pais_residencia" name="pais_residencia" required>
-                    <option value="" disabled selected>Cargando países…</option>
-                  </select>
-                  <div class="invalid-feedback">Selecciona un país.</div>
-                </div>
-
-                <div class="form-group col-md-4">
-                  <label for="telefono">Teléfono</label>
-                  <input type="tel" class="form-control" id="telefono" name="telefono"
-                         placeholder="Solo números" inputmode="numeric"
-                         maxlength="15" pattern="\d{8,15}" required>
-                  <div class="invalid-feedback">Ingresa un teléfono válido (8–15 dígitos).</div>
-                </div>
-
-                <div class="form-group col-md-4">
-                  <label for="correo_electronico">Correo Electrónico</label>
-                  <input type="email" class="form-control" id="correo_electronico" name="correo_electronico"
-                         placeholder="tucorreo@dominio.com" required>
-                  <div class="invalid-feedback">Ingresa un correo válido.</div>
-                </div>
-
-                <div class="form-group col-md-8">
-                  <label for="direccion">Dirección</label>
-                  <input type="text" class="form-control" id="direccion" name="direccion"
-                         placeholder="Calle, número, referencia" required autocomplete="street-address">
-                  <div class="invalid-feedback">Ingresa tu dirección.</div>
-                </div>
-
-                <div class="form-group col-md-2">
-                  <label for="cantidad_adultos">Adultos</label>
-                  <input type="number" class="form-control" id="cantidad_adultos" name="cantidad_adultos"
-                         min="1" step="1" value="1" required>
-                  <div class="invalid-feedback">Mínimo 1.</div>
-                </div>
-
-                <div class="form-group col-md-2">
-                  <label for="fecha_reserva">Fecha</label>
-                  <input type="date" class="form-control" id="fecha_reserva" name="fecha_reserva" required>
-                  <div class="invalid-feedback">Selecciona una fecha.</div>
-                </div>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="nombre">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre y apellido" required autocomplete="name">
+                <div class="invalid-feedback">Ingresa tu nombre.</div>
               </div>
 
-              <div class="mt-3 d-flex justify-content-end">
-                <button type="submit" class="btn btn-success btn-lg btn-block btn-md-auto">
-                  Pagar
-                </button>
+              <div class="form-group col-md-6">
+                <label for="tipo_documento">Tipo Documento</label>
+                <select class="form-control" id="tipo_documento" name="tipo_documento" required>
+                  {% for value, label in tipo_document %}
+                    <option value="{{ value }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+                <div class="invalid-feedback">Selecciona una opción.</div>
               </div>
 
-            </form>
+              <div class="form-group col-md-6">
+                <label for="dui" id="label_dui">DUI</label>
+                <input type="text" class="form-control" id="dui" name="dui"
+                       placeholder="9 dígitos (sin guiones)" inputmode="numeric"
+                       maxlength="9" pattern="\d{9}" required>
+                <small class="form-text text-muted">Ej: 041661239</small>
+                <div class="invalid-feedback">Debe tener exactamente 9 dígitos (sin guiones).</div>
+              </div>
 
+              <div class="form-group col-md-6">
+                <label for="pais_residencia">País</label>
+                <select class="form-control" id="pais_residencia" name="pais_residencia" required>
+                  <option value="" disabled selected>Cargando países…</option>
+                </select>
+                <div class="invalid-feedback">Selecciona un país.</div>
+              </div>
+
+              <div class="form-group col-md-6">
+                <label for="telefono">Teléfono</label>
+                <input type="tel" class="form-control" id="telefono" name="telefono"
+                       placeholder="Solo números" inputmode="numeric"
+                       maxlength="15" pattern="\d{8,15}" required>
+                <div class="invalid-feedback">Ingresa un teléfono válido (8–15 dígitos).</div>
+              </div>
+
+              <div class="form-group col-md-6">
+                <label for="correo_electronico">Correo Electrónico</label>
+                <input type="email" class="form-control" id="correo_electronico" name="correo_electronico"
+                       placeholder="tucorreo@dominio.com" required>
+                <div class="invalid-feedback">Ingresa un correo válido.</div>
+              </div>
+
+              <div class="form-group col-12">
+                <label for="direccion">Dirección</label>
+                <input type="text" class="form-control" id="direccion" name="direccion"
+                       placeholder="Calle, número, referencia" required autocomplete="street-address">
+                <div class="invalid-feedback">Ingresa tu dirección.</div>
+              </div>
+
+              <div class="form-group col-md-6">
+                <label for="cantidad_adultos">Adultos</label>
+                <input type="number" class="form-control" id="cantidad_adultos" name="cantidad_adultos"
+                       min="1" step="1" value="1" required>
+                <div class="invalid-feedback">Mínimo 1.</div>
+              </div>
+
+              <div class="form-group col-md-6">
+                <label for="fecha_reserva">Fecha</label>
+                <input type="date" class="form-control" id="fecha_reserva" name="fecha_reserva" required>
+                <div class="invalid-feedback">Selecciona una fecha.</div>
+              </div>
+            </div>
+
+            <div class="mt-3">
+              <button type="submit" class="btn btn-primary btn-lg btn-block">
+                Pagar
+              </button>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
+
+      <!-- Columna derecha: resumen del tour -->
+      <div class="col-12 col-lg-4">
+        <div class="card vsm-sticky-card">
+          <div class="vsm-detail-img vsm-detail-img--reserva">
+            <img src="{{ tour.url_azure }}" alt="{{ tour.titulo }}">
+          </div>
+          <div class="card-body">
+            <h5 class="font-weight-bold mb-3">{{ tour.titulo }}</h5>
+            <ul class="vsm-summary-list">
+              <li>
+                <span class="vsm-summary-label">Precio adulto</span>
+                <span class="vsm-summary-value">${{ tour.precio_adulto }}</span>
+              </li>
+              <li>
+                <span class="vsm-summary-label">Precio niño</span>
+                <span class="vsm-summary-value">${{ tour.precio_nino }}</span>
+              </li>
+              <li>
+                <span class="vsm-summary-label">Duración</span>
+                <span class="vsm-summary-value">{{ tour.duracion }} h</span>
+              </li>
+              <li>
+                <span class="vsm-summary-label">Total estimado</span>
+                <span class="vsm-summary-value vsm-summary-total">${{ tour.precio_adulto }}</span>
+              </li>
+            </ul>
+            <p class="text-muted small mb-0 mt-3">
+              El total final se calcula según la cantidad de personas y los impuestos aplicables.
+            </p>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </section>
