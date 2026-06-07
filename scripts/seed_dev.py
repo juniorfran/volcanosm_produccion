@@ -34,8 +34,8 @@ def seed_config():
         Contacts.objects.create(contact_email="info@volcanosm.com", contact_phone="+503 2660-0000",
             addres="Volcán de San Miguel (Chaparrastique), San Miguel, El Salvador")
     if not General_Description.objects.exists():
-        General_Description.objects.create(titulo_largo="Al Pie del Volcán", titulo_corto="Volcano",
-            medio_titulo="Turismo de aventura", descripcion_larga="Vive la aventura en el Volcán de San Miguel: tours, camping y caminatas.",
+        General_Description.objects.create(titulo_largo="Al Pie del Volcán", titulo_corto="SM",
+            medio_titulo="Volcano", descripcion_larga="Vive la aventura en el Volcán de San Miguel: tours, camping y caminatas.",
             descripcion_corta="Turismo en el Volcán de San Miguel")
     if not Direccionamiento.objects.exists():
         Direccionamiento.objects.create(nombre="Ubicación principal", imagen="", url_azure="")
