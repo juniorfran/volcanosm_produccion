@@ -1,4 +1,5 @@
 {% extends 'base_utilities.html' %}
+{% load l10n %}
 {% block content %}
 <div class="container-fluid">
 
@@ -50,7 +51,7 @@
                                 <button type="button" class="btn btn-sm btn-primary mt-2 btn-add"
                                         data-id="{{ a.pk }}"
                                         data-nombre="{{ a.nombre|escapejs }}"
-                                        data-tarifa="{{ a.tarifa }}"
+                                        data-tarifa="{{ a.tarifa|unlocalize }}"
                                         data-disp="{{ a.cantidad_disponible }}">
                                     <i class="bi bi-plus-lg"></i> Agregar
                                 </button>

@@ -1,5 +1,6 @@
 {% extends 'base_utilities.html' %}
 {% load static %}
+{% load l10n %}
 
 {% block tittle_sections %}
   <h3 class="fw-bold"><i class="bi bi-shop"></i> Punto de Venta</h3>
@@ -75,8 +76,8 @@
                 <div class="card pos-card text-center"
                      data-id="{{ p.id }}"
                      data-nombre-real="{{ p.nombre }}"
-                     data-precio="{{ p.precio_de_venta }}"
-                     data-stock="{{ p.stock }}">
+                     data-precio="{{ p.precio_de_venta|unlocalize }}"
+                     data-stock="{{ p.stock|unlocalize }}">
                   {% if p.imagen %}
                     <img src="{{ p.imagen.url }}" class="card-img-top" alt="{{ p.nombre }}">
                   {% else %}
