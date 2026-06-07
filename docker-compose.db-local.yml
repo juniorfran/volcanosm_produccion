@@ -1,0 +1,48 @@
+# MySQL local de respaldo (réplica de solo lectura para failover).
+#
+# Levantar junto al stack existente (se une a la misma red del proyecto, así
+# el contenedor `web` lo alcanza por el nombre de servicio `db_local`):
+#
+#   docker compose \
+#     -f docker-compose.yml \
+#     -f docker-compose.override.yml \
+#     -f docker-compose.db-local.yml \
+#     up -d db_local
+#
+# Variables requeridas en .env:
+#   LOCAL_DB_ROOT_PASSWORD=...   (root del MySQL local)
+#   LOCAL_DB_NAME=cuadmesv_tour
+#   LOCAL_DB_USER=volcano
+#   LOCAL_DB_PASSWORD=...        (usuario que usa Django para la réplica)
+#
+# IMPORTANTE: la versión de la imagen debe ser compatible con la del MySQL
+# remoto para que el dump importe sin problemas. Verificar con:
+#   mysql -h www.metrocuadrado.com.sv -u cuadmesv_tour -p -e "SELECT VERSION();"
+# y ajustar `image:` (mysql:5.7 / mysql:8.0 / mariadb:10.x) según corresponda.
+
+services:
+  db_local:
+    image: mysql:8.0
+    container_name: volcanosm_db_local
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${LOCAL_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${LOCAL_DB_NAME:-cuadmesv_tour}
+      MYSQL_USER: ${LOCAL_DB_USER:-volcano}
+      MYSQL_PASSWORD: ${LOCAL_DB_PASSWORD}
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - db_local_data:/var/lib/mysql
+    ports:
+      - "127.0.0.1:3307:3306"   # acceso opcional desde el host (no expuesto a internet)
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${LOCAL_DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_local_data:

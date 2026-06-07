@@ -162,3 +162,6 @@ media/ImagenTour/3/3_imagen4_10.jpg
 media/ImagenTour/3/4.jpg
 media/ImagenTour/3/5.jpg
 media/tours/1_imagen_12.jpg
+
+# Credenciales del MySQL local de respaldo
+.env.db-local

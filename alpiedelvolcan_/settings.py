@@ -237,9 +237,44 @@ DATABASES = {
         'PORT': '3306',  # Puerto predeterminado de MySQL
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            # Si la DB remota no responde, fallar rápido en vez de colgar el
+            # worker ~120s. Así el sitio devuelve error en segundos y se
+            # recupera solo cuando la DB vuelve.
+            'connect_timeout': 5,
+            'read_timeout': 30,
+            'write_timeout': 30,
         },
+        # No reusar conexiones muertas entre requests.
+        'CONN_HEALTH_CHECKS': True,
+        'CONN_MAX_AGE': 0,
     }
 }
+
+# --- Réplica local de respaldo (failover de solo lectura) ---------------------
+# MySQL local sincronizado desde la remota (ver scripts/sync_db.sh y
+# docker-compose.db-local.yml). Sirve LECTURAS cuando la remota cae.
+# Se siembra con un mysqldump de la remota; mientras no exista, no se usa.
+DATABASES['replica'] = {
+    'ENGINE': 'django.db.backends.mysql',
+    'NAME': os.environ.get('LOCAL_DB_NAME', 'cuadmesv_tour'),
+    'USER': os.environ.get('LOCAL_DB_USER', 'volcano'),
+    'PASSWORD': os.environ.get('LOCAL_DB_PASSWORD', ''),
+    'HOST': os.environ.get('LOCAL_DB_HOST', 'db_local'),
+    'PORT': os.environ.get('LOCAL_DB_PORT', '3306'),
+    'OPTIONS': {
+        'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        'connect_timeout': 5,
+        'read_timeout': 30,
+        'write_timeout': 30,
+    },
+    'CONN_HEALTH_CHECKS': True,
+    'CONN_MAX_AGE': 0,
+}
+
+# Activar el failover solo cuando la réplica ya esté sembrada y sincronizando.
+# En el .env del servidor: DB_FAILOVER_ENABLED=1
+if os.environ.get('DB_FAILOVER_ENABLED') == '1':
+    DATABASE_ROUTERS = ['alpiedelvolcan_.db_router.FailoverRouter']
 
 # DATABASES = {
 #     'sqlite': {
