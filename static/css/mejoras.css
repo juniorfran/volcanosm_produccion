@@ -117,3 +117,97 @@ img{ max-width:100%; }
   #header-carousel .carousel-item img{ height:56vh!important; min-height:340px; }
   .destination-item img{ height:230px; }
 }
+
+/* ============================================================
+   COMPONENTES DEL REDISEÑO ESTRUCTURAL (markup nuevo .vsm-*)
+   ============================================================ */
+.vsm-section{ padding:5.5rem 0; }
+.vsm-section--tint{ background:var(--green-tint); }
+.vsm-wrap{ max-width:1200px; margin:0 auto; padding:0 1.25rem; }
+.vsm-head{ max-width:700px; margin:0 auto 3rem; text-align:center; }
+.vsm-eyebrow{ color:var(--green-d); font-weight:700; text-transform:uppercase; letter-spacing:4px; font-size:.78rem; display:block; }
+.vsm-head h2{ font-size:clamp(1.8rem,3.6vw,2.7rem); margin:.5rem 0 .7rem; }
+.vsm-head p{ color:var(--muted); font-size:1.05rem; }
+
+/* Hero */
+.vsm-hero{ position:relative; min-height:92vh; display:flex; align-items:center; color:#fff; overflow:hidden; border-radius:0 0 36px 36px; }
+.vsm-hero .carousel,.vsm-hero .carousel-inner,.vsm-hero .carousel-item{ position:absolute; inset:0; height:100%; }
+.vsm-hero .carousel-item img{ width:100%; height:100%; object-fit:cover; }
+.vsm-hero__veil{ position:absolute; inset:0; z-index:2; background:linear-gradient(110deg,rgba(8,20,6,.82),rgba(8,20,6,.35) 60%,rgba(8,20,6,.15)); }
+.vsm-hero__inner{ position:relative; z-index:3; max-width:1200px; margin:0 auto; padding:0 1.5rem; width:100%; }
+.vsm-hero__content{ max-width:720px; }
+.vsm-hero__badge{ display:inline-block; background:rgba(122,183,48,.2); border:1px solid rgba(122,183,48,.55); color:#d4efb2; padding:.4rem 1.1rem; border-radius:999px; font-weight:600; letter-spacing:1px; font-size:.85rem; }
+.vsm-hero h1{ color:#fff; font-size:clamp(2.2rem,5.6vw,4.3rem); line-height:1.04; margin:1.2rem 0; }
+.vsm-hero p{ font-size:1.18rem; color:#e9f1e1; max-width:580px; }
+.vsm-hero__cta{ display:flex; gap:1rem; flex-wrap:wrap; margin-top:1.9rem; }
+.vsm-hero__stats{ display:flex; gap:2.8rem; margin-top:2.8rem; flex-wrap:wrap; }
+.vsm-hero__stats .n{ font-size:1.9rem; font-weight:800; color:#fff; }
+.vsm-hero__stats .l{ font-size:.85rem; color:#cfe0c4; }
+
+/* Features */
+.vsm-features{ display:grid; grid-template-columns:repeat(4,1fr); gap:1.4rem; }
+.vsm-feature{ background:#fff; border:1px solid var(--line); border-radius:var(--r); padding:2.1rem 1.4rem; text-align:center; transition:transform .25s,box-shadow .25s,border-color .25s; }
+.vsm-feature:hover{ transform:translateY(-6px); box-shadow:var(--shadow); border-color:var(--green); }
+.vsm-feature__ico{ width:66px; height:66px; border-radius:50%; background:var(--green-soft); color:var(--green-d); display:flex; align-items:center; justify-content:center; font-size:1.7rem; margin:0 auto 1.1rem; }
+.vsm-feature h5{ font-size:1.05rem; margin-bottom:.4rem; }
+.vsm-feature p{ color:var(--muted); font-size:.92rem; margin:0; }
+
+/* Tours grid */
+.vsm-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.7rem; }
+.vsm-tour{ background:#fff; border-radius:var(--r); overflow:hidden; box-shadow:var(--shadow-sm); transition:transform .3s,box-shadow .3s; display:flex; flex-direction:column; }
+.vsm-tour:hover{ transform:translateY(-8px); box-shadow:var(--shadow-lg); }
+.vsm-tour__img{ position:relative; height:225px; overflow:hidden; }
+.vsm-tour__img img{ width:100%; height:100%; object-fit:cover; transition:transform .55s; }
+.vsm-tour:hover .vsm-tour__img img{ transform:scale(1.08); }
+.vsm-tour__badge{ position:absolute; top:12px; left:12px; background:var(--green); color:#fff; font-weight:700; padding:.35rem .85rem; border-radius:999px; font-size:.85rem; z-index:2; box-shadow:0 4px 12px rgba(0,0,0,.2); }
+.vsm-tour__off{ position:absolute; top:12px; right:12px; background:#c0392b; color:#fff; font-weight:600; padding:.3rem .7rem; border-radius:999px; font-size:.75rem; z-index:2; }
+.vsm-tour__body{ padding:1.35rem; display:flex; flex-direction:column; gap:.55rem; flex:1; }
+.vsm-tour__body h5{ font-size:1.12rem; margin:0; }
+.vsm-tour__meta{ display:flex; gap:1.2rem; color:var(--muted); font-size:.86rem; }
+.vsm-tour__body .btn{ margin-top:auto; }
+
+/* CTA band */
+.vsm-cta{ position:relative; background:linear-gradient(120deg,var(--green-dd),var(--green-d)); color:#fff; border-radius:30px; padding:3.4rem 2rem; text-align:center; box-shadow:var(--shadow-lg); }
+.vsm-cta h2{ color:#fff; font-size:clamp(1.7rem,3.4vw,2.4rem); }
+.vsm-cta p{ color:#e7f5d7; max-width:620px; margin:.6rem auto 1.6rem; }
+.vsm-cta .btn-light{ color:var(--green-dd); font-weight:700; }
+
+/* Team grid */
+.vsm-team-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:1.4rem; }
+.vsm-member{ background:#fff; border-radius:var(--r); overflow:hidden; box-shadow:var(--shadow-sm); transition:transform .3s,box-shadow .3s; }
+.vsm-member:hover{ transform:translateY(-8px); box-shadow:var(--shadow); }
+.vsm-member__img{ height:300px; overflow:hidden; }
+.vsm-member__img img{ width:100%; height:100%; object-fit:cover; transition:transform .5s; }
+.vsm-member:hover .vsm-member__img img{ transform:scale(1.06); }
+.vsm-member__body{ padding:1.1rem; text-align:center; }
+.vsm-member__body h5{ margin:0; font-size:1.05rem; }
+.vsm-member__body p{ color:var(--green-d); font-size:.85rem; margin:.2rem 0 0; }
+
+@media (max-width:991.98px){
+  .vsm-features,.vsm-team-grid{ grid-template-columns:repeat(2,1fr); }
+  .vsm-grid{ grid-template-columns:repeat(2,1fr); }
+  .vsm-hero{ min-height:80vh; }
+}
+@media (max-width:575.98px){
+  .vsm-features,.vsm-team-grid,.vsm-grid{ grid-template-columns:1fr; }
+  .vsm-section{ padding:3.2rem 0; }
+  .vsm-hero__stats{ gap:1.6rem; }
+}
+
+/* Full-bleed: rompe el .container del base para secciones a todo lo ancho */
+body{ overflow-x:hidden; }
+.vsm-bleed{ width:100vw; position:relative; left:50%; margin-left:-50vw; }
+
+/* Topbar nuevo */
+.vsm-topbar{ background:var(--ink); color:#cfe0c4; font-size:.86rem; padding:.55rem 0; }
+.vsm-topbar a{ color:#cfe0c4; text-decoration:none; }
+.vsm-topbar a:hover{ color:#fff; }
+.vsm-topbar .fab,.vsm-topbar .fa{ }
+.vsm-topbar i.text-primary{ color:var(--green)!important; }
+
+/* Navbar CTA */
+.navbar .vsm-navcta{ color:#fff!important; background:var(--green); padding:.55rem 1.4rem!important; }
+.navbar .vsm-navcta:hover{ background:var(--green-d); color:#fff!important; }
+
+/* Servicios: nueva sección con íconos */
+.vsm-feature__ico img{ width:42px; height:42px; object-fit:contain; }

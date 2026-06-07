@@ -17,18 +17,14 @@
 
         {% block content %}
 
-        {% if request.path == '/' %}  {# Verifica si la URL es la página de inicio #}
+        {% if request.path == '/' %}  {# Página de inicio (rediseño) #}
 
-            {% include "sections/carrusel_inicio.html" %}
-            {% include "sections/booking_start.html" %}
-            {% comment %} {% include "sections/featurestart.html" %} {% endcomment %}
+            {% include "sections/hero.html" %}
+            {% include "sections/features.html" %}
             {% include "sections/destination.html" %}
             {% include "sections/services.html" %}
-            {% comment %} {% include "sections/package.html" %} {% endcomment %}
-            {% comment %} {% include "sections/registration.html" %} {% endcomment %}
+            {% include "sections/cta.html" %}
             {% include "sections/team.html" %}
-            {% comment %} {% include "sections/testimonial.html" %} {% endcomment %}
-        
 
         {% endif %}
 

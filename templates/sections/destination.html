@@ -1,42 +1,36 @@
- {% load static %}
-<!-- Destination Start -->
-<div class="container-fluid py-5">
-    <div class="container pt-5 pb-3">
-        <div class="text-center mb-3 pb-3">
-            <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">Tours Al Pie del Volcan</h6>
-            <h1>Explora con los mejores Tours</h1>
-        </div>
-        <div class="row justify-content-center">
-            {% for tour in tours %}
-            <div class="col-lg-4 col-md-6 mb-4">
-                {% if tour.disponible %}
-                <div class="destination-item position-relative overflow-hidden mb-2">
-                    <img class="img-fluid" src="{{ tour.url_azure }}" alt="{{ tour.titulo }}">
-                    <a class="destination-overlay text-white text-decoration-none" href="{% url 'tour_detail' tour.id %}">
-                        <h5 class="text-white">{{ tour.titulo }}</h5>
-                        <p class="text-white">Precio Adultos: ${{ tour.precio_adulto }}</p>
-                        <p class="text-white">Duracion: {{ tour.duracion }} Horas</p>
-                    </a>
-                </div>
-                {% else %}
-                <div class="destination-item position-relative overflow-hidden mb-2">
-                    <img class="img-fluid" src="{{ tour.url_azure }}" alt="{{ tour.titulo }}">
-                    <div class="destination-overlay text-white text-decoration-none">
-                        <h5 class="text-white">{{ tour.titulo }}</h5>
-                        <p class="text-white">Precio Adultos: ${{ tour.precio_adulto }}</p>
-                        <p class="text-white">Duracion: {{ tour.duracion }} Horas</p>
-                        <div class="alert alert-danger" role="alert" style="background-color: rgba(255, 235, 59, 0.5);">
-                            <h4 class="alert-heading text-white">¡No disponible!</h4>
-                            <p class="text-white">Por el momento este tour no se encuentra disponible.</p>
-                            <hr>
-                            <p class="mb-0 text-white"><a class="text-white" href="{% url 'contacto'%}">Solicitar Ayuda</a></p>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </div>
+<!-- Tours -->
+<section class="vsm-section vsm-bleed">
+  <div class="vsm-wrap">
+    <div class="vsm-head">
+      <span class="vsm-eyebrow">Tours al pie del volcán</span>
+      <h2>Explora nuestros mejores tours</h2>
+      <p>Elige tu próxima aventura y reserva en minutos.</p>
     </div>
-</div>
-<!-- Destination End -->
+    <div class="vsm-grid">
+      {% for tour in tours %}
+      <article class="vsm-tour">
+        <div class="vsm-tour__img">
+          {% if tour.url_azure %}<img src="{{ tour.url_azure }}" alt="{{ tour.titulo }}">{% endif %}
+          <span class="vsm-tour__badge">${{ tour.precio_adulto }}</span>
+          {% if not tour.disponible %}<span class="vsm-tour__off">No disponible</span>{% endif %}
+        </div>
+        <div class="vsm-tour__body">
+          <h5>{{ tour.titulo }}</h5>
+          <div class="vsm-tour__meta">
+            <span><i class="fa fa-clock text-primary mr-1"></i>{{ tour.duracion }} h</span>
+            <span><i class="fa fa-tag text-primary mr-1"></i>Adultos ${{ tour.precio_adulto }}</span>
+          </div>
+          {% if tour.disponible %}
+          <a href="{% url 'tour_detail' tour.id %}" class="btn btn-outline-primary btn-block">Ver detalle</a>
+          {% else %}
+          <a href="{% url 'contacto' %}" class="btn btn-outline-primary btn-block">Consultar disponibilidad</a>
+          {% endif %}
+        </div>
+      </article>
+      {% empty %}
+      <p class="text-center text-muted">Pronto publicaremos nuevos tours.</p>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-5"><a href="{% url 'tours' %}" class="btn btn-primary btn-lg">Ver todos los tours</a></div>
+  </div>
+</section>

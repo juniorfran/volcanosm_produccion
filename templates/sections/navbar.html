@@ -1,25 +1,24 @@
-<!-- Navbar Start -->
+<!-- Navbar -->
 <div class="container-fluid position-relative nav-bar p-0">
-    <div class="container-lg position-relative p-0 px-lg-3" style="z-index: 9;">
-        <nav class="navbar navbar-expand-lg bg-light navbar-light shadow-lg py-3 py-lg-0 pl-3 pl-lg-5">
-            <a href="{% url 'index' %}" class="navbar-brand">
-                <h1 class="m-0 text-primary"><span class="text-dark">{{ ultima_descripcion.medio_titulo }} </span>{{ ultima_descripcion.titulo_corto }}</h1>
-            </a>
-            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-between px-3" id="navbarCollapse">
-                <div class="navbar-nav ml-auto py-0">
-                    <a href="{% url 'index' %}" class="nav-item nav-link {% if request.path == '/' %}active{% endif %}">Inicio</a>
-                    <a href="{% url 'nosotros' %}" class="nav-item nav-link {% if request.path == '/nosotros/' %}active{% endif %}">Nosotros</a>
-                    <a href="{% url 'servicios' %}" class="nav-item nav-link {% if request.path == '/servicios/' %}active{% endif %}">Servicios</a>
-                    <a href="{% url 'servicio_inter' %}" class="nav-item nav-link {% if request.path == '/internet/' %}active{% endif %}">VolcanoSM Internet</a>
-                    <a href="{% url 'tours' %}" class="nav-item nav-link {% if request.path == '/tours/' %}active{% endif %}">Tours</a>
-                    <a href="{% url 'contacto' %}" class="nav-item nav-link {% if request.path == '/contacto/' %}active{% endif %}">Contactanos</a>
-                    
-                </div>
-            </div>
-        </nav>
-    </div>
+  <div class="container-lg position-relative p-0 px-lg-3" style="z-index:9;">
+    <nav class="navbar navbar-expand-lg navbar-light py-2">
+      <a href="{% url 'index' %}" class="navbar-brand">
+        <h1 class="m-0 text-primary"><span class="text-dark">{{ ultima_descripcion.medio_titulo }} </span>{{ ultima_descripcion.titulo_corto }}</h1>
+      </a>
+      <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end px-3" id="navbarCollapse">
+        <div class="navbar-nav ml-auto py-0 align-items-lg-center">
+          <a href="{% url 'index' %}" class="nav-item nav-link {% if request.path == '/' %}active{% endif %}">Inicio</a>
+          <a href="{% url 'nosotros' %}" class="nav-item nav-link {% if request.path == '/nosotros/' %}active{% endif %}">Nosotros</a>
+          <a href="{% url 'servicios' %}" class="nav-item nav-link {% if request.path == '/servicios/' %}active{% endif %}">Servicios</a>
+          <a href="{% url 'tours' %}" class="nav-item nav-link {% if request.path == '/tours/' %}active{% endif %}">Tours</a>
+          <a href="{% url 'servicio_inter' %}" class="nav-item nav-link {% if request.path == '/internet/' %}active{% endif %}">Internet</a>
+          <a href="{% url 'contacto' %}" class="nav-item nav-link {% if request.path == '/contacto/' %}active{% endif %}">Contáctanos</a>
+          <a href="{% url 'tours' %}" class="nav-item nav-link vsm-navcta ml-lg-2">Reservar</a>
+        </div>
+      </div>
+    </nav>
+  </div>
 </div>
-<!-- Navbar End -->

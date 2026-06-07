@@ -1,38 +1,20 @@
-
-{% load static %}
-
-
-<!-- Team Start -->
-<div class="container-fluid py-6">
-    <div class="container pt-5 pb-3">
-        <div class="text-center mb-3 pb-3">
-            <h6 class="text-primary text-uppercase" style="letter-spacing: 5px; font-size: 35px;">Guias</h6>
-            <h1>Nuestros guias capacitados</h1>
-        </div>
-        <div class="d-flex justify-content-center">
-            <div class="row">
-                {% for team_member in teams_bar|slice:":3" %}
-                    <div class="col-lg-4 col-md-4 col-sm-12 pb-2">
-                        <div class="team-item bg-white mb-4">
-                            <div class="team-img position-relative overflow-hidden">
-                                <img class="img-fluid w-100" src="{{ team_member.imagen_url }}" alt="{{ team_member.team_nombre }}">
-                                <div class="team-social">
-                                    <a class="btn btn-outline-primary btn-square" href="{{ team_member.url_twitter }}"><i class="fab fa-twitter"></i></a>
-                                    <a class="btn btn-outline-primary btn-square" href="{{ team_member.url_facebook }}"><i class="fab fa-facebook-f"></i></a>
-                                    <a class="btn btn-outline-primary btn-square" href="{{ team_member.url_instagram }}"><i class="fab fa-instagram"></i></a>
-                                    <a class="btn btn-outline-primary btn-square" href="{{ team_member.url_linkedin }}"><i class="fab fa-linkedin-in"></i></a>
-                                </div>
-                            </div>
-                            <div class="text-center py-4">
-                                <h5 class="text-truncate">{{ team_member.team_nombre }}</h5>
-                                <p class="m-0">{{ team_member.team_job }}</p>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
+<!-- Equipo -->
+<section class="vsm-section vsm-bleed">
+  <div class="vsm-wrap">
+    <div class="vsm-head">
+      <span class="vsm-eyebrow">Nuestro equipo</span>
+      <h2>Guías capacitados y apasionados</h2>
     </div>
-</div>
-
-<!-- Team End -->
+    <div class="vsm-team-grid">
+      {% for m in teams_bar|slice:":4" %}
+      <div class="vsm-member">
+        <div class="vsm-member__img">{% if m.imagen_url %}<img src="{{ m.imagen_url }}" alt="{{ m.team_nombre }}">{% endif %}</div>
+        <div class="vsm-member__body">
+          <h5>{{ m.team_nombre }}</h5>
+          <p>{{ m.team_job }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>

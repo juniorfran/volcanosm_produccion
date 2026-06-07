@@ -1,0 +1,32 @@
+{% load static %}
+<!-- Hero -->
+<section class="vsm-hero vsm-bleed">
+  <div id="heroCarousel" class="carousel slide" data-ride="carousel" data-interval="5000">
+    <div class="carousel-inner">
+      {% for item in carrusel_incio %}
+      <div class="carousel-item {% if forloop.first %}active{% endif %}">
+        <img src="{{ item.imagen_url }}" alt="{{ item.titulo }}">
+      </div>
+      {% empty %}
+      <div class="carousel-item active"><img src="{% static 'img/carousel-1.jpg' %}" alt="Volcano SM"></div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="vsm-hero__veil"></div>
+  <div class="vsm-hero__inner">
+    <div class="vsm-hero__content">
+      <span class="vsm-hero__badge"><i class="fa fa-mountain mr-1"></i> Volcán de San Miguel</span>
+      <h1>{{ ultima_descripcion.titulo_largo|default:"Vive la aventura al pie del volcán" }}</h1>
+      <p>{{ ultima_descripcion.descripcion_corta|default:"Tours guiados, camping y caminatas en el Chaparrastique con guías certificados." }}</p>
+      <div class="vsm-hero__cta">
+        <a href="{% url 'tours' %}" class="btn btn-primary btn-lg">Ver tours <i class="fa fa-arrow-right ml-2"></i></a>
+        <a href="{% url 'contacto' %}" class="btn btn-light btn-lg">Contáctanos</a>
+      </div>
+      <div class="vsm-hero__stats">
+        <div><div class="n">{{ tours|length }}+</div><div class="l">Tours disponibles</div></div>
+        <div><div class="n">100%</div><div class="l">Guías certificados</div></div>
+        <div><div class="n">★ 4.9</div><div class="l">Valoración</div></div>
+      </div>
+    </div>
+  </div>
+</section>
