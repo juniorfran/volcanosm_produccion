@@ -165,3 +165,6 @@ media/tours/1_imagen_12.jpg
 
 # Credenciales del MySQL local de respaldo
 .env.db-local
+
+# Media local de desarrollo (placeholders del seed)
+media_local/
