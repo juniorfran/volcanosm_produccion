@@ -1,0 +1,121 @@
+/* ============================================================
+   TPV Volcano — capa de UI (se carga después de style.css)
+   ============================================================ */
+
+/* ---------- Área de contenido ---------- */
+#content { background: #f4f6f9; }
+#content .container, #content main { max-width: 1200px; }
+
+/* ---------- Encabezado de página ---------- */
+.tpv-page-head{
+  display:flex; justify-content:space-between; align-items:center; gap:1rem;
+  flex-wrap:wrap; margin-bottom:1.25rem; padding-bottom:.75rem;
+  border-bottom:1px solid #e6e9ee;
+}
+.tpv-page-head h1, .tpv-page-head .h1{ font-size:1.4rem; font-weight:700; margin:0; color:#1f2d3d; }
+.tpv-page-head .bi, .tpv-page-head .fa { color:#0d6efd; }
+
+/* ---------- FORMULARIOS (estiliza todo, tenga o no clase) ---------- */
+#content form input:not([type=checkbox]):not([type=radio]):not([type=submit]):not([type=button]):not([type=file]):not([type=hidden]),
+#content form select,
+#content form textarea,
+#content form .form-control,
+#content form .form-select{
+  width:100%; padding:.55rem .85rem; font-size:.95rem; line-height:1.45;
+  color:#212529; background:#fff; border:1px solid #ccd2da; border-radius:.55rem;
+  transition:border-color .15s ease, box-shadow .15s ease; margin-bottom:.1rem;
+}
+#content form input:focus, #content form select:focus, #content form textarea:focus,
+#content form .form-control:focus, #content form .form-select:focus{
+  border-color:#86b7fe; box-shadow:0 0 0 .2rem rgba(13,110,253,.18); outline:0;
+}
+#content form textarea{ min-height:96px; }
+#content form label:not(.form-check-label), #content form .form-label{
+  font-weight:600; font-size:.82rem; color:#56606b; margin-bottom:.3rem;
+  text-transform:uppercase; letter-spacing:.02em;
+}
+#content form .form-text{ font-size:.8rem; color:#8a929c; }
+#content form .form-check-input{ width:1.1rem; height:1.1rem; }
+#content form input[type=file]{ padding:.4rem; }
+
+/* ---------- Tarjetas ---------- */
+#content .card{ border:0; border-radius:.9rem; box-shadow:0 2px 14px rgba(20,30,50,.06); }
+#content .card-header{
+  background:#fff; border-bottom:1px solid #eef0f3; font-weight:700; color:#1f2d3d;
+  border-radius:.9rem .9rem 0 0; padding:.9rem 1.1rem;
+}
+#content .card-body{ padding:1.2rem; }
+
+/* Sub-título de sección dentro de un form */
+.tpv-section-title{
+  font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+  color:#0d6efd; margin:.4rem 0 .9rem; padding-bottom:.35rem; border-bottom:1px dashed #e0e4ea;
+}
+
+/* ---------- Botones ---------- */
+#content .btn{ border-radius:.55rem; font-weight:600; padding:.5rem 1rem; }
+#content .btn-lg{ padding:.7rem 1.4rem; font-size:1.05rem; }
+
+/* ---------- Tablas ---------- */
+#content table.table{ background:#fff; border-radius:.7rem; overflow:hidden; box-shadow:0 2px 14px rgba(20,30,50,.05); }
+#content table.table thead th{
+  background:#f6f8fa; border:0; font-size:.78rem; text-transform:uppercase;
+  letter-spacing:.03em; color:#6b7480; padding:.75rem;
+}
+#content table.table td{ vertical-align:middle; }
+
+/* ============================================================
+   SIDEBAR / MENÚ
+   ============================================================ */
+#sidebar{ background:#1c2733 !important; min-width:255px; max-width:255px; }
+#sidebar h1 .logo, #sidebar .logo{ color:#fff !important; font-weight:800; letter-spacing:.5px; }
+#sidebar .logo::before{ content:"\F45F"; font-family:"bootstrap-icons"; margin-right:.4rem; color:#ffc107; }
+
+#sidebar > ul > li.nav-item > a.nav-link{
+  color:#d4dbe3 !important; border-radius:.55rem; margin:.12rem .55rem; padding:.62rem .9rem;
+  font-weight:600; font-size:.95rem; display:flex; align-items:center; gap:.1rem;
+}
+#sidebar > ul > li.nav-item > a.nav-link:hover{ background:rgba(255,255,255,.09); color:#fff !important; }
+#sidebar .nav-link .fa, #sidebar .nav-link .bi, #sidebar .nav-link i{
+  width:1.5rem; text-align:center; margin-right:.45rem; font-size:1rem;
+}
+
+/* Submenús */
+#sidebar .collapse .list-group, #sidebar .collapse ul{ background:rgba(0,0,0,.18); border-radius:.5rem; margin:.1rem .55rem .4rem; padding:.25rem 0; }
+#sidebar .list-group-item, #sidebar .collapse li{
+  background:transparent !important; border:0 !important; padding:.05rem .4rem;
+}
+#sidebar .collapse a{
+  display:block; color:#aeb8c4 !important; font-size:.88rem; font-weight:500;
+  text-decoration:none; padding:.4rem .6rem .4rem 2.4rem; border-radius:.4rem;
+}
+#sidebar .collapse a:hover{ color:#fff !important; background:rgba(255,255,255,.07); }
+#sidebar .collapse a .bi, #sidebar .collapse a i{ margin-right:.4rem; }
+
+#sidebar .footer p{ color:#7e8893; font-size:.72rem; }
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+.tpv-stat{
+  border-radius:1rem; padding:1.15rem 1.25rem; color:#fff; display:flex;
+  align-items:center; justify-content:space-between; box-shadow:0 5px 16px rgba(20,30,50,.12);
+}
+.tpv-stat .v{ font-size:1.9rem; font-weight:800; line-height:1.05; }
+.tpv-stat .l{ opacity:.92; font-size:.82rem; }
+.tpv-stat .bi{ font-size:2.2rem; opacity:.45; }
+.bg-grad-blue{ background:linear-gradient(135deg,#2563eb,#1d4ed8); }
+.bg-grad-green{ background:linear-gradient(135deg,#16a34a,#15803d); }
+.bg-grad-amber{ background:linear-gradient(135deg,#f59e0b,#d97706); }
+.bg-grad-violet{ background:linear-gradient(135deg,#7c3aed,#6d28d9); }
+.bg-grad-rose{ background:linear-gradient(135deg,#e11d48,#be123c); }
+.bg-grad-slate{ background:linear-gradient(135deg,#475569,#334155); }
+
+.tpv-quick{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.5rem;
+  background:#fff; border-radius:1rem; padding:1.4rem 1rem; text-align:center; text-decoration:none;
+  color:#1f2d3d; box-shadow:0 2px 12px rgba(20,30,50,.06); transition:transform .12s, box-shadow .12s;
+  height:100%; font-weight:600;
+}
+.tpv-quick:hover{ transform:translateY(-3px); box-shadow:0 10px 22px rgba(20,30,50,.13); color:#0d6efd; }
+.tpv-quick .bi{ font-size:2rem; color:#0d6efd; }

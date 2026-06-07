@@ -29,8 +29,27 @@ except wompi_config.DoesNotExist:
 
 @login_required
 def index_utilidades(request):
-    
-    return render(request, 'base_utilities.html')
+    # Dashboard del TPV (primera pantalla del panel)
+    from django.utils import timezone
+    from django.db.models import Sum, F
+    from TPV_.Ventas.models import Ventas
+    from TPV_.Productos.models import Producto
+    from TPV_.Cajas.models import Cajas
+    from TPV_.Alquileres.models import Alquiler
+    from TPV_.Clientes.models import Cliente
+
+    hoy = timezone.localdate()
+    ventas_hoy = Ventas.objects.filter(fecha_creacion__date=hoy, estado='F')
+    contexto = {
+        'ventas_hoy_count': ventas_hoy.count(),
+        'ventas_hoy_total': ventas_hoy.aggregate(s=Sum('total'))['s'] or 0,
+        'productos_count': Producto.objects.filter(status='A').count(),
+        'stock_bajo': Producto.objects.filter(status='A', stock__lte=F('stock_minimo')).count(),
+        'caja_abierta': Cajas.objects.filter(estado='abierto', usuario_responsable=request.user).first(),
+        'alquileres_activos': Alquiler.objects.filter(estado__in=['activo', 'parcial']).count(),
+        'clientes_count': Cliente.objects.count(),
+    }
+    return render(request, 'tpv_dashboard.html', contexto)
 
 
 def consultar_enlace_pago(enlace_pago_id, client_id, client_secret):
