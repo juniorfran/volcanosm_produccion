@@ -52,11 +52,13 @@ def nosotros_index(request):
     direccion_actual = "nosotros"
     
     conf_direccionamiento = Direccionamiento.objects.order_by('-fecha_creacion').first()
-    
-    
+    generalidades = Generalidades.objects.order_by('-fecha_creacion').first()
+
+
     context={
         'titulo':titulo,
         'direccion_actual':direccion_actual,
+        'generalidades': generalidades,
         'services':services,
         'teams_bar':teams_bar[:4],  #mostrando solo
         #los primeros 4 equipos en la barra de info
